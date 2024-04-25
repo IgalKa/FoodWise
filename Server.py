@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from Utils import find_product_name
 
 app = Flask(__name__)
 
@@ -11,11 +12,13 @@ def scan():
         barcode = data['barcode']
         mode = data['mode']
 
-        # Do something with the barcode and mode here
+        # Do actions with the barcode and mode here
         if mode == 'add':
             print(f'Adding {barcode} to database')
+            print(f'You want to add {find_product_name(barcode)} to database')
         else:
             print(f'Removing {barcode} from database')
+            print(f'You want to delete {find_product_name(barcode)} from database')
         # Return a JSON response
         response = {'message': 'Data received successfully'}
         return jsonify(response), 200
