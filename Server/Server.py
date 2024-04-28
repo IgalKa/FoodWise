@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from Utils import find_product_name
+from Utils import find_product_name,find_refrigerator_contents
 
 app = Flask(__name__)
 
@@ -26,6 +26,14 @@ def scan():
         # If 'barcode' or 'mode' keys are missing, return an error response
         error_response = {'error': 'Barcode and mode are required fields'}
         return jsonify(error_response), 400
+
+
+@app.route('/refrigerator_contents', methods=['GET'])
+def get_refrigerator_contents():
+    refrigerator_id=request.args.get('refrigerator_id')
+    refrigerator_contents=find_refrigerator_contents(refrigerator_id)
+    return jsonify(refrigerator_contents), 200
+
 
 #app.debug = True
 

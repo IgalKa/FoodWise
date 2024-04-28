@@ -18,3 +18,18 @@ def find_product_name(barcode):
         return result[0]  # Return the first column of the result (name)
     else:
         return None
+
+
+def find_refrigerator_contents(refrigerator_id):
+    conn = sqlite3.connect('data_bases\\Refigerators.db')
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT product_name,product_quantity FROM refrigerators WHERE refrigerator_id = ?",
+                   (refrigerator_id,))
+    result = cursor.fetchall()
+
+    # Close the database connection
+    conn.close()
+
+    # If a row was found, return the name, otherwise return None
+    return result
