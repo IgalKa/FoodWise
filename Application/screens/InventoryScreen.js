@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, Dimensions, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, Dimensions, TextInput, ImageBackground } from 'react-native';
 
 const DATA = [
     { id: '1', name: 'Itemm 1', quantity: 10, image: require('../assets/milk.jpg') },
@@ -50,25 +50,33 @@ function InventoryScreen({ navigation }) {
     );
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.logo}>FoodWise</Text>
-            <Text style={styles.title}>Inventory</Text>
-            <View style={styles.searchContainer}>
-                <Image source={require('../assets/search.jpg')} style={styles.searchIcon} />
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search by item name"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
+        <ImageBackground
+            source={require('../assets/images/background.jpg')} // Adjust the path to your background image
+            style={styles.background}
+        >
+            <View style={styles.logoContainer}>
+                <Text style={styles.logo}>FoodWise</Text>
+            </View>
+
+            <View style={styles.container}>
+                <Text style={styles.title}>Inventory</Text>
+                <View style={styles.searchContainer}>
+                    <Image source={require('../assets/search.jpg')} style={styles.searchIcon} />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Search by item name"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                    />
+                </View>
+                <FlatList
+                    data={isSearching ? filteredData : DATA}
+                    renderItem={renderItem}
+                    keyExtractor={item => item.id}
+                    numColumns={2}
                 />
             </View>
-            <FlatList
-                data={isSearching ? filteredData : DATA}
-                renderItem={renderItem}
-                keyExtractor={item => item.id}
-                numColumns={2}
-            />
-        </View>
+        </ImageBackground>
     );
 }
 
@@ -77,23 +85,25 @@ export default InventoryScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#003f5c',
         alignItems: 'center',
         justifyContent: 'center',
     },
     logo: {
-        fontWeight: "bold",
-        fontSize: 50,
-        color: "#fb5b5a",
-        marginBottom: 40
+        fontWeight: 'bold',
+        fontSize: 30,
+        color: '#fff',
+        paddingLeft: 15,
+        marginTop: 15,
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#465881',
-        borderRadius: 20,
+        borderColor: '#fff',
+        borderWidth: 0.5,
+        borderRadius: 10,
         paddingHorizontal: 16,
         marginBottom: 20,
+        width: '90%',
     },
     searchIcon: {
         width: 24,
@@ -107,9 +117,10 @@ const styles = StyleSheet.create({
     },
     title: {
         fontWeight: "bold",
-        fontSize: 25,
-        color: "#fb5b5a",
-        marginBottom: 40
+        fontSize: 40,
+        color: "#fff",
+        marginBottom: 40,
+        marginTop: 10,
     },
     item: {
         backgroundColor: '#465881',
@@ -137,5 +148,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'white',
         marginBottom: 10,
+    },
+    background: {
+        flex: 1,
+        resizeMode: 'cover', // or 'stretch' or 'contain'
     },
 });

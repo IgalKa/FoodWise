@@ -8,6 +8,9 @@ import WelcomeScreen from './screens/WelcomeScreen';
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import InventoryScreen from './screens/InventoryScreen';
+import { I18nManager } from 'react-native';
+
+I18nManager.allowRTL(false);
 
 const Stack = createNativeStackNavigator();
 
