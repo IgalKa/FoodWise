@@ -93,5 +93,5 @@ ipython_config.py
 # Poetry
 #poetry.lock
 
-# pycache
 __pycache__/
+# pycache
