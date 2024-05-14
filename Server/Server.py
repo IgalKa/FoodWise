@@ -24,18 +24,23 @@ def scan():
         if product_name is None:
             abort(404, description=f"Product with barcode {barcode} not found")
 
+        if not database.check_refrigerator_exist(refrigerator_id):
+            abort(404, description=f"Refrigerator number {refrigerator_id} does not exist")
+
         if mode == 'add':
             print(f'Adding {product_name} to refrigerator number: {refrigerator_id}')
             database.add_product(refrigerator_id, barcode)
             return jsonify({'message': f"The product has been successfully added to the refrigerator number {refrigerator_id}"}), 200
 
-        else:
+        elif mode == 'remove':
             print(f'Removing {product_name} from database')
             result = database.remove_product(refrigerator_id, barcode)
             if result:
                 return jsonify({'message': f"The product has been successfully removed from refrigerator number {refrigerator_id}"}), 200
             else:
                 abort(404, description=f"Product with barcode {barcode} not found in the rerigerator number {refrigerator_id}")
+        else:
+            abort(405, description=f"Mode {mode} not supported")
 
 
     else:
@@ -46,10 +51,16 @@ def scan():
 
 @app.route('/refrigerator_contents', methods=['GET'])
 def get_refrigerator_contents():
+
     refrigerator_id = request.args.get('refrigerator_id')
     database = app.extensions['database']
-    refrigerator_contents = database.find_refrigerator_contents(refrigerator_id)
-    return jsonify(refrigerator_contents), 200
+    if database.check_refrigerator_exist(refrigerator_id):
+        refrigerator_contents = database.find_refrigerator_contents(refrigerator_id)
+        return jsonify(refrigerator_contents.__json__()), 200
+    else:
+        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+        return jsonify(error_response), 404
+
 
 
 #app.debug = True
