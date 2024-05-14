@@ -32,7 +32,7 @@ export default function WelcomeScreen() {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.signupContainer}>
-                    <TouchableOpacity onPress={() => navigation.navigate('Inventory')}>
+                    <TouchableOpacity onPress={() => navigation.replace('Inventory')}>
                         <Text style={styles.signupButton}>Inventory</Text>
                     </TouchableOpacity>
                 </View>

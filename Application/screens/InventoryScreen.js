@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, Dimensions, TextInput, ImageBackground } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, TextInput, ImageBackground, BackHandler, ActivityIndicator } from 'react-native';
+import { useDoubleBackPressExit } from '../hooks/DoubleBackExit';
+import { useFocusEffect } from '@react-navigation/native';
+import axios from 'axios';
 
 const DATA = [
     { id: '1', name: 'Itemm 1', quantity: 10, image: require('../assets/milk.jpg') },
@@ -24,57 +27,118 @@ function InventoryScreen({ navigation }) {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
-    const [filteredData, setFilteredData] = useState(DATA);
+    const [data, setData] = useState(null);
+    const [filteredData, setFilteredData] = useState(data);
+    const [loading, setLoading] = useState(true);
+
+
+
+    const fetchData = async () => {
+        try {
+            const response = await axios.get('http://10.100.102.7:12345/refrigerator_contents', {
+                params: {
+                    refrigerator_id: 1
+                },
+                timeout: 10000,
+            });
+
+            const transformedItems = response.data.products.map(item => ({
+                name: item.product_name,
+                quantity: item.product_quantity,
+                image: `data:image/png;base64,${item.product_image}`,
+                date: item.product_addedTime,
+            }));
+
+            setData(transformedItems);
+        } catch (error) {
+            console.log('Error fetching data:', error);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        // Fetch data initially
+        fetchData();
+        // Set up interval for periodic polling
+        const intervalId = setInterval(fetchData, 15000); // Fetch data every 5 seconds (adjust as needed)
+        // Clean up interval on component unmount
+        return () => clearInterval(intervalId);
+    }, []);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            setLoading(true);
+            fetchData();
+        }, [])
+    );
+
+
+
+
 
 
     useEffect(() => {
         if (searchQuery) {
             setIsSearching(true);
-            const filteredItems = DATA.filter(item =>
+            const filteredItems = data.filter(item =>
                 item.name.toLowerCase().includes(searchQuery.toLowerCase())
             );
             setFilteredData(filteredItems);
         } else {
             setIsSearching(false);
-            setFilteredData(DATA);
+            setFilteredData(data);
         }
     }, [searchQuery]);
 
 
     const renderItem = ({ item }) => (
         <TouchableOpacity style={styles.item}>
-            <Image source={item.image} style={styles.image} />
+            <Image source={{ uri: item.image }} style={styles.image} />
             <Text style={styles.name}>{item.name}</Text>
             <Text style={styles.quantity}>Quantity: {item.quantity}</Text>
         </TouchableOpacity>
     );
+
+    useDoubleBackPressExit(() => {
+        BackHandler.exitApp();
+    });
+
+
 
     return (
         <ImageBackground
             source={require('../assets/images/background.jpg')} // Adjust the path to your background image
             style={styles.background}
         >
-            <View style={styles.logoContainer}>
+            {/* <View style={styles.logoContainer}>
                 <Text style={styles.logo}>FoodWise</Text>
-            </View>
+            </View> */}
 
             <View style={styles.container}>
-                <Text style={styles.title}>Inventory</Text>
-                <View style={styles.searchContainer}>
-                    <Image source={require('../assets/search.jpg')} style={styles.searchIcon} />
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search by item name"
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
+                {!loading && (
+                    <View style={styles.searchContainer}>
+                        <Image source={require('../assets/search.jpg')} style={styles.searchIcon} />
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Search by item name"
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                        />
+                    </View>
+                )}
+                {loading && (
+                    <ActivityIndicator size="large" color="#fff" />
+                )}
+                {!loading && (
+                    <FlatList
+                        data={isSearching ? filteredData : data}
+                        renderItem={renderItem}
+                        keyExtractor={item => item.id}
+                        numColumns={2}
                     />
-                </View>
-                <FlatList
-                    data={isSearching ? filteredData : DATA}
-                    renderItem={renderItem}
-                    keyExtractor={item => item.id}
-                    numColumns={2}
-                />
+                )}
             </View>
         </ImageBackground>
     );
@@ -104,6 +168,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         marginBottom: 20,
         width: '90%',
+        marginTop: 30,
     },
     searchIcon: {
         width: 24,
