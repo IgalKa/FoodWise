@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify
 from Database import Database
 
 app = Flask(__name__)
@@ -22,30 +22,37 @@ def scan():
         product_name = database.find_product(barcode)
 
         if product_name is None:
-            abort(404, description=f"Product with barcode {barcode} not found")
+            error_response = {'error': f"Product with barcode {barcode} not found"}
+            return jsonify(error_response), 404
 
         if not database.check_refrigerator_exist(refrigerator_id):
-            abort(404, description=f"Refrigerator number {refrigerator_id} does not exist")
+            error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+            return jsonify(error_response), 404
 
         if mode == 'add':
             print(f'Adding {product_name} to refrigerator number: {refrigerator_id}')
             database.add_product(refrigerator_id, barcode)
-            return jsonify({'message': f"The product has been successfully added to the refrigerator number {refrigerator_id}"}), 200
+            message_response = {'message': f"The product has been successfully added to the refrigerator number {refrigerator_id}"}
+            return jsonify(message_response), 200
 
         elif mode == 'remove':
             print(f'Removing {product_name} from database')
             result = database.remove_product(refrigerator_id, barcode)
             if result:
-                return jsonify({'message': f"The product has been successfully removed from refrigerator number {refrigerator_id}"}), 200
+                message_response = {'message': f"The product has been successfully removed from refrigerator number {refrigerator_id}"}
+                return jsonify(message_response), 200
             else:
-                abort(404, description=f"Product with barcode {barcode} not found in the rerigerator number {refrigerator_id}")
+                error_response = {'error': f"Product with barcode {barcode} not found in the rerigerator number {refrigerator_id}"}
+                return jsonify(error_response), 404
+
         else:
-            abort(405, description=f"Mode {mode} not supported")
+            error_response = {'error': f"Mode {mode} not supported"}
+            return jsonify(error_response), 405
 
 
     else:
         # If 'barcode' or 'mode' keys are missing, return an error response
-        error_response = {'error': 'Barcode and mode are required fields'}
+        error_response = {'error': 'invalid request'}
         return jsonify(error_response), 400
 
 

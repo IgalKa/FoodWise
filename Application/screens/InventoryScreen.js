@@ -35,7 +35,7 @@ function InventoryScreen({ navigation }) {
 
     const fetchData = async () => {
         try {
-            const response = await axios.get('http://10.100.102.7:12345/refrigerator_contents', {
+            const response = await axios.get('http://192.168.0.106:12345/refrigerator_contents', {
                 params: {
                     refrigerator_id: 1
                 },
