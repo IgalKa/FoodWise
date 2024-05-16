@@ -30,6 +30,7 @@ function InventoryScreen({ navigation }) {
     const [data, setData] = useState(null);
     const [filteredData, setFilteredData] = useState(data);
     const [loading, setLoading] = useState(true);
+    const [gotData, setGotData] = useState(true);
 
 
 
@@ -77,15 +78,15 @@ function InventoryScreen({ navigation }) {
 
 
 
-
-
     useEffect(() => {
         if (searchQuery) {
             setIsSearching(true);
-            const filteredItems = data.filter(item =>
-                item.name.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-            setFilteredData(filteredItems);
+            if (data) {
+                const filteredItems = data.filter(item =>
+                    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+                setFilteredData(filteredItems);
+            }
         } else {
             setIsSearching(false);
             setFilteredData(data);
@@ -117,7 +118,7 @@ function InventoryScreen({ navigation }) {
             </View> */}
 
             <View style={styles.container}>
-                {!loading && (
+                {!loading && data && data.length > 0 && (
                     <View style={styles.searchContainer}>
                         <Image source={require('../assets/search.jpg')} style={styles.searchIcon} />
                         <TextInput
