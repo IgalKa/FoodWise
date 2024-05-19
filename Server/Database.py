@@ -1,3 +1,4 @@
+import random
 import sqlite3
 from datetime import datetime
 from models.Product import Product
@@ -99,32 +100,15 @@ class Database:
         conn.close()
         return result
 
-    def check_refrigerator_exist(self, refrigerator_id):
+    def check_value_exist(self, table_name, column_name, value):
         # Connect to the SQLite database
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
-
         cursor.execute("SELECT * "
-                       "FROM refrigerator "
-                       "WHERE refrigerator_id = ? ",
-                       (refrigerator_id,))
-        result = cursor.fetchone()  # Fetch the first row of the result
-        conn.close()
-        if result:
-            return True
-        else:
-            return False
+                       "FROM " + table_name +
+                       " WHERE " + column_name + " = ? ", (value,))
 
-    def check_user_exist(self, email):
-        # Connect to the SQLite database
-        conn = sqlite3.connect(self.path)
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT * "
-                       "FROM user "
-                       "WHERE email = ? ",
-                       (email,))
-        result = cursor.fetchone()  # Fetch the first row of the result
+        result = cursor.fetchone()
         conn.close()
         if result:
             return True
@@ -138,9 +122,38 @@ class Database:
 
         data = (email, password, first_name, last_name)
         cursor.execute(
-                "INSERT INTO user (email,password,first_name,last_name)"
-                "VALUES (?,?,?,?)", data)
+            "INSERT INTO user (email,password,first_name,last_name)"
+            "VALUES (?,?,?,?)", data)
 
         conn.commit()
         conn.close()
 
+    def generate_refrigerator_id(self):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        while (True):
+            random_number = random.randint(100000000, 999999999)
+            if not self.check_value_exist(table_name="refrigerator", column_name="refrigerator_id",
+                                          value=random_number):
+                break
+
+        cursor.execute("INSERT INTO refrigerator (refrigerator_id)"
+                       "VALUES (?)", (random_number,))
+
+        conn.commit()
+        conn.close()
+        return random_number
+
+    def link_refrigerator_to_user(self, refrigerator_id, user_id):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM link WHERE user_id = ? AND refrigerator_id = ?", (user_id, refrigerator_id))
+        result = cursor.fetchall()
+
+        if result:
+            return "the link already exists", 0
+
+        cursor.execute("INSERT INTO link (user_id, refrigerator_id) VALUES (?, ?)", (user_id, refrigerator_id))
+        return "link created", 1

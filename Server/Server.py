@@ -1,7 +1,12 @@
 from flask import Flask, request, jsonify
 from Database import Database
+import logging
 
 app = Flask(__name__)
+
+# Set up basic configuration for logging to the console
+logging.basicConfig(level=logging.DEBUG,  # Log level
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 database = Database()
 app.extensions['database'] = database
@@ -23,7 +28,8 @@ def scan():
             error_response = {'error': f"Product with barcode {barcode} not found"}
             return jsonify(error_response), 404
 
-        if not database.check_refrigerator_exist(refrigerator_id):
+        # identify if the refrigerator id exists
+        if not database.check_value_exist(table_name="refrigerator",column_name="refrigerator_id", value=refrigerator_id):
             error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
             return jsonify(error_response), 404
 
@@ -59,7 +65,7 @@ def get_refrigerator_contents():
     refrigerator_id = request.args.get('refrigerator_id')
     database = app.extensions['database']
 
-    if database.check_refrigerator_exist(refrigerator_id):
+    if database.check_value_exist(table_name="refrigerator",column_name="refrigerator_id", value=refrigerator_id):
         refrigerator_contents = database.find_refrigerator_contents(refrigerator_id)
         return jsonify(refrigerator_contents.__json__()), 200
     else:
@@ -78,8 +84,8 @@ def reqister_new_user():
         last_name = data['last_name']
         database = app.extensions['database']
 
-        # identify if this user already exists
-        if database.check_user_exist(email):
+        # identify if this email already exists
+        if database.check_value_exist(table_name="user",column_name="email", value=email):
             error_response = {'error': f"User with email {email} already exists"}
             return jsonify(error_response), 400
         else:
@@ -90,7 +96,41 @@ def reqister_new_user():
             return jsonify(message_response), 200
 
 
+@app.route('/request_refrigerator_id', methods=['GET'])
+def get_request_refrigerator_id():
+    database = app.extensions['database']
+    new_refrigerator_id = database.generate_refrigerator_id()
+    app.logger.info(f"The number {new_refrigerator_id} has been assigned to a new refrigerator as id")
+    return jsonify(new_refrigerator_id), 200
 
+
+@app.route('/link', methods=['POST'])
+def link():
+    data = request.get_json()  # Get the Body JSON data from the request
+    if not ('user_id' in data and 'refrigerator_id' in data):
+        error_response = {'error': 'invalid request'}
+        return jsonify(error_response), 400
+
+    user_id = data['user_id']
+    refrigerator_id = data['refrigerator_id']
+
+    database = app.extensions['database']
+
+    if not database.check_value_exist(table_name="user",column_name="user_id", value=user_id):
+        error_response = {'error': f"User with id {user_id} does not exist"}
+        return jsonify(error_response), 404
+
+    if not database.check_value_exist(table_name="refrigerator",column_name="refrigerator_id", value=refrigerator_id):
+        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+        return jsonify(error_response), 404
+
+    result = database.link_refrigerator_to_user(refrigerator_id, user_id)
+    if result[1] == 1:
+        app.logger.info(f"user {user_id} has been linked to refrigerator {refrigerator_id}")
+    else:
+        app.logger.warning(f"There was an attempt to make an existing link between user {user_id} to refrigerator {refrigerator_id}")
+    message_response = {'message': result[0]}
+    return jsonify(message_response), 200
 
 
 if __name__ == '__main__':
