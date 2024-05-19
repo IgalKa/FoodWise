@@ -1,13 +1,12 @@
 import random
 import sqlite3
 from datetime import datetime
-from models.Product import Product
-from models.Refrigerator import Refrigerator
+from Server.models import Refrigerator, Product
 
 
 class Database:
-    def __init__(self):
-        self.path = 'data_bases\\database.db'
+    def __init__(self, path):
+        self.path = path
 
     def find_product(self, barcode):
         # Connect to the SQLite database

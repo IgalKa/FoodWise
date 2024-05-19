@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from Database import Database
+from database.Database import Database
 import logging
 
 app = Flask(__name__)
@@ -8,7 +8,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG,  # Log level
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-database = Database()
+database = Database("../Server/data/database.db")
 app.extensions['database'] = database
 
 
@@ -60,7 +60,7 @@ def scan():
 
 
 @app.route('/refrigerator_contents', methods=['GET'])
-def get_refrigerator_contents():
+def refrigerator_contents():
     # Get the QueryParam 'refrigerator_id' from the request
     refrigerator_id = request.args.get('refrigerator_id')
     database = app.extensions['database']
@@ -74,7 +74,7 @@ def get_refrigerator_contents():
 
 
 @app.route('/register', methods=['POST'])
-def reqister_new_user():
+def register_new_user():
     data = request.get_json()  # Get the Body JSON data from the request
     # Check if 'barcode', 'mode', 'refrigerator_id' keys exist in the JSON data
     if 'email' in data and 'password' in data and 'first_name' in data and 'last_name' in data:
