@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from database.Database import Database
+from Server.database.Database import Database
 import logging
 
 app = Flask(__name__)
