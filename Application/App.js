@@ -3,6 +3,7 @@ import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { I18nManager } from 'react-native';
 import Navigation from './navigation/StackNavigation';
+import { AuthProvider } from './contexts/AuthContext';
 
 I18nManager.allowRTL(false);
 I18nManager.forceRTL(false);
@@ -12,9 +13,11 @@ I18nManager.forceRTL(false);
 
 function App() {
   return (
-    <NavigationContainer>
-      <Navigation />
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <Navigation />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
 

@@ -1,16 +1,56 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ImageBackground } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AuthForm from '../components/AuthForm';
+import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
+import CONFIG from '../config'; // Your config file for the server URL
 
 const LoginScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigation = useNavigation();
+    const [error, setError] = useState('');
+    const { setUserId } = useAuth();
+    const [loading, setLoading] = useState(false);
 
-    const handleLogin = () => {
-        // Add your login logic here
-        console.log('Email:', email);
-        console.log('Password:', password);
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => {
+                setError('');
+            }, 7500); // Clear error after 7.5 seconds
+
+            return () => clearTimeout(timer); // Cleanup timer on unmount
+        }
+    }, [error]);
+
+    const handleLogin = async () => {
+
+        if (!email || !password) {
+            setError('Email and password are required.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await axios.get(`${CONFIG.SERVER_URL}/login`, {
+                email,
+                password,
+            });
+
+            if (response.data.success) {
+                await setUserId(response.userId);
+                navigation.navigate('Inventory');
+            } else {
+                setError(response.data.message); // Set error message from server response
+            }
+        } catch (error) {
+            setError('An error occurred during login. Please try again.');
+            console.log('Error during login:', error);
+        }
+        finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -25,7 +65,31 @@ const LoginScreen = () => {
             <View style={styles.container}>
 
                 <View style={styles.overlay}>
-                    <View style={styles.formContainer}>
+                    <AuthForm
+                        title="Login"
+                        fields={[
+                            {
+                                placeholder: 'Email',
+                                value: email,
+                                onChangeText: setEmail,
+                                keyboardType: 'email-address',
+                            },
+                            {
+                                placeholder: 'Password',
+                                value: password,
+                                onChangeText: setPassword,
+                                secureTextEntry: true,
+                            },
+                        ]}
+                        buttonText="Login"
+                        onSubmit={handleLogin}
+                        footerText="Don't have an account?"
+                        footerActionText="Sign Up"
+                        onFooterActionPress={() => navigation.navigate('Signup')}
+                        loading={loading}
+                    />
+                    {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                    {/* <View style={styles.formContainer}>
                         <Text style={styles.loginText}>Login</Text>
                         <TextInput
                             style={styles.input}
@@ -45,12 +109,12 @@ const LoginScreen = () => {
                             <Text style={styles.buttonText}>Login</Text>
                         </TouchableOpacity>
                         <View style={styles.signupContainer}>
-                            <Text style={styles.signupText}>Don't have and account? </Text>
+                            <Text style={styles.signupText}>Don't have an account? </Text>
                             <TouchableOpacity onPress={() => navigation.navigate('Signup')} >
                                 <Text style={styles.signupButton}>Sign Up</Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
+                    </View> */}
                 </View>
 
             </View >
@@ -75,51 +139,51 @@ const styles = StyleSheet.create({
     logoContainer: {
         marginBottom: 30,
     },
-    formContainer: {
-        width: '80%',
-    },
-    loginText: {
-        fontSize: 50,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'left',
-        color: '#fff',
-    },
-    input: {
-        height: 40,
-        borderColor: '#fff',
-        borderWidth: 1,
-        borderRadius: 5,
-        paddingHorizontal: 10,
-        marginBottom: 15,
-        color: '#fff',
-    },
-    loginButton: {
-        backgroundColor: '#cd87ff',
-        paddingVertical: 12,
-        borderRadius: 5,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    signupText: {
-        fontSize: 16,
-        marginTop: 20,
-        lineHeight: 20, // Set line height to match button height
-        // Other styles
-    },
-    signupButton: {
-        textAlign: 'center',
-    },
-    signupButtonText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#fff', // or any other color you prefer
-        // Other styles
-    },
+    // formContainer: {
+    //     width: '80%',
+    // },
+    // loginText: {
+    //     fontSize: 50,
+    //     fontWeight: 'bold',
+    //     marginBottom: 20,
+    //     textAlign: 'left',
+    //     color: '#fff',
+    // },
+    // input: {
+    //     height: 40,
+    //     borderColor: '#fff',
+    //     borderWidth: 1,
+    //     borderRadius: 5,
+    //     paddingHorizontal: 10,
+    //     marginBottom: 15,
+    //     color: '#fff',
+    // },
+    // loginButton: {
+    //     backgroundColor: '#cd87ff',
+    //     paddingVertical: 12,
+    //     borderRadius: 5,
+    // },
+    // buttonText: {
+    //     color: '#fff',
+    //     fontSize: 18,
+    //     fontWeight: 'bold',
+    //     textAlign: 'center',
+    // },
+    // signupText: {
+    //     fontSize: 16,
+    //     marginTop: 20,
+    //     lineHeight: 20, // Set line height to match button height
+    //     // Other styles
+    // },
+    // signupButton: {
+    //     textAlign: 'center',
+    // },
+    // signupButtonText: {
+    //     fontSize: 16,
+    //     fontWeight: 'bold',
+    //     color: '#fff', // or any other color you prefer
+    //     // Other styles
+    // },
     logoContainer: {
         flex: 0.25,
         backgroundColor: 'rgba(0,0,0,0.5)',
@@ -131,19 +195,24 @@ const styles = StyleSheet.create({
         paddingLeft: 15,
         marginTop: 15,
     },
-    signupContainer: {
-        flexDirection: 'row',
-        paddingTop: 15,
-        justifyContent: 'center',
+    // signupContainer: {
+    //     flexDirection: 'row',
+    //     paddingTop: 15,
+    //     justifyContent: 'center',
 
-    },
-    signupButton: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#fff',
-    },
-    signupText: {
-        fontSize: 16,
+    // },
+    // signupButton: {
+    //     fontSize: 16,
+    //     fontWeight: 'bold',
+    //     color: '#fff',
+    // },
+    // signupText: {
+    //     fontSize: 16,
+    // },
+    errorText: {
+        color: 'red',
+        marginTop: 10,
+        textAlign: 'center',
     },
 });
 
