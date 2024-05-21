@@ -145,15 +145,23 @@ class Database:
         conn.close()
         return random_number
 
-    def link_refrigerator_to_user(self, refrigerator_id, user_id, nickname):
+    def link_refrigerator_to_user(self, refrigerator_id, user_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM link WHERE user_id = ? AND refrigerator_id = ?", (user_id, refrigerator_id))
+        cursor.execute("SELECT * "
+                       "FROM link "
+                       "WHERE user_id = ? AND refrigerator_id = ?", (user_id, refrigerator_id))
         result = cursor.fetchall()
 
         if result:
             return "the link already exists", 0
+
+        cursor.execute("SELECT * "
+                       "FROM link"
+                       " WHERE user_id = ? ", (user_id,))
+        result = cursor.fetchall()
+        nickname = f"Refrigerator {len(result)+1}"
 
         cursor.execute("INSERT INTO link (user_id, refrigerator_id,nickname) "
                        "VALUES (?, ?,?)", (user_id, refrigerator_id, nickname))
@@ -171,3 +179,14 @@ class Database:
         result = cursor.fetchall()
 
         return {"refrigerators": [{"refrigerator_id": row[0], "nickname": row[1]} for row in result]}
+
+    def change_refrigerator_nickname(self, refrigerator_id, user_id, nickname):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("UPDATE link "
+                       "SET nickname =? "
+                       "WHERE user_id = ? AND refrigerator_id = ?", (nickname, user_id, refrigerator_id))
+
+        conn.commit()
+        conn.close()

@@ -106,7 +106,7 @@ def register_new_user():
 
 
 @app.route('/request_refrigerator_id', methods=['GET'])
-def get_request_refrigerator_id():
+def request_refrigerator_id():
     database = app.extensions['database']
     new_refrigerator_id = database.generate_refrigerator_id()
     app.logger.info(f"The number {new_refrigerator_id} has been assigned to a new refrigerator as id")
@@ -122,7 +122,6 @@ def link():
 
     user_id = data['user_id']
     refrigerator_id = data['refrigerator_id']
-    nickname = data['nickname']
 
     database = app.extensions['database']
 
@@ -134,7 +133,7 @@ def link():
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return jsonify(error_response), 404
 
-    result = database.link_refrigerator_to_user(refrigerator_id, user_id, nickname)
+    result = database.link_refrigerator_to_user(refrigerator_id, user_id)
     if result[1] == 1:
         app.logger.info(f"user {user_id} has been linked to refrigerator {refrigerator_id}")
     else:
@@ -155,6 +154,32 @@ def linked_refrigerators():
 
     app.logger.info(f"there was a request for all the linked refrigerators for user {user_id}")
     return database.find_linked_refrigerators(user_id), 200
+
+
+@app.route('/update_refrigerator_name', methods=['POST'])
+def update_refrigerator_name():
+    user_id = request.args.get('user_id')
+    data = request.get_json()
+
+    if not ('new_name' in data and 'refrigerator_id' in data):
+        error_response = {'error': 'invalid request'}
+        return jsonify(error_response), 400
+
+    refrigerator_id = data['refrigerator_id']
+    new_name = data['new_name']
+
+    if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
+        error_response = {'error': f"User with id {user_id} does not exist"}
+        return jsonify(error_response), 404
+
+    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
+        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+        return jsonify(error_response), 404
+
+    database.change_refrigerator_nickname(refrigerator_id, user_id, new_name)
+    app.logger.info(f"User {user_id} changed the name of refrigerator {refrigerator_id} to {new_name}")
+    message_response = {'message': "the name was updated successfully"}
+    return jsonify(message_response), 200
 
 
 if __name__ == '__main__':
