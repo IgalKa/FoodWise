@@ -1,6 +1,14 @@
 from flask import Flask, request, jsonify
-from Server.database.Database import Database
 import logging
+import sys
+from os.path import abspath, dirname, join
+
+# Calculate the project root directory and add it to sys.path
+project_root = abspath(join(dirname(__file__), '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from database.Database import Database
 
 app = Flask(__name__)
 
@@ -29,7 +37,8 @@ def scan():
             return jsonify(error_response), 404
 
         # identify if the refrigerator id exists
-        if not database.check_value_exist(table_name="refrigerator",column_name="refrigerator_id", value=refrigerator_id):
+        if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id",
+                                          value=refrigerator_id):
             error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
             return jsonify(error_response), 404
 
@@ -65,7 +74,7 @@ def refrigerator_contents():
     refrigerator_id = request.args.get('refrigerator_id')
     database = app.extensions['database']
 
-    if database.check_value_exist(table_name="refrigerator",column_name="refrigerator_id", value=refrigerator_id):
+    if database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
         refrigerator_contents = database.find_refrigerator_contents(refrigerator_id)
         return jsonify(refrigerator_contents.__json__()), 200
     else:
@@ -85,7 +94,7 @@ def register_new_user():
         database = app.extensions['database']
 
         # identify if this email already exists
-        if database.check_value_exist(table_name="user",column_name="email", value=email):
+        if database.check_value_exist(table_name="user", column_name="email", value=email):
             error_response = {'error': f"User with email {email} already exists"}
             return jsonify(error_response), 400
         else:
@@ -116,11 +125,11 @@ def link():
 
     database = app.extensions['database']
 
-    if not database.check_value_exist(table_name="user",column_name="user_id", value=user_id):
+    if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
         error_response = {'error': f"User with id {user_id} does not exist"}
         return jsonify(error_response), 404
 
-    if not database.check_value_exist(table_name="refrigerator",column_name="refrigerator_id", value=refrigerator_id):
+    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return jsonify(error_response), 404
 
@@ -128,7 +137,8 @@ def link():
     if result[1] == 1:
         app.logger.info(f"user {user_id} has been linked to refrigerator {refrigerator_id}")
     else:
-        app.logger.warning(f"There was an attempt to make an existing link between user {user_id} to refrigerator {refrigerator_id}")
+        app.logger.warning(
+            f"There was an attempt to make an existing link between user {user_id} to refrigerator {refrigerator_id}")
     message_response = {'message': result[0]}
     return jsonify(message_response), 200
 

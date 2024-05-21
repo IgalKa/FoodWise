@@ -1,7 +1,8 @@
 import random
 import sqlite3
 from datetime import datetime
-from Server.models import Refrigerator, Product
+from Server.models.Refrigerator import Refrigerator
+from Server.models.Product import Product
 
 
 class Database:
