@@ -145,7 +145,7 @@ class Database:
         conn.close()
         return random_number
 
-    def link_refrigerator_to_user(self, refrigerator_id, user_id):
+    def link_refrigerator_to_user(self, refrigerator_id, user_id, nickname):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
@@ -155,5 +155,19 @@ class Database:
         if result:
             return "the link already exists", 0
 
-        cursor.execute("INSERT INTO link (user_id, refrigerator_id) VALUES (?, ?)", (user_id, refrigerator_id))
+        cursor.execute("INSERT INTO link (user_id, refrigerator_id,nickname) "
+                       "VALUES (?, ?,?)", (user_id, refrigerator_id, nickname))
+        conn.commit()
+        conn.close()
         return "link created", 1
+
+    def find_linked_refrigerators(self, user_id):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT refrigerator_id,nickname "
+                       "FROM link "
+                       "WHERE user_id = ? ", (user_id,))
+        result = cursor.fetchall()
+
+        return {"refrigerators": [{"refrigerator_id": row[0], "nickname": row[1]} for row in result]}

@@ -122,6 +122,7 @@ def link():
 
     user_id = data['user_id']
     refrigerator_id = data['refrigerator_id']
+    nickname = data['nickname']
 
     database = app.extensions['database']
 
@@ -133,7 +134,7 @@ def link():
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return jsonify(error_response), 404
 
-    result = database.link_refrigerator_to_user(refrigerator_id, user_id)
+    result = database.link_refrigerator_to_user(refrigerator_id, user_id, nickname)
     if result[1] == 1:
         app.logger.info(f"user {user_id} has been linked to refrigerator {refrigerator_id}")
     else:
@@ -141,6 +142,19 @@ def link():
             f"There was an attempt to make an existing link between user {user_id} to refrigerator {refrigerator_id}")
     message_response = {'message': result[0]}
     return jsonify(message_response), 200
+
+
+@app.route('/linked_refrigerators', methods=['GET'])
+def linked_refrigerators():
+    user_id = request.args.get('user_id')
+    database = app.extensions['database']
+
+    if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
+        error_response = {'error': f"User with id {user_id} does not exist"}
+        return jsonify(error_response), 404
+
+    app.logger.info(f"there was a request for all the linked refrigerators for user {user_id}")
+    return database.find_linked_refrigerators(user_id), 200
 
 
 if __name__ == '__main__':
