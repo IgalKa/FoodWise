@@ -85,7 +85,7 @@ def refrigerator_contents():
 @app.route('/register', methods=['POST'])
 def register_new_user():
     data = request.get_json()  # Get the Body JSON data from the request
-    # Check if 'barcode', 'mode', 'refrigerator_id' keys exist in the JSON data
+    # Check if 'email', 'password', 'first_name', last_name keys exist in the JSON data
     if 'email' in data and 'password' in data and 'first_name' in data and 'last_name' in data:
         email = data['email']
         password = data['password']
@@ -180,6 +180,35 @@ def update_refrigerator_name():
     app.logger.info(f"User {user_id} changed the name of refrigerator {refrigerator_id} to {new_name}")
     message_response = {'message': "the name was updated successfully"}
     return jsonify(message_response), 200
+
+
+@app.route('/user_login', methods=['POST'])
+def user_login():
+    data = request.get_json()  # Get the Body JSON data from the request
+    # Check if 'email', 'password' keys are not exist in the JSON data
+    if not ('email' in data and 'password' in data):
+        error_response = {'error': 'invalid request'}
+        app.logger.error(error_response)
+        return jsonify(error_response), 400
+
+    user_email = data['email']
+    user_password = data['password']
+    database = app.extensions['database']
+
+    if not database.check_value_exist(table_name="user", column_name="email", value=user_email):
+        error_response = {'error': f"User with email {user_email} does not exist"}
+        app.logger.error(error_response)
+        return jsonify(error_response), 404
+
+    if not database.check_2values_exist(table_name="user", column_name1="email", column_name2="password",
+                                        value1=user_email, value2=user_password):
+        error_response = {'error': f"Wrong password for user with email {user_email}"}
+        app.logger.error(error_response)
+        return jsonify(error_response), 404
+
+    result = database.get_user(user_email, user_password)
+    app.logger.info("User logged successfully")
+    return jsonify(result), 200
 
 
 if __name__ == '__main__':

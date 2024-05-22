@@ -115,6 +115,21 @@ class Database:
         else:
             return False
 
+    def check_2values_exist(self, table_name, column_name1, column_name2, value1, value2):
+        # Connect to the SQLite database
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * "
+                       "FROM " + table_name +
+                       " WHERE " + column_name1 + " = ? AND " + column_name2 + " = ? ", (value1, value2))
+
+        result = cursor.fetchone()
+        conn.close()
+        if result:
+            return True
+        else:
+            return False
+
     def add_user(self, email, password, first_name, last_name):
         # Connect to the SQLite database
         conn = sqlite3.connect(self.path)
@@ -127,6 +142,21 @@ class Database:
 
         conn.commit()
         conn.close()
+
+    def get_user(self, email, password):
+        # Connect to the SQLite database
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        data = (email, password)
+        cursor.execute("SELECT user_id, first_name, last_name "
+                       "FROM user "
+                       "WHERE email = ? AND password = ?", data)
+        result = cursor.fetchone()
+        conn.close()
+
+        return result
+
 
     def generate_refrigerator_id(self):
         conn = sqlite3.connect(self.path)
@@ -161,7 +191,7 @@ class Database:
                        "FROM link"
                        " WHERE user_id = ? ", (user_id,))
         result = cursor.fetchall()
-        nickname = f"Refrigerator {len(result)+1}"
+        nickname = f"Refrigerator {len(result) + 1}"
 
         cursor.execute("INSERT INTO link (user_id, refrigerator_id,nickname) "
                        "VALUES (?, ?,?)", (user_id, refrigerator_id, nickname))
@@ -187,6 +217,5 @@ class Database:
         cursor.execute("UPDATE link "
                        "SET nickname =? "
                        "WHERE user_id = ? AND refrigerator_id = ?", (nickname, user_id, refrigerator_id))
-
         conn.commit()
         conn.close()
