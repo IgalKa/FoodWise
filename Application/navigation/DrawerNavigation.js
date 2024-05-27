@@ -3,6 +3,7 @@ import * as React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import InventoryScreen from '../screens/InventoryScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
+import MyRefrigeratorsScreen from '../screens/MyRefrigeratorsScreen';
 
 
 
@@ -32,6 +33,10 @@ const DrawerNavigator = () => {
             <Drawer.Screen name='Welcome' component={WelcomeScreen} options={{
                 drawerLabel: 'Welcome',
                 headerTitle: 'Welcome',
+            }} />
+            <Drawer.Screen name='MyRefrigerators' component={MyRefrigeratorsScreen} options={{
+                drawerLabel: 'My Refrigerators',
+                headerTitle: 'My Refrigerators',
             }} />
         </Drawer.Navigator>
     )

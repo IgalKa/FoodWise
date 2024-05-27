@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, TextInput, ImageBackground, BackHandler, ActivityIndicator } from 'react-native';
-import { useDoubleBackPressExit } from '../hooks/DoubleBackExit';
 import { useFocusEffect } from '@react-navigation/native';
+import ScreenLayout from '../components/ScreenLayout';
 import axios from 'axios';
+import CONFIG from '../config';
+import { useAuth } from '../contexts/AuthContext';
+
+
 
 const DATA = [
     { id: '1', name: 'Itemm 1', quantity: 10, image: require('../assets/milk.jpg') },
@@ -30,17 +34,18 @@ function InventoryScreen({ navigation }) {
     const [data, setData] = useState(null);
     const [filteredData, setFilteredData] = useState(data);
     const [loading, setLoading] = useState(true);
-    const [gotData, setGotData] = useState(true);
+    const [toastShown, setToastShown] = useState(false);
+    const { fridgeId } = useAuth();
 
 
 
     const fetchData = async () => {
         try {
-            const response = await axios.get('http://192.168.0.106:12345/refrigerator_contents', {
+            const response = await axios.get(`${CONFIG.SERVER_URL}/refrigerator_contents`, {
                 params: {
-                    refrigerator_id: 1
+                    refrigerator_id: fridgeId,
                 },
-                timeout: 10000,
+                timeout: 30000,
             });
 
             const transformedItems = response.data.products.map(item => ({
@@ -53,25 +58,27 @@ function InventoryScreen({ navigation }) {
             setData(transformedItems);
         } catch (error) {
             console.log('Error fetching data:', error);
+            console.log(fridgeId);
         }
         finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        // Fetch data initially
-        fetchData();
-        // Set up interval for periodic polling
-        const intervalId = setInterval(fetchData, 15000); // Fetch data every 5 seconds (adjust as needed)
-        // Clean up interval on component unmount
-        return () => clearInterval(intervalId);
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            // Fetch data initially when the screen is focused
+            fetchData();
+            // Set up interval for periodic polling
+            const intervalId = setInterval(fetchData, 15000); // Fetch data every 15 seconds (adjust as needed)
+            // Clean up interval when the screen goes out of focus
+            return () => clearInterval(intervalId);
+        }, [fridgeId])
+    );
 
     useFocusEffect(
         React.useCallback(() => {
             setLoading(true);
-            fetchData();
         }, [])
     );
 
@@ -102,57 +109,47 @@ function InventoryScreen({ navigation }) {
         </TouchableOpacity>
     );
 
-    useDoubleBackPressExit(() => {
-        BackHandler.exitApp();
-    });
-
 
 
     return (
-        <ImageBackground
-            source={require('../assets/images/background.jpg')} // Adjust the path to your background image
-            style={styles.background}
-        >
-            {/* <View style={styles.logoContainer}>
-                <Text style={styles.logo}>FoodWise</Text>
-            </View> */}
-
-            <View style={styles.container}>
-                {!loading && data && data.length > 0 && (
-                    <View style={styles.searchContainer}>
-                        <Image source={require('../assets/search.jpg')} style={styles.searchIcon} />
-                        <TextInput
-                            style={styles.searchInput}
-                            placeholder="Search by item name"
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                        />
-                    </View>
-                )}
-                {loading && (
-                    <ActivityIndicator size="large" color="#fff" />
-                )}
-                {!loading && (
-                    <FlatList
-                        data={isSearching ? filteredData : data}
-                        renderItem={renderItem}
-                        keyExtractor={item => item.id}
-                        numColumns={2}
+        <ScreenLayout>
+            {!loading && data && data.length > 0 && (
+                <View style={styles.searchContainer}>
+                    <Image source={require('../assets/search.jpg')} style={styles.searchIcon} />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Search by item name"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
                     />
-                )}
-            </View>
-        </ImageBackground>
+                </View>
+            )}
+            {loading && (
+                <ActivityIndicator size="large" color="#fff" />
+            )}
+            {!loading && data && data.length > 0 && (
+                <FlatList
+                    data={isSearching ? filteredData : data}
+                    renderItem={renderItem}
+                    keyExtractor={item => item.id}
+                    numColumns={2}
+                />
+            )}
+            {!loading && data && data.length === 0 && (
+                <Text>No products</Text>
+            )}
+        </ScreenLayout>
     );
 }
 
 export default InventoryScreen;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
+    // container: {
+    //     flex: 1,
+    //     alignItems: 'center',
+    //     justifyContent: 'center',
+    // },
     logo: {
         fontWeight: 'bold',
         fontSize: 30,
@@ -215,8 +212,8 @@ const styles = StyleSheet.create({
         color: 'white',
         marginBottom: 10,
     },
-    background: {
-        flex: 1,
-        resizeMode: 'cover', // or 'stretch' or 'contain'
-    },
+    // background: {
+    //     flex: 1,
+    //     resizeMode: 'cover', // or 'stretch' or 'contain'
+    // },
 });
