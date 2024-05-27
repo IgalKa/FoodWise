@@ -14,24 +14,24 @@ class App:
         self.root = tk.Tk()
         self.root.title("FoodWise")
         self.root.attributes('-fullscreen', True)
+        self.root.configure(bg="#c5a3e9")
 
-        background_image = tk.PhotoImage("background.jpg")
-        background_label = tk.Label(self.root, image=background_image)
-        background_label.place(x=0, y=0, relwidth=1, relheight=1)
-
-        self.button = tk.Button(self.root, text="Linking mode", command=self.on_link_click, width=20, height=5)
+        self.button = tk.Button(self.root, text="link new user", command=self.on_link_click, width=20, height=5,
+                                background='#8a2be2', foreground='white')
         self.button.pack()
 
-        self.button1 = tk.Button(self.root, text="Adding mode", command=self.on_add_click, width=20, height=5)
+        self.button1 = tk.Button(self.root, text="Adding mode", command=self.on_add_click, width=20, height=5,
+                                 background='#8a2be2', foreground='white')
         self.button1.pack(pady=10)
 
-        self.button2 = tk.Button(self.root, text="Removal mode", command=self.on_removal_click, width=20, height=5)
+        self.button2 = tk.Button(self.root, text="Removal mode", command=self.on_removal_click, width=20, height=5,
+                                 background='#8a2be2', foreground='white')
         self.button2.pack(pady=20)
 
-        self.label = tk.Label(self.root, text="current mode: Adding mode");
+        self.label = tk.Label(self.root, text="current mode: Adding mode", background="#c5a3e9", foreground='white')
         self.label.pack(pady=20)
 
-        self.status_label = tk.Label(self.root, text="", fg="black", width=20, height=5)
+        self.status_label = tk.Label(self.root, text="", fg="black", width=20, height=5, background="#c5a3e9")
         self.status_label.pack(pady=10)
 
         self.barcode_thread = threading.Thread(target=self.listen_barcode_scanner)
@@ -74,10 +74,9 @@ class App:
 
     def handle_scan(self, barcode, refrigerator_id):
         print("Scanned data:", barcode)
-        global mode
 
-        if mode == "remove" or mode == "add":
-            data = {'refrigerator_id': refrigerator_id, 'barcode': barcode, 'mode': mode}
+        if self.mode == "remove" or self.mode == "add":
+            data = {'refrigerator_id': refrigerator_id, 'barcode': barcode, 'mode': self.mode}
         else:
             data = {'refrigerator_id': refrigerator_id, 'user_id': barcode}
 
