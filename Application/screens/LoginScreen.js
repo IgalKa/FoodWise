@@ -11,7 +11,7 @@ const LoginScreen = () => {
     const [password, setPassword] = useState('');
     const navigation = useNavigation();
     const [error, setError] = useState('');
-    const { setUserId } = useAuth();
+    const { setUserId, clearFridgeId, setUserName, setUserLastName } = useAuth();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -33,20 +33,28 @@ const LoginScreen = () => {
 
         setLoading(true);
         try {
-            const response = await axios.get(`${CONFIG.SERVER_URL}/login`, {
+            const response = await axios.post(`${CONFIG.SERVER_URL}/user_login`, {
                 email,
                 password,
             });
 
-            if (response.data.success) {
-                await setUserId(response.userId);
+            if (response.status === 200) {
+                await setUserId(response.data[0].toString());
+                await setUserName(response.data[1]);
+                await setUserLastName(response.data[2]);
+                await clearFridgeId();
                 navigation.navigate('Inventory');
             } else {
                 setError(response.data.message); // Set error message from server response
             }
         } catch (error) {
-            setError('An error occurred during login. Please try again.');
-            console.log('Error during login:', error);
+
+            if (error.response && error.response.data && error.response.data.error) {
+                setError(error.response.data.error); // Set error message from server response for status 400
+            } else {
+                setError('An unexpected error occurred. Please try again.');
+            }
+            console.log('Error logging in:', error);
         }
         finally {
             setLoading(false);

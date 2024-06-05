@@ -1,6 +1,7 @@
 import React from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ImageBackground, Button } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+
 
 export default function WelcomeScreen() {
     const navigation = useNavigation();
@@ -32,9 +33,6 @@ export default function WelcomeScreen() {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.signupContainer}>
-                    <TouchableOpacity onPress={() => navigation.replace('Inventory')}>
-                        <Text style={styles.signupButton}>Inventory</Text>
-                    </TouchableOpacity>
                 </View>
             </View>
         </ImageBackground>

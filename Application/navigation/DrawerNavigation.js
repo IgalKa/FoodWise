@@ -4,6 +4,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import InventoryScreen from '../screens/InventoryScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import MyRefrigeratorsScreen from '../screens/MyRefrigeratorsScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 
 
@@ -30,13 +31,13 @@ const DrawerNavigator = () => {
                 drawerLabel: 'Inventory',
                 headerTitle: 'Inventory',
             }} />
-            <Drawer.Screen name='Welcome' component={WelcomeScreen} options={{
-                drawerLabel: 'Welcome',
-                headerTitle: 'Welcome',
-            }} />
             <Drawer.Screen name='MyRefrigerators' component={MyRefrigeratorsScreen} options={{
                 drawerLabel: 'My Refrigerators',
                 headerTitle: 'My Refrigerators',
+            }} />
+            <Drawer.Screen name='Settings' component={SettingsScreen} options={{
+                drawerLabel: 'Settings',
+                headerTitle: 'Settings',
             }} />
         </Drawer.Navigator>
     )

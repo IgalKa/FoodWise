@@ -34,7 +34,6 @@ function InventoryScreen({ navigation }) {
     const [data, setData] = useState(null);
     const [filteredData, setFilteredData] = useState(data);
     const [loading, setLoading] = useState(true);
-    const [toastShown, setToastShown] = useState(false);
     const { fridgeId } = useAuth();
 
 
@@ -138,6 +137,11 @@ function InventoryScreen({ navigation }) {
             {!loading && data && data.length === 0 && (
                 <Text>No products</Text>
             )}
+            {!fridgeId && (
+                <TouchableOpacity style={styles.selectButton} onPress={() => { navigation.navigate('MyRefrigerators'); }} >
+                    <Text style={styles.buttonText}>Select A Refrigerator</Text>
+                </TouchableOpacity>
+            )}
         </ScreenLayout>
     );
 }
@@ -212,8 +216,16 @@ const styles = StyleSheet.create({
         color: 'white',
         marginBottom: 10,
     },
-    // background: {
-    //     flex: 1,
-    //     resizeMode: 'cover', // or 'stretch' or 'contain'
-    // },
+    selectButton: {
+        backgroundColor: '#cd87ff',
+        paddingVertical: 12,
+        borderRadius: 5,
+        width: '80%',
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
 });

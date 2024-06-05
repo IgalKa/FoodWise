@@ -6,6 +6,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [userId, setUserId] = useState(null);
     const [userName, setUserName] = useState(null);
+    const [userLastName, setUserLastName] = useState(null);
     const [fridgeId, setFridgeId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -14,6 +15,7 @@ export const AuthProvider = ({ children }) => {
             const id = await AsyncStorage.getItem('userId');
             const fridge = await AsyncStorage.getItem('fridgeId');
             const name = await AsyncStorage.getItem('userName');
+            const lastName = await AsyncStorage.getItem('userLastName');
             if (id) {
                 setUserId(id);
             }
@@ -22,6 +24,9 @@ export const AuthProvider = ({ children }) => {
             }
             if (name) {
                 setUserName(name);
+            }
+            if (lastName) {
+                setUserLastName(lastName);
             }
             setIsLoading(false);
         };
@@ -47,6 +52,11 @@ export const AuthProvider = ({ children }) => {
         await AsyncStorage.setItem('userName', name);
     };
 
+    const saveUserLastName = async (lastName) => {
+        setUserLastName(lastName);
+        await AsyncStorage.setItem('userLastName', lastName);
+    };
+
     const clearUserId = async () => {
         setUserId(null);
         await AsyncStorage.removeItem('userId');
@@ -58,12 +68,17 @@ export const AuthProvider = ({ children }) => {
     };
 
     const clearUserName = async () => {
-        setuUserName(null);
+        setUserName(null);
         await AsyncStorage.removeItem('userName');
     };
 
+    const clearUserLastName = async () => {
+        setUserLastName(null);
+        await AsyncStorage.removeItem('userLastName');
+    };
+
     return (
-        <AuthContext.Provider value={{ userId, fridgeId, userName, setUserId: saveUserId, setFridgeId: saveFridgeId, setUserName: saveUserName, clearUserId, clearFridgeId, clearUserName, isLoading }}>
+        <AuthContext.Provider value={{ userId, fridgeId, userName, userLastName, setUserId: saveUserId, setFridgeId: saveFridgeId, setUserName: saveUserName, setUserLastName: saveUserLastName, clearUserId, clearFridgeId, clearUserName, clearUserLastName, isLoading }}>
             {children}
         </AuthContext.Provider>
     );
