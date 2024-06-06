@@ -156,6 +156,23 @@ def linked_refrigerators():
     return database.find_linked_refrigerators(user_id), 200
 
 
+@app.route('/number_linked_refrigerators', methods=['GET'])
+def number_linked_refrigerators():
+    user_id = request.args.get('user_id')
+    database = app.extensions['database']
+
+    if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
+        error_response = {'error': f"User with id {user_id} does not exist"}
+        return jsonify(error_response), 404
+
+    result = database.find_linked_refrigerators(user_id)
+    number_refrigerators= len(result['refrigerators'])
+
+    app.logger.info(f"there was a request for the number of the linked refrigerators for user {user_id} ,returned {number_refrigerators}")
+    response={"number_linked_refrigerators": number_refrigerators}
+    return response, 200
+
+
 @app.route('/update_refrigerator_name', methods=['POST'])
 def update_refrigerator_name():
     user_id = request.args.get('user_id')
