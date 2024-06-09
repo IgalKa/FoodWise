@@ -150,11 +150,6 @@ function InventoryScreen({ navigation }) {
 export default InventoryScreen;
 
 const styles = StyleSheet.create({
-    // container: {
-    //     flex: 1,
-    //     alignItems: 'center',
-    //     justifyContent: 'center',
-    // },
     logo: {
         fontWeight: 'bold',
         fontSize: 30,
@@ -197,7 +192,7 @@ const styles = StyleSheet.create({
         marginVertical: 8,
         marginHorizontal: 8,
         borderRadius: 10,
-        width: 150, // Adjust width as needed for grid layout
+        width: 150,
         alignItems: 'center',
     },
     image: {

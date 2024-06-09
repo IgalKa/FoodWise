@@ -10,7 +10,7 @@ function ScreenLayout({ children }) {
 
     return (
         <ImageBackground
-            source={require('../assets/images/background.jpg')} // Adjust the path to your background image
+            source={require('../assets/images/background.jpg')}
             style={styles.background}
         >
             <View style={styles.container}>
@@ -30,6 +30,6 @@ const styles = StyleSheet.create({
     },
     background: {
         flex: 1,
-        resizeMode: 'cover', // or 'stretch' or 'contain'
+        resizeMode: 'cover',
     },
 });

@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import AuthForm from '../components/AuthForm';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
-import CONFIG from '../config'; // Your config file for the server URL
+import CONFIG from '../config';
 
 const LoginScreen = () => {
     const [email, setEmail] = useState('');
@@ -20,7 +20,7 @@ const LoginScreen = () => {
                 setError('');
             }, 7500); // Clear error after 7.5 seconds
 
-            return () => clearTimeout(timer); // Cleanup timer on unmount
+            return () => clearTimeout(timer);
         }
     }, [error]);
 
@@ -45,12 +45,12 @@ const LoginScreen = () => {
                 await clearFridgeId();
                 navigation.navigate('Inventory');
             } else {
-                setError(response.data.message); // Set error message from server response
+                setError(response.data.message);
             }
         } catch (error) {
 
             if (error.response && error.response.data && error.response.data.error) {
-                setError(error.response.data.error); // Set error message from server response for status 400
+                setError(error.response.data.error);
             } else {
                 setError('An unexpected error occurred. Please try again.');
             }
@@ -63,7 +63,7 @@ const LoginScreen = () => {
 
     return (
         <ImageBackground
-            source={require('../assets/images/background.jpg')} // Adjust the path to your background image
+            source={require('../assets/images/background.jpg')}
             style={styles.background}
         >
             <View style={styles.logoContainer}>
@@ -97,32 +97,6 @@ const LoginScreen = () => {
                         loading={loading}
                     />
                     {error ? <Text style={styles.errorText}>{error}</Text> : null}
-                    {/* <View style={styles.formContainer}>
-                        <Text style={styles.loginText}>Login</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Email"
-                            value={email}
-                            onChangeText={setEmail}
-                            keyboardType="email-address"
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Password"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                        />
-                        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-                            <Text style={styles.buttonText}>Login</Text>
-                        </TouchableOpacity>
-                        <View style={styles.signupContainer}>
-                            <Text style={styles.signupText}>Don't have an account? </Text>
-                            <TouchableOpacity onPress={() => navigation.navigate('Signup')} >
-                                <Text style={styles.signupButton}>Sign Up</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View> */}
                 </View>
 
             </View >
@@ -136,62 +110,17 @@ const styles = StyleSheet.create({
     },
     background: {
         flex: 1,
-        resizeMode: 'cover', // or 'stretch' or 'contain'
+        resizeMode: 'cover',
     },
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)', // Adjust the opacity as needed
+        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     logoContainer: {
         marginBottom: 30,
     },
-    // formContainer: {
-    //     width: '80%',
-    // },
-    // loginText: {
-    //     fontSize: 50,
-    //     fontWeight: 'bold',
-    //     marginBottom: 20,
-    //     textAlign: 'left',
-    //     color: '#fff',
-    // },
-    // input: {
-    //     height: 40,
-    //     borderColor: '#fff',
-    //     borderWidth: 1,
-    //     borderRadius: 5,
-    //     paddingHorizontal: 10,
-    //     marginBottom: 15,
-    //     color: '#fff',
-    // },
-    // loginButton: {
-    //     backgroundColor: '#cd87ff',
-    //     paddingVertical: 12,
-    //     borderRadius: 5,
-    // },
-    // buttonText: {
-    //     color: '#fff',
-    //     fontSize: 18,
-    //     fontWeight: 'bold',
-    //     textAlign: 'center',
-    // },
-    // signupText: {
-    //     fontSize: 16,
-    //     marginTop: 20,
-    //     lineHeight: 20, // Set line height to match button height
-    //     // Other styles
-    // },
-    // signupButton: {
-    //     textAlign: 'center',
-    // },
-    // signupButtonText: {
-    //     fontSize: 16,
-    //     fontWeight: 'bold',
-    //     color: '#fff', // or any other color you prefer
-    //     // Other styles
-    // },
     logoContainer: {
         flex: 0.25,
         backgroundColor: 'rgba(0,0,0,0.5)',
@@ -203,20 +132,6 @@ const styles = StyleSheet.create({
         paddingLeft: 15,
         marginTop: 15,
     },
-    // signupContainer: {
-    //     flexDirection: 'row',
-    //     paddingTop: 15,
-    //     justifyContent: 'center',
-
-    // },
-    // signupButton: {
-    //     fontSize: 16,
-    //     fontWeight: 'bold',
-    //     color: '#fff',
-    // },
-    // signupText: {
-    //     fontSize: 16,
-    // },
     errorText: {
         color: 'red',
         marginTop: 10,

@@ -60,7 +60,7 @@ const ItemSelectionScreen = () => {
     );
 
     useEffect(() => {
-        setSelectedItem(fridgeId); // Initialize selected item from context
+        setSelectedItem(fridgeId);
     }, [fridgeId]);
 
     const handleItemPress = (item) => {
@@ -222,13 +222,13 @@ const styles = StyleSheet.create({
     item: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between', // Align text and radio button
+        justifyContent: 'space-between',
         padding: 15,
         marginVertical: 8,
         marginHorizontal: 16,
         backgroundColor: '#465881',
         borderRadius: 10,
-        width: '90%', // Take 90% of available horizontal space
+        width: '90%',
     },
     selectedItem: {
         borderWidth: 2,
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
         color: '#465881',
     },
     buttonContainer: {
-        flexDirection: 'row', // Align children from left to right
+        flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'flex-start'
     },
