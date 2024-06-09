@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
     },
     slogan: {
         fontSize: 30,
+        color: '#ededed',
     },
     startButton: {
         backgroundColor: '#ab73f0',
@@ -89,6 +90,7 @@ const styles = StyleSheet.create({
     },
     signupText: {
         fontSize: 16,
+        color: '#ededed',
     },
 });
 

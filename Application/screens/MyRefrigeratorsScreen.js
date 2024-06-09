@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { Button } from '@rneui/themed';
+import { useNavigation } from '@react-navigation/native';
 import { View, FlatList, TouchableOpacity, Text, StyleSheet, ActivityIndicator, Modal, TextInput } from 'react-native';
 import ScreenLayout from '../components/ScreenLayout';
 import { useAuth } from '../contexts/AuthContext';
@@ -17,6 +18,7 @@ const ItemSelectionScreen = () => {
     const [isLinkModalVisible, setLinkModalVisible] = useState(false);
     const [newName, setNewName] = useState('');
     const [renameId, setRenameId] = useState(null);
+    const navigation = useNavigation();
 
 
     const fetchData = async () => {
@@ -64,8 +66,13 @@ const ItemSelectionScreen = () => {
     const handleItemPress = (item) => {
         const newSelectedItem = item.id === selectedItem ? null : item.id;
         setSelectedItem(newSelectedItem);
-        if (newSelectedItem)
+        if (newSelectedItem) {
+            console.log(newSelectedItem);
             setFridgeId(newSelectedItem.toString());
+            setTimeout(() => {
+                navigation.navigate('InventoryScreen');
+            }, 250);
+        }
         else
             setFridgeId(newSelectedItem);
     };
@@ -79,6 +86,11 @@ const ItemSelectionScreen = () => {
     const handleLinkPress = (item) => {
         setLinkModalVisible(true);
     };
+
+    const handelLinkCancel = () => {
+        setLinkModalVisible(false);
+        fetchData();
+    }
 
     const handleRename = async () => {
         setModalVisible(false);
@@ -174,7 +186,7 @@ const ItemSelectionScreen = () => {
                 visible={isLinkModalVisible}
                 transparent={true}
                 animationType="fade"
-                onRequestClose={() => setModalVisible(false)}
+                onRequestClose={handelLinkCancel}
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent2}>
@@ -185,7 +197,7 @@ const ItemSelectionScreen = () => {
                             style={styles.qr}
                         />
                         <View style={styles.cancelButton2}>
-                            <Button color="warning" title="Cancel" onPress={() => setLinkModalVisible(false)} />
+                            <Button color="warning" title="Cancel" onPress={handelLinkCancel} />
                         </View>
                     </View>
                 </View>

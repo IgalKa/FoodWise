@@ -114,10 +114,11 @@ function InventoryScreen({ navigation }) {
         <ScreenLayout>
             {!loading && data && data.length > 0 && (
                 <View style={styles.searchContainer}>
-                    <Image source={require('../assets/search.jpg')} style={styles.searchIcon} />
+                    <Image source={require('../assets/search.png')} style={styles.searchIcon} />
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Search by item name"
+                        placeholderTextColor={'#ededed'}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                     />
@@ -135,7 +136,7 @@ function InventoryScreen({ navigation }) {
                 />
             )}
             {!loading && data && data.length === 0 && (
-                <Text>No products</Text>
+                <Text style={styles.defaultText}>No products</Text>
             )}
             {!fridgeId && (
                 <TouchableOpacity style={styles.selectButton} onPress={() => { navigation.navigate('MyRefrigerators'); }} >
@@ -176,6 +177,7 @@ const styles = StyleSheet.create({
         width: 24,
         height: 24,
         marginRight: 8,
+
     },
     searchInput: {
         flex: 1,
@@ -228,4 +230,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
     },
+    defaultText: {
+        color: '#ededed',
+    }
 });

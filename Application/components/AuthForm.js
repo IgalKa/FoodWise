@@ -19,6 +19,7 @@ const AuthForm = ({
                     key={index}
                     style={styles.input}
                     placeholder={field.placeholder}
+                    placeholderTextColor="#ededed"
                     value={field.value}
                     onChangeText={field.onChangeText}
                     keyboardType={field.keyboardType}
@@ -82,6 +83,7 @@ const styles = StyleSheet.create({
     },
     footerText: {
         fontSize: 16,
+        color: '#ededed'
     },
     footerActionText: {
         fontSize: 16,
