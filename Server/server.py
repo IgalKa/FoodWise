@@ -33,36 +33,43 @@ def scan():
         product_name = database.find_product(barcode)
 
         if product_name is None:
+            app.logger.warning(f'request to get product with the barcode number {barcode} that was not '
+                               f'found in the database')
             error_response = {'error': f"Product with barcode {barcode} not found"}
             return jsonify(error_response), 404
 
         # identify if the refrigerator id exists
         if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id",
                                           value=refrigerator_id):
+            app.logger.warning(f'attempt to access refrigerator {refrigerator_id} that does not exist')
             error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
             return jsonify(error_response), 404
 
         if mode == 'add':
-            print(f'Adding {product_name} to refrigerator number: {refrigerator_id}')
+            app.logger.info(f'Adding {product_name} to refrigerator number: {refrigerator_id}')
             database.add_product(refrigerator_id, barcode)
             message_response = {
                 'message': f"The product has been successfully added to the refrigerator number {refrigerator_id}"}
             return jsonify(message_response), 200
         elif mode == 'remove':
-            print(f'Removing {product_name} from database')
+            app.logger.info(f'Removing {product_name} from refrigerator number: {refrigerator_id}')
             result = database.remove_product(refrigerator_id, barcode)
             if result:
+                app.logger.info(f'The product has been successfully removed from refrigerator number {refrigerator_id}')
                 message_response = {
                     'message': f"The product has been successfully removed from refrigerator number {refrigerator_id}"}
                 return jsonify(message_response), 200
             else:
+                app.logger.warning(f'product with barcode {barcode} not found in the refrigerator number {refrigerator_id}')
                 error_response = {
                     'error': f"Product with barcode {barcode} not found in the refrigerator number {refrigerator_id}"}
                 return jsonify(error_response), 404
         else:
+            app.logger.error(f'attempt to use mode {mode} that does not exist')
             error_response = {'error': f"Mode {mode} not supported"}
             return jsonify(error_response), 405
     else:
+        app.logger.error("invalid request of scan endpoint")
         # If 'barcode' or 'mode' or 'refrigerator_id' keys are missing, return an error response
         error_response = {'error': 'invalid request'}
         return jsonify(error_response), 400
@@ -76,8 +83,10 @@ def refrigerator_contents():
 
     if database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
         refrigerator_contents = database.find_refrigerator_contents(refrigerator_id)
+        app.logger.info(f'retrieved refrigerator contents for {refrigerator_id}')
         return jsonify(refrigerator_contents.__json__()), 200
     else:
+        app.logger.warning(f'attempt to access refrigerator {refrigerator_id} that does not exist')
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return jsonify(error_response), 404
 
@@ -118,6 +127,7 @@ def link():
     data = request.get_json()  # Get the Body JSON data from the request
     if not ('user_id' in data and 'refrigerator_id' in data):
         error_response = {'error': 'invalid request'}
+        app.logger.error("invalid request of link endpoint")
         return jsonify(error_response), 400
 
     user_id = data['user_id']
@@ -126,10 +136,12 @@ def link():
     database = app.extensions['database']
 
     if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
+        app.logger.warning(f'attempt to access user {user_id} that does not exist')
         error_response = {'error': f"User with id {user_id} does not exist"}
         return jsonify(error_response), 404
 
     if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
+        app.logger.warning(f'attempt to access refrigerator {refrigerator_id} that does not exist')
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return jsonify(error_response), 404
 
@@ -162,6 +174,7 @@ def number_linked_refrigerators():
     database = app.extensions['database']
 
     if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
+        app.logger.warning(f'attempt to access user {user_id} that does not exist')
         error_response = {'error': f"User with id {user_id} does not exist"}
         return jsonify(error_response), 404
 
@@ -186,10 +199,12 @@ def update_refrigerator_name():
     new_name = data['new_name']
 
     if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
+        app.logger.warning(f'attempt to access user {user_id} that does not exist')
         error_response = {'error': f"User with id {user_id} does not exist"}
         return jsonify(error_response), 404
 
     if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
+        app.logger.warning(f'attempt to access refrigerator {refrigerator_id} that does not exist')
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return jsonify(error_response), 404
 
