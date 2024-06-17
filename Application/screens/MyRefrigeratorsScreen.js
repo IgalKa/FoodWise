@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import QRCode from 'react-native-qrcode-svg';
 import axios from 'axios';
 import CONFIG from '../config';
+import { getLinkedRefrigerators, updateRefrigeratorName } from '../api/refrigeratorApi';
 
 const ItemSelectionScreen = () => {
     const [selectedItem, setSelectedItem] = useState(null);
@@ -23,12 +24,13 @@ const ItemSelectionScreen = () => {
 
     const fetchData = async () => {
         try {
-            const response = await axios.get(`${CONFIG.SERVER_URL}/linked_refrigerators`, {
-                params: {
-                    user_id: userId,
-                },
-                timeout: 30000,
-            });
+            // const response = await axios.get(`${CONFIG.SERVER_URL}/linked_refrigerators`, {
+            //     params: {
+            //         user_id: userId,
+            //     },
+            //     timeout: 30000,
+            // });
+            const response = await getLinkedRefrigerators(userId);
 
             const transformedItems = response.data.refrigerators.map(item => ({
                 id: item.refrigerator_id.toString(),
@@ -96,15 +98,16 @@ const ItemSelectionScreen = () => {
         setModalVisible(false);
         setLoading(true);
         try {
-            const response = await axios.post(`${CONFIG.SERVER_URL}/update_refrigerator_name`, {
-                new_name: newName,
-                refrigerator_id: renameId,
-            }, {
-                params: {
-                    user_id: userId,
-                },
-                timeout: 30000,
-            });
+            // const response = await axios.post(`${CONFIG.SERVER_URL}/update_refrigerator_name`, {
+            //     new_name: newName,
+            //     refrigerator_id: renameId,
+            // }, {
+            //     params: {
+            //         user_id: userId,
+            //     },
+            //     timeout: 30000,
+            // });
+            const response = await updateRefrigeratorName(newName, renameId, userId);
 
         } catch (error) {
             //console.log('Error updating data:', error);
@@ -264,6 +267,7 @@ const styles = StyleSheet.create({
     selectTitle: {
         fontSize: 18,
         fontWeight: 'bold',
+        color: '#ededed',
     },
     modalContainer: {
         flex: 1,

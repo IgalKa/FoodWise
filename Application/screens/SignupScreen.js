@@ -5,6 +5,7 @@ import AuthForm from '../components/AuthForm';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CONFIG from '../config'; // Your config file for the server URL
+import { userSignup } from '../api/userApi';
 
 export default function SignupScreen() {
 
@@ -52,12 +53,14 @@ export default function SignupScreen() {
     console.log('Password:', password);
 
     try {
-      const response = await axios.post(`${CONFIG.SERVER_URL}/register`, {
-        email,
-        password,
-        first_name: firstName,
-        last_name: lastName,
-      });
+      // const response = await axios.post(`${CONFIG.SERVER_URL}/register`, {
+      //   email,
+      //   password,
+      //   first_name: firstName,
+      //   last_name: lastName,
+      // });
+
+      const response = await userSignup(email, password, firstName, lastName);
 
       if (response.status === 200) {
         navigation.navigate('Login');

@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, TextInput, ImageBackground, BackHandler, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import ScreenLayout from '../components/ScreenLayout';
-import axios from 'axios';
-import CONFIG from '../config';
+import { getRefrigeratorContents } from '../api/refrigeratorApi';
 import { useAuth } from '../contexts/AuthContext';
 
 
@@ -40,12 +39,7 @@ function InventoryScreen({ navigation }) {
 
     const fetchData = async () => {
         try {
-            const response = await axios.get(`${CONFIG.SERVER_URL}/refrigerator_contents`, {
-                params: {
-                    refrigerator_id: fridgeId,
-                },
-                timeout: 30000,
-            });
+            const response = await getRefrigeratorContents(fridgeId);
 
             const transformedItems = response.data.products.map(item => ({
                 name: item.product_name,
@@ -69,7 +63,7 @@ function InventoryScreen({ navigation }) {
             // Fetch data initially when the screen is focused
             fetchData();
             // Set up interval for periodic polling
-            const intervalId = setInterval(fetchData, 15000); // Fetch data every 15 seconds (adjust as needed)
+            const intervalId = setInterval(fetchData, 15000);
             // Clean up interval when the screen goes out of focus
             return () => clearInterval(intervalId);
         }, [fridgeId])
@@ -124,7 +118,7 @@ function InventoryScreen({ navigation }) {
                     />
                 </View>
             )}
-            {loading && (
+            {loading && fridgeId && (
                 <ActivityIndicator size="large" color="#fff" />
             )}
             {!loading && data && data.length > 0 && (

@@ -5,6 +5,7 @@ import AuthForm from '../components/AuthForm';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import CONFIG from '../config';
+import { userLogin } from '../api/userApi';
 
 const LoginScreen = () => {
     const [email, setEmail] = useState('');
@@ -33,10 +34,11 @@ const LoginScreen = () => {
 
         setLoading(true);
         try {
-            const response = await axios.post(`${CONFIG.SERVER_URL}/user_login`, {
-                email,
-                password,
-            });
+            // const response = await axios.post(`${CONFIG.SERVER_URL}/user_login`, {
+            //     email,
+            //     password,
+            // });
+            const response = await userLogin(email, password);
 
             if (response.status === 200) {
                 await setUserId(response.data[0].toString());
