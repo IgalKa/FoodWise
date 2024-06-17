@@ -1,45 +1,91 @@
 from evdev import InputDevice, categorize, ecodes
 import requests
 import tkinter as tk
+from tkinter import font
 import threading
+import queue
 
 
 class App:
     def __init__(self):
-        self.server_host = '192.168.0.102'
-        self.server_port = 12345
-        self.url = f'http://{self.server_host}:{self.server_port}/'
+        self.url = f'https://michaelshu.pythonanywhere.com/'
         self.mode = "add"
+        self.queue = queue.Queue()
 
         self.root = tk.Tk()
         self.root.title("FoodWise")
         self.root.attributes('-fullscreen', True)
         self.root.configure(bg="#c5a3e9")
+        self.root.config(cursor="none")
 
-        self.button = tk.Button(self.root, text="link new user", command=self.on_link_click, width=20, height=5,
-                                background='#8a2be2', foreground='white')
+        custom_font = font.Font(family="Helvetica", size=12, weight="bold")
+
+        self.button = tk.Button(self.root,
+                                text="link new user",
+                                command=self.on_link_click,
+                                width=20,
+                                height=5,
+                                background='#8a2be2',
+                                foreground='white',
+                                font=custom_font)
         self.button.pack()
 
-        self.button1 = tk.Button(self.root, text="Adding mode", command=self.on_add_click, width=20, height=5,
-                                 background='#8a2be2', foreground='white')
+        self.button1 = tk.Button(self.root,
+                                 text="Adding mode",
+                                 command=self.on_add_click,
+                                 width=20,
+                                 height=5,
+                                 background='#8a2be2',
+                                 foreground='white',
+                                 font=custom_font)
+
         self.button1.pack(pady=10)
 
-        self.button2 = tk.Button(self.root, text="Removal mode", command=self.on_removal_click, width=20, height=5,
-                                 background='#8a2be2', foreground='white')
-        self.button2.pack(pady=20)
+        self.button2 = tk.Button(self.root,
+                                 text="Removal mode",
+                                 command=self.on_removal_click,
+                                 width=20,
+                                 height=5,
+                                 background='#8a2be2',
+                                 foreground='white',
+                                 font=custom_font)
 
-        self.label = tk.Label(self.root, text="current mode: Adding mode", background="#c5a3e9", foreground='white')
-        self.label.pack(pady=20)
+        self.button2.pack(pady=10)
 
-        self.status_label = tk.Label(self.root, text="", fg="black", width=20, height=5, background="#c5a3e9")
+        self.label = tk.Label(self.root,
+                              text="current mode: Adding mode",
+                              background="#c5a3e9",
+                              foreground='white',
+                              font=custom_font)
+
+        self.label.pack(pady=10)
+
+        self.status_label = tk.Label(self.root,
+                                     text="",
+                                     fg="black",
+                                     width=20,
+                                     height=5,
+                                     background="#c5a3e9")
+
         self.status_label.pack(pady=10)
 
+        self.root.after(100, self.process_queue)
         self.barcode_thread = threading.Thread(target=self.listen_barcode_scanner)
         self.barcode_thread.daemon = True
         self.barcode_thread.start()
 
     def run(self):
         self.root.mainloop()
+
+    def process_queue(self):
+        while not self.queue.empty():
+            try:
+                data = self.queue.get_nowait()
+                self.send_to_server(data)
+                self.queue.task_done()
+            except queue.Empty:
+                break
+        self.root.after(100, self.process_queue)
 
     def on_add_click(self):
         self.mode = "add"
@@ -80,7 +126,7 @@ class App:
         else:
             data = {'refrigerator_id': refrigerator_id, 'user_id': barcode}
 
-        self.send_to_server(data)
+        self.queue.put(data)
 
     def listen_barcode_scanner(self):
         refrigerator_id = self.find_refrigerator_id()
@@ -101,12 +147,12 @@ class App:
 
     def find_refrigerator_id(self):
         try:
-            with open("id", 'r') as file:
+            with open("/home/codeCrafters/Desktop/id", 'r') as file:
                 return file.read()
         except FileNotFoundError:
             response = requests.get(self.url + "request_refrigerator_id")
             refrigerator_id = response.json()
-            with open("id", 'w') as file:
+            with open("/home/codeCrafters/Desktop/id", 'w') as file:
                 file.write(str(refrigerator_id))
             return refrigerator_id
 
