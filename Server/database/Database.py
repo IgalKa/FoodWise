@@ -65,7 +65,9 @@ class Database:
                 "WHERE refrigerator_id = ? and barcode = ?",
                 (result[0] + 1, refrigerator_id, barcode))
         else:
-            data = (refrigerator_id, barcode, 1, datetime.now())
+            now = datetime.now()
+            formatted_date = now.strftime('%Y-%m-%d')
+            data = (refrigerator_id, barcode, 1, formatted_date)
             cursor.execute(
                 "INSERT INTO refrigerator_content (refrigerator_id,barcode,product_quantity,oldest_added_date)"
                 "VALUES (?,?,?,?)", data)
