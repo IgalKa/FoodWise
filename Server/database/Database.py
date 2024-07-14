@@ -20,7 +20,6 @@ class Database:
                        "WHERE barcode = ? ",
                        (int(barcode),))
         result = cursor.fetchone()
-        print(result)
 
         conn.close()
         # If a row was found, return the name, otherwise return None
@@ -62,7 +61,7 @@ class Database:
         if result:
             cursor.execute(
                 "UPDATE refrigerator_content "
-                "SET product_quantity=?"
+                "SET product_quantity = ?"
                 "WHERE refrigerator_id = ? and barcode = ?",
                 (result[0] + 1, refrigerator_id, barcode))
         else:
@@ -92,7 +91,7 @@ class Database:
                                (refrigerator_id, barcode))
             else:
                 cursor.execute("UPDATE refrigerator_content "
-                               "SET product_quantity=? "
+                               "SET product_quantity = ? "
                                "WHERE refrigerator_id = ? and barcode = ?",
                                (result[0] - 1, refrigerator_id, barcode))
             conn.commit()
@@ -154,9 +153,7 @@ class Database:
                        "WHERE email = ? AND password = ?", data)
         result = cursor.fetchone()
         conn.close()
-
         return result
-
 
     def generate_refrigerator_id(self):
         conn = sqlite3.connect(self.path)
@@ -185,7 +182,7 @@ class Database:
         result = cursor.fetchall()
 
         if result:
-            return "the link already exists", 0
+            return "The link already exists", 0
 
         cursor.execute("SELECT * "
                        "FROM link"
@@ -197,7 +194,7 @@ class Database:
                        "VALUES (?, ?,?)", (user_id, refrigerator_id, nickname))
         conn.commit()
         conn.close()
-        return "link created", 1
+        return "Link created", 1
 
     def find_linked_refrigerators(self, user_id):
         conn = sqlite3.connect(self.path)
@@ -215,7 +212,7 @@ class Database:
         cursor = conn.cursor()
 
         cursor.execute("UPDATE link "
-                       "SET nickname =? "
+                       "SET nickname = ? "
                        "WHERE user_id = ? AND refrigerator_id = ?", (nickname, user_id, refrigerator_id))
         conn.commit()
         conn.close()
