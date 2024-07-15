@@ -24,11 +24,11 @@ def test_refrigerator_contents(client):
     assert response.status_code == 200
 
     response = client.get('/refrigerator_contents?refrigerator_id=2')
-    # Check if the response status code is 200 (OK)
+    # Check if the response status code is 404
     assert response.status_code == 404
 
     response = client.get('/refrigerator_contents')
-    # Check if the response status code is 200 (OK)
+    # Check if the response status code is 404
     assert response.status_code == 404
 
 
@@ -43,7 +43,7 @@ def test_scan(client):
 
 
 def test_link(client):
-    data = {"user_id": 1,"refrigerator_id":2}
+    data = {"user_id": 1, "refrigerator_id": 2}
     response = client.post('/link', json=data)
     assert response.status_code == 200
 
