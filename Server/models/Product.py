@@ -3,11 +3,12 @@ import os
 
 
 class Product:
-    def __init__(self, name, image, quantity, addedTime):
+    def __init__(self, name, image, quantity, added_date, alert_date):
         self.name = name
         self.image_path = image
         self.quantity = quantity
-        self.addedTime = addedTime
+        self.added_date = added_date
+        self.alert_date = alert_date
 
     def __json__(self):
         base64_image = None
@@ -25,5 +26,6 @@ class Product:
             'product_name': self.name,
             'product_image': base64_image,
             'product_quantity': self.quantity,
-            'product_addedTime': self.addedTime
+            'product_added_date': self.added_date,
+            'product_alert_date': self.alert_date
         }

@@ -196,9 +196,9 @@ def refrigerator_contents():
     database = app.extensions['database']
 
     if database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
-        refrigerator_contents = database.find_refrigerator_contents(refrigerator_id)
+        refrigerator_content = database.find_refrigerator_contents(refrigerator_id)
         app.logger.info(f'Retrieved refrigerator contents for {refrigerator_id}')
-        return jsonify(refrigerator_contents.__json__()), 200
+        return jsonify(refrigerator_content.__json__()), 200
     else:
         app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}

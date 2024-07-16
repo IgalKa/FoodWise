@@ -1,6 +1,6 @@
 import random
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 from Server.models.Refrigerator import Refrigerator
 from Server.models.Product import Product
 
@@ -33,7 +33,7 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT product_name,image,product_quantity,oldest_added_date "
+        cursor.execute("SELECT product_name,image,product_quantity,oldest_added_date,alert_date "
                        "FROM refrigerator_content NATURAL INNER JOIN product "
                        "WHERE refrigerator_id = ?",
                        (refrigerator_id,))
@@ -41,7 +41,7 @@ class Database:
 
         refrigerator = Refrigerator(refrigerator_id)
         for row in result:
-            product = Product(row[0], row[1], row[2], row[3])
+            product = Product(row[0], row[1], row[2], row[3], row[4])
             refrigerator.add_product(product)
 
         conn.close()
@@ -66,11 +66,13 @@ class Database:
                 (result[0] + 1, refrigerator_id, barcode))
         else:
             now = datetime.now()
-            formatted_date = now.strftime('%Y-%m-%d')
-            data = (refrigerator_id, barcode, 1, formatted_date)
+            formatted_current_date = now.strftime('%Y-%m-%d')
+            two_weeks_later = now + timedelta(weeks=2)
+            formatted_two_weeks_date = two_weeks_later.strftime('%Y-%m-%d')
+            data = (refrigerator_id, barcode, 1, formatted_current_date,formatted_two_weeks_date)
             cursor.execute(
-                "INSERT INTO refrigerator_content (refrigerator_id,barcode,product_quantity,oldest_added_date)"
-                "VALUES (?,?,?,?)", data)
+                "INSERT INTO refrigerator_content (refrigerator_id,barcode,product_quantity,oldest_added_date,alert_date)"
+                "VALUES (?,?,?,?,?)", data)
 
         conn.commit()
         conn.close()
