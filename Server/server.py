@@ -258,9 +258,74 @@ def update_refrigerator_name():
 def find_product_number():
     product_name = request.args.get('product_name')
     database = app.extensions['database']
+
     result =database.find_barcode(product_name)
     app.logger.info(f"The result of the search for {product_name} is {result}")
     return jsonify(result),200
+
+@app.route('/add_product_to_tracking', methods=['POST'])
+def add_product_to_tracking():
+    data = request.get_json()
+    database = app.extensions['database']
+    refrigerator_id = data['refrigerator_id']
+    barcode = data['barcode']
+
+    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
+        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+        return jsonify(error_response), 404
+
+
+    if not database.check_value_exist(table_name="product", column_name="barcode", value=barcode):
+        app.logger.warning(f'product with barcode {barcode} that was not found in the database')
+        error_response = {'error': f"product with barcode {barcode} not found"}
+        return jsonify(error_response), 404
+
+
+    if database.check_2values_exist("refrigerator_track", "refrigerator_id", "barcode", refrigerator_id ,barcode):
+        app.logger.info(f"product with barcode {barcode} already in tracking for refrigerator {refrigerator_id}")
+        message_response = {'message': "product already in tracking for this refrigerator"}
+        return jsonify(message_response), 200
+
+
+    database.add_product_to_tracking(refrigerator_id,barcode)
+    message_response = {'message': "The product was added successfully for tracking"}
+    return jsonify(message_response), 200
+
+@app.route('/remove_product_from_tracking', methods=['POST'])
+def remove_product_from_tracking():
+    data = request.get_json()
+    database = app.extensions['database']
+    refrigerator_id = data['refrigerator_id']
+    barcode = data['barcode']
+
+    if not database.check_2values_exist("refrigerator_track", "refrigerator_id", "barcode", refrigerator_id ,barcode):
+        app.logger.info(f"product with barcode {barcode} already not in tracking for refrigerator {refrigerator_id}")
+        message_response = {'message': "product already not in tracking for this refrigerator"}
+        return jsonify(message_response), 200
+
+
+    database.remove_product_from_tracking(refrigerator_id, barcode)
+    message_response = {'message': "The product was removed successfully from tracking"}
+    return jsonify(message_response), 200
+
+
+@app.route('/create_shopping_list', methods=['GET'])
+def create_shopping_list():
+    database = app.extensions['database']
+    refrigerator_id = request.args.get('refrigerator_id')
+
+    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
+        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+        return jsonify(error_response), 404
+
+    result=database.get_shopping_list(refrigerator_id)
+    return jsonify(result), 200
+
+
+
+
 
 
 

@@ -239,3 +239,50 @@ class Database:
                        "WHERE user_id = ? AND refrigerator_id = ?", (nickname, user_id, refrigerator_id))
         conn.commit()
         conn.close()
+
+
+
+    def add_product_to_tracking(self, refrigerator_id, barcode):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+        data = (refrigerator_id, barcode)
+        cursor.execute(
+            "INSERT INTO refrigerator_track(refrigerator_id, barcode)  "
+            "VALUES (?, ?)", data
+        )
+        conn.commit()
+        conn.close()
+
+    def remove_product_from_tracking(self, refrigerator_id, barcode):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+        data = (refrigerator_id, barcode)
+        cursor.execute(
+            "DELETE FROM refrigerator_track "
+            "WHERE refrigerator_id = ? AND barcode = ?", data
+        )
+        conn.commit()
+        conn.close()
+
+
+    def get_shopping_list(self, refrigerator_id):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT product_name 
+            FROM refrigerator_track 
+            NATURAL INNER JOIN product 
+            WHERE refrigerator_id = ? 
+            AND barcode NOT IN (
+                SELECT barcode 
+                FROM refrigerator_content 
+                WHERE refrigerator_id = ?
+            )
+        """, (refrigerator_id, refrigerator_id))
+
+        result = cursor.fetchall()
+        conn.close()
+        products_json = [row[0] for row in result]
+        return products_json
+
+
