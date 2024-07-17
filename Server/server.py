@@ -254,5 +254,16 @@ def update_refrigerator_name():
 
 
 
+@app.route('/find_product_number', methods=['GET'])
+def find_product_number():
+    product_name = request.args.get('product_name')
+    database = app.extensions['database']
+    result =database.find_barcode(product_name)
+    app.logger.info(f"The result of the search for {product_name} is {result}")
+    return jsonify(result),200
+
+
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=12345, threaded=True)

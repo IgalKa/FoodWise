@@ -28,6 +28,25 @@ class Database:
         else:
             return None
 
+    def find_barcode(self,product_name):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT product_name,barcode "
+                        "FROM product "
+                        "WHERE product_name LIKE ? || '%'"
+                       ,(product_name,))
+
+
+        result = cursor.fetchall()
+        conn.close()
+
+        # Format the result as a JSON array of objects
+        products_json = [{'product_name': row[0], 'barcode': row[1]} for row in result]
+        return products_json
+
+
+
     def find_refrigerator_contents(self, refrigerator_id):
         # Connect to the SQLite database
         conn = sqlite3.connect(self.path)
