@@ -2,13 +2,14 @@ from flask import Flask, request, jsonify
 import logging
 import sys
 from os.path import abspath, dirname, join
+from database.Database import Database
+from models import Functions
 
 # Calculate the project root directory and add it to sys.path
 project_root = abspath(join(dirname(__file__), '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from database.Database import Database
 
 app = Flask(__name__)
 
@@ -16,13 +17,12 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG,  # Log level
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-database = Database("../Server/data/database.db")
-app.extensions['database'] = database
+app.extensions['database'] = Database("../Server/data/database.db")
 
 
 #     Embedded endpoints
 
-
+# /request_refrigerator_id
 @app.route('/request_refrigerator_id', methods=['GET'])
 def request_refrigerator_id():
     database = app.extensions['database']
@@ -31,6 +31,7 @@ def request_refrigerator_id():
     return jsonify(new_refrigerator_id), 200
 
 
+# /link , json={"user_id": 1, "refrigerator_id": 1}
 @app.route('/link', methods=['POST'])
 def link():
     data = request.get_json()  # Get the Body JSON data from the request
@@ -60,10 +61,12 @@ def link():
     else:
         app.logger.warning(
             f"There was an attempt to make an existing link between user {user_id} to refrigerator {refrigerator_id}")
+
     message_response = {'message': result[0]}
     return jsonify(message_response), 200
 
 
+# /scan , json={"barcode": 7290008757034, "mode": "add", "refrigerator_id": 1}
 @app.route('/scan', methods=['POST'])
 def scan():
     data = request.get_json()  # Get the Body JSON data from the request
@@ -118,6 +121,7 @@ def scan():
 
 #     Frontend endpoints
 
+# /register , json={"email": "michaelsho@mta.ac.il", "password": "12345678", "first_name": "Michael", "last_name": "Shuster"}
 @app.route('/register', methods=['POST'])
 def register_new_user():
     data = request.get_json()  # Get the Body JSON data from the request
@@ -146,6 +150,7 @@ def register_new_user():
         return jsonify(message_response), 200
 
 
+# /user_login , json={"email": "liorbaa@mta.ac.il", "password": "12345678"}
 @app.route('/user_login', methods=['POST'])
 def user_login():
     data = request.get_json()  # Get the Body JSON data from the request
@@ -175,6 +180,7 @@ def user_login():
     return jsonify(result), 200
 
 
+# /linked_refrigerators?user_id=1
 @app.route('/linked_refrigerators', methods=['GET'])
 def linked_refrigerators():
     user_id = request.args.get('user_id')
@@ -189,6 +195,7 @@ def linked_refrigerators():
     return database.find_linked_refrigerators(user_id), 200
 
 
+# /refrigerator_contents?refrigerator_id=1
 @app.route('/refrigerator_contents', methods=['GET'])
 def refrigerator_contents():
     # Get the QueryParam 'refrigerator_id' from the request
@@ -205,6 +212,7 @@ def refrigerator_contents():
         return jsonify(error_response), 404
 
 
+# /number_linked_refrigerators?user_id=1
 @app.route('/number_linked_refrigerators', methods=['GET'])
 def number_linked_refrigerators():
     user_id = request.args.get('user_id')
@@ -224,6 +232,7 @@ def number_linked_refrigerators():
     return response, 200
 
 
+# /update_refrigerator_name?user_id=1 , json={"refrigerator_id": 1, "new_name": "Main Refrigerator"}
 @app.route('/update_refrigerator_name', methods=['POST'])
 def update_refrigerator_name():
     user_id = request.args.get('user_id')
@@ -236,6 +245,7 @@ def update_refrigerator_name():
 
     refrigerator_id = data['refrigerator_id']
     new_name = data['new_name']
+    database = app.extensions['database']
 
     if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
         app.logger.warning(f'Attempt to access user {user_id} that does not exist')
@@ -252,6 +262,45 @@ def update_refrigerator_name():
     message_response = {'message': "The name was updated successfully"}
     return jsonify(message_response), 200
 
+
+# /update_alert_date , json={"refrigerator_id": 1, "product_name": "Eggs pack 12L free organic", "alert_date": "2024-08-19"}
+@app.route('/update_alert_date', methods=['POST'])
+def update_alert_date():
+    data = request.get_json()
+    # If 'refrigerator_id' or 'product_name' or 'alert_date' keys are missing, return an error response
+    if not ('refrigerator_id' in data and 'product_name' in data and 'alert_date' in data):
+        app.logger.error("Invalid request of update_alert_date endpoint")
+        error_response = {'error': 'invalid request'}
+        return jsonify(error_response), 400
+
+    refrigerator_id = data['refrigerator_id']
+    product_name = data['product_name']
+    alert_date = data['alert_date']
+    database = app.extensions['database']
+
+    barcode = database.find_barcode(product_name)
+    if barcode is None:
+        app.logger.warning(f'Attempt to get barcode of product_name {product_name} that was not found in the database')
+        error_response = {'error': f"Barcode of product_name {product_name} not found"}
+        return jsonify(error_response), 404
+
+    if not database.check_2values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
+                                         column_name2="barcode", value1=refrigerator_id, value2=barcode):
+        app.logger.warning(f'Attempt to update alert_date of refrigerator {refrigerator_id} with product barcode '
+                           f'{barcode} that was not found in the database')
+        error_response = {'error': f"Product with barcode {barcode} not found"}
+        return jsonify(error_response), 404
+
+    if not Functions.is_future_date(alert_date):
+        app.logger.warning(f'Attempt to update alert_date with date {alert_date} that is in the past')
+        error_response = {'error': f"Alert date {alert_date} is in the past"}
+        return jsonify(error_response), 400
+
+    database.update_alert_date(refrigerator_id, barcode, alert_date)
+    app.logger.info(f"Alert date of refrigerator {refrigerator_id} with product barcode {barcode} updated successfully "
+                    f"to {alert_date}")
+    message_response = {'message': f"Alert_date updated successfully"}
+    return jsonify(message_response), 200
 
 
 if __name__ == '__main__':

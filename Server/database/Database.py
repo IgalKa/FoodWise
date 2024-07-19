@@ -1,6 +1,6 @@
 import random
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime
 from Server.models.Refrigerator import Refrigerator
 from Server.models.Product import Product
 
@@ -24,7 +24,25 @@ class Database:
         conn.close()
         # If a row was found, return the name, otherwise return None
         if result:
-            return result[0]  # Return the first column of the result (name)
+            return result[0]  # Return the first column of the result (product_name)
+        else:
+            return None
+
+    def find_barcode(self, product_name):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT barcode "
+                       "FROM product "
+                       "WHERE product_name = ? ",
+                       (product_name,)
+                       )
+        result = cursor.fetchone()
+
+        conn.close()
+        # If a row was found, return the name, otherwise return None
+        if result:
+            return result[0]  # Return the first column of the result (barcode)
         else:
             return None
 
@@ -67,12 +85,10 @@ class Database:
         else:
             now = datetime.now()
             formatted_current_date = now.strftime('%Y-%m-%d')
-            two_weeks_later = now + timedelta(weeks=2)
-            formatted_two_weeks_date = two_weeks_later.strftime('%Y-%m-%d')
-            data = (refrigerator_id, barcode, 1, formatted_current_date,formatted_two_weeks_date)
+            data = (refrigerator_id, barcode, 1, formatted_current_date)
             cursor.execute(
-                "INSERT INTO refrigerator_content (refrigerator_id,barcode,product_quantity,oldest_added_date,alert_date)"
-                "VALUES (?,?,?,?,?)", data)
+                "INSERT INTO refrigerator_content (refrigerator_id,barcode,product_quantity,oldest_added_date)"
+                "VALUES (?,?,?,?)", data)
 
         conn.commit()
         conn.close()
@@ -186,6 +202,7 @@ class Database:
         result = cursor.fetchall()
 
         if result:
+            conn.close()
             return "The link already exists", 0
 
         cursor.execute("SELECT * "
@@ -195,7 +212,7 @@ class Database:
         nickname = f"Refrigerator {len(result) + 1}"
 
         cursor.execute("INSERT INTO link (user_id, refrigerator_id,nickname) "
-                       "VALUES (?, ?,?)", (user_id, refrigerator_id, nickname))
+                       "VALUES (?,?,?)", (user_id, refrigerator_id, nickname))
         conn.commit()
         conn.close()
         return "Link created", 1
@@ -218,5 +235,16 @@ class Database:
         cursor.execute("UPDATE link "
                        "SET nickname = ? "
                        "WHERE user_id = ? AND refrigerator_id = ?", (nickname, user_id, refrigerator_id))
+        conn.commit()
+        conn.close()
+
+    def update_alert_date(self, refrigerator_id, barcode, alert_date):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("UPDATE refrigerator_content "
+                       "SET alert_date = ?"
+                       "WHERE refrigerator_id = ? AND barcode = ?",
+                       (alert_date, refrigerator_id, barcode))
         conn.commit()
         conn.close()
