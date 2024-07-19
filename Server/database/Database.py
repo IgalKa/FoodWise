@@ -248,3 +248,21 @@ class Database:
                        (alert_date, refrigerator_id, barcode))
         conn.commit()
         conn.close()
+
+    def get_alert_date(self, refrigerator_id, barcode):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT alert_date "
+                       "FROM refrigerator_content "
+                       "WHERE refrigerator_id = ? AND barcode = ?",
+                       (refrigerator_id, barcode)
+                       )
+        result = cursor.fetchone()
+        conn.close()
+
+        if result:
+            return result[0]
+        else:
+            return None
+

@@ -10,7 +10,6 @@ project_root = abspath(join(dirname(__file__), '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-
 app = Flask(__name__)
 
 # Set up basic configuration for logging to the console
@@ -263,7 +262,7 @@ def update_refrigerator_name():
     return jsonify(message_response), 200
 
 
-# /update_alert_date , json={"refrigerator_id": 1, "product_name": "Eggs pack 12L free organic", "alert_date": "2024-08-19"}
+# /update_alert_date , json={"refrigerator_id": 1, "product_name": "Milk 1% 1L Tnuva", "alert_date": "2024-07-25"}
 @app.route('/update_alert_date', methods=['POST'])
 def update_alert_date():
     data = request.get_json()
@@ -285,10 +284,10 @@ def update_alert_date():
         return jsonify(error_response), 404
 
     if not database.check_2values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
-                                         column_name2="barcode", value1=refrigerator_id, value2=barcode):
+                                        column_name2="barcode", value1=refrigerator_id, value2=barcode):
         app.logger.warning(f'Attempt to update alert_date of refrigerator {refrigerator_id} with product barcode '
                            f'{barcode} that was not found in the database')
-        error_response = {'error': f"Product with barcode {barcode} not found"}
+        error_response = {'error': f"Refrigerator {refrigerator_id} with product barcode {barcode} wasn't found in database"}
         return jsonify(error_response), 404
 
     if not Functions.is_future_date(alert_date):
@@ -301,6 +300,35 @@ def update_alert_date():
                     f"to {alert_date}")
     message_response = {'message': f"Alert_date updated successfully"}
     return jsonify(message_response), 200
+
+
+@app.route('/get_alert_date', methods=['GET'])
+def get_alert_date():
+    refrigerator_id = request.args.get('refrigerator_id')
+    product_name = request.args.get('product_name')
+    database = app.extensions['database']
+
+    barcode = database.find_barcode(product_name)
+    if barcode is None:
+        app.logger.warning(f'Attempt to get barcode of product_name {product_name} that was not found in the database')
+        error_response = {'error': f"Barcode of product_name {product_name} not found"}
+        return jsonify(error_response), 404
+
+    if not database.check_2values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
+                                        column_name2="barcode", value1=refrigerator_id, value2=barcode):
+        app.logger.warning(f'Attempt to update alert_date of refrigerator {refrigerator_id} with product barcode '
+                           f'{barcode} that was not found in the database')
+        error_response = {'error': f"Refrigerator {refrigerator_id} with product barcode {barcode} wasn't found in database"}
+        return jsonify(error_response), 404
+
+    result = database.get_alert_date(refrigerator_id, barcode)
+    if result:
+        app.logger.info(f'Alert date of refrigerator {refrigerator_id} with product barcode {barcode} is: {result}')
+        return jsonify(result), 200
+    else:
+        app.logger.warning(f'Alert date of refrigerator {refrigerator_id} with product barcode {barcode} is: NULL')
+        error_response = {'error': f"Alert_date is NULL"}
+        return error_response, 400
 
 
 if __name__ == '__main__':
