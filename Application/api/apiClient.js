@@ -3,7 +3,7 @@ import CONFIG from '../config';
 
 
 const apiClient = axios.create({
-    baseURL: 'http://10.100.102.7:12345',
+    baseURL: 'http://10.0.0.8:12345',
     timeout: 20000,
 });
 

@@ -247,20 +247,25 @@ class Database:
         cursor = conn.cursor()
         data = (refrigerator_id, barcode)
         cursor.execute(
-            "INSERT INTO refrigerator_track(refrigerator_id, barcode)  "
-            "VALUES (?, ?)", data
+            "INSERT INTO refrigerator_track(refrigerator_id, barcode,amount)  "
+            "VALUES (?, ?,1)", data
         )
         conn.commit()
         conn.close()
 
-    def remove_product_from_tracking(self, refrigerator_id, barcode):
+    def update_refrigerator_parameters(self, refrigerator_id, products):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
-        data = (refrigerator_id, barcode)
         cursor.execute(
             "DELETE FROM refrigerator_track "
-            "WHERE refrigerator_id = ? AND barcode = ?", data
+            "WHERE refrigerator_id = ? ", (refrigerator_id,)
         )
+
+        for product in products:
+            cursor.execute('''
+                INSERT INTO refrigerator_track(refrigerator_id,barcode, amount) VALUES (?,?,?)
+            ''', (refrigerator_id,product['barcode'],product['amount']))
+
         conn.commit()
         conn.close()
 
@@ -284,5 +289,24 @@ class Database:
         conn.close()
         products_json = [row[0] for row in result]
         return products_json
+
+
+    def get_parameter_list(self, refrigerator_id):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT product_name,barcode,amount
+        FROM refrigerator_track
+        NATURAL INNER JOIN product
+        WHERE refrigerator_id = ?  
+        """, (refrigerator_id,))
+        result = cursor.fetchall()
+        conn.close()
+
+        # Format the result as a JSON array of objects
+        products_json = [{'product_name': row[0], 'barcode': row[1],'amount': row[2]} for row in result]
+        return products_json
+
+
 
 
