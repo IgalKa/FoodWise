@@ -2,64 +2,23 @@ import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Text, FlatList, 
 TouchableOpacity, Alert,Image ,Modal,ImageBackground} from 'react-native';
 import axios from 'axios';
-import ScreenLayout from '../components/ScreenLayout';
+import { useNavigation } from '@react-navigation/native';
+import Share from 'react-native-share';
+import CustomButton from '../components/CustomButton';
 
 export default function ShoppingList ({route}) {
-  const [productName, setProductName] = useState('');
-  const [results, setResults] = useState([]);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [error, setError] = useState(null);
   const { fridgeId } = route.params;
+  const navigation = useNavigation();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const [modalVisible, setModalVisible] = useState(false);
-  const [parametersVisble,setParametersVisible] =useState(false);
   const [ShoppingList, setShoppingList] = useState([]);
   const [ParametersList, setParametersList] = useState([]);
 
 
-  const handleSearch = async () => {
-    try {
-      setError(null); // Clear previous errors
-      const response = await axios.get('http://10.0.0.8:12345/find_product_number', {
-        params: { product_name: productName },
-      });
-      setResults(response.data);
-    } catch (error) {
-      console.error('Error fetching search results:', error);
-      setError('Failed to fetch search results. Please try again.');
-    }
-  };
-
-  const handleItemPress = (item) => {
-    if (selectedItem && selectedItem.barcode === item.barcode) {
-      setSelectedItem(null); // Deselect if the same item is pressed again
-    } else {
-      setSelectedItem(item);
-    }
-  };
-
-  const handleSendSelected = async () => {
-    if (selectedItem) {
-      try {
-        console.log(fridgeId)
-        const response = await axios.post('http://10.0.0.8:12345/add_product_to_tracking', {
-          barcode: selectedItem.barcode,
-          refrigerator_id:fridgeId,
-        });
-        Alert.alert('Success', 'Selected barcode sent successfully!');
-      } catch (error) {
-        console.error('Error sending selected barcode:', error);
-        Alert.alert('Error', 'Failed to send selected barcode. Please try again.');
-      }
-    } else {
-      Alert.alert('Error', 'No item selected.');
-    }
-  };
-
-  const handleShoppingList = async () => {
+  const handleGenrateShoppingList = async () => {
     try{
-        setParametersVisible(false);
         const response = await axios.get('http://10.0.0.8:12345/create_shopping_list',{
             params: { refrigerator_id:fridgeId },
         });
@@ -73,19 +32,8 @@ export default function ShoppingList ({route}) {
 
   };
 
-  const handleParametersList = async () => {
-    try{
-      setParametersVisible(true)
-      const response = await axios.get('http://10.0.0.8:12345/parameter_list',{
-        params: { refrigerator_id:fridgeId },
-      });
-      setParametersList(response.data); 
-      setModalVisible(true); // Show the modal after data is fetched
-
-    }catch(error){
-      console.error('Error fetching search results:', error);
-      setError('Failed to fetch search results. Please try again.');
-    }
+  const handleShoppingList = () => {
+      setModalVisible(true);      
   };
 
   const handleRemoveParameter = (item)=>{
@@ -113,73 +61,48 @@ export default function ShoppingList ({route}) {
     );
   };
 
-  const handleApplyChanges = async () =>{
-    try{
-      setModalVisible(false)
-      setParametersVisible(false)
-      const response = await axios.post('http://10.0.0.8:12345/update_refrigerator_parameters', ParametersList,{
-        params: {
-          refrigerator_id: fridgeId
-        }
-      });
 
-    }catch(error){
-      console.error('Error fetching search results:', error);
-      setError('Failed to fetch search results. Please try again.');
-    }
-  }
+  const handleShareList = () => {
+    const listString = ShoppingList.map(item => `${item.product_name}, ${item.lack}`).join('\n');
 
+    const shareOptions = {
+      title: 'My List',
+      message: listString,
+    };
 
-  const renderSearchItem = ({ item }) => (
-    <TouchableOpacity
-      style={[styles.itemContainer, selectedItem && selectedItem.barcode === item.barcode && styles.selectedItem]}
-      onPress={() => handleItemPress(item)}
-    >
-      <Text style={styles.itemText}>{item.product_name}</Text>
-    </TouchableOpacity>
-  );
+    Share.open(shareOptions)
+      .then((res) => console.log(res))
+      .catch((err) => err && console.log(err));
+  };
+  
 
   const renderShoppingItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Text style={styles.itemText}>{item}</Text>
-    </View>
-  );
-
-  const renderParameterItem = ({ item }) => (
-    <View style={styles.parameterItemContainer}>
-      <View style={styles.parameterItem}>
-        <TouchableOpacity  
-          onPress={ ()=> handleAddParameter(item)}
-          style={styles.parameterButton}
-        >
-          <Text style={styles.plus}>+</Text>
-        </TouchableOpacity>
-        <Text style={styles.itemText}>{item.product_name}</Text>
-        <TouchableOpacity  
-          onPress={ ()=> handleRemoveParameter(item)}
-          style={styles.parameterButton}
-        >
-          { item.amount==1&& <Text style={styles.remove}>X</Text> }
-          { item.amount!=1&& <View style={styles.minusSign} /> }
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.itemText}>{item.amount}</Text>
+      <Text style={styles.itemText}>{item.product_name}</Text>
+      <Text style={styles.itemText}>{item.lack}</Text>
     </View>
   );
 
   return (
     <ImageBackground
-            source={require('../assets/images/background.jpg')}
-            style={styles.imageBackground}
+      source={require('../assets/images/background.jpg')}
+      style={styles.imageBackground}
     >
 
-        <View style={styles.button}>
-          <Button title="generate shopping list" onPress={handleShoppingList} />
-        </View>
+        <CustomButton
+          title="saved shopping list"
+          onPress={handleShoppingList}
+        />
+        
+        <CustomButton 
+          title="generate shopping list" 
+          onPress={handleGenrateShoppingList} 
+        />
 
-        <View style={styles.button}>
-          <Button title="edit shopping list parameters" onPress={handleParametersList} />
-        </View>
+        <CustomButton
+          title="edit shopping list parameters" 
+          onPress={() => navigation.navigate('RefrigeratorParameters',{fridgeId:1})}  
+        />
 
         <Modal
           animationType="slide"
@@ -188,8 +111,7 @@ export default function ShoppingList ({route}) {
           onRequestClose={() => {
             setModalVisible(false); // Close modal when pressing hardware back button on Android
           }}
-        >
-          {!parametersVisble && (
+        >    
           <ImageBackground
             source={require('../assets/images/background.jpg')}
             style={styles.imageBackground}
@@ -202,62 +124,14 @@ export default function ShoppingList ({route}) {
                 keyExtractor={(item, index) => index.toString()}
                 contentContainerStyle={styles.listContent}
               />
-              <Button title="Close" onPress={() => setModalVisible(false)} />
+              <View style={styles.buttonContainer}>
+                <CustomButton title="Close" onPress={() => setModalVisible(false)} />
+                <CustomButton title="Share" onPress={handleShareList} />
+              </View>
             </View>
-          </ImageBackground>
-          )}
-
-          {parametersVisble && (
-          <ImageBackground
-            source={require('../assets/images/background.jpg')}
-            style={styles.imageBackground}
-          >
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Parameters List:</Text>
-              <FlatList
-                data={ParametersList}
-                renderItem={renderParameterItem}
-                keyExtractor={(item) => item.barcode.toString()}
-                contentContainerStyle={styles.listContent}
-              />
-              <Button title="Apply changes" onPress={handleApplyChanges} />
-            </View>
-          </ImageBackground>
-          )}        
-
+          </ImageBackground>       
         </Modal>
-
-
-        <View style={styles.searchContainer}>
-            <Image source={require('../assets/search.png')} style={styles.searchIcon} />
-            <TextInput
-                style={styles.searchInput}
-                placeholder="Search by item name"
-                placeholderTextColor={'#ededed'}
-                value={productName}
-                onChangeText={setProductName}
-                onSubmitEditing={handleSearch}
-                returnKeyType="Search" // Customize the return key on the keyboard
-            />
-        </View>
-        {error && <Text style={styles.error}>{error}</Text>}
-
-          
-        <FlatList
-            style={styles.flatList}
-            data={results}
-            keyExtractor={(item) => item.barcode.toString()}
-            renderItem={renderSearchItem}
-            contentContainerStyle={styles.list}
-        />
-
-        {selectedItem && (
-          <View style={styles.button}>
-            <Button style={{marginTop:10}} title="add product" onPress={handleSendSelected} />
-          </View>
-        )}
-
-        
+     
     </ImageBackground>
   );
 };
@@ -271,43 +145,15 @@ const styles = StyleSheet.create({
     list: {
       marginTop: 16,
     },
-    flatList:{
-      maxHeight: '50%',
-    },
     item: {
       backgroundColor: '#f9c2ff',
       padding: 20,
       marginVertical: 8,
       borderRadius: 10,
     },
-    selectedItem: {
-      backgroundColor: '#90ee90',
-    },
     error: {
       color: 'red',
       marginVertical: 8,
-    },
-    searchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderColor: '#fff',
-        borderWidth: 0.5,
-        borderRadius: 10,
-        paddingHorizontal: 16,
-        marginBottom: 20,
-        width: '90%',
-        marginTop: 30,
-    },
-    searchIcon: {
-        width: 24,
-        height: 24,
-        marginRight: 8,
-
-    },
-    searchInput: {
-        flex: 1,
-        height: 40,
-        color: 'white',
     },
     modalContainer: {
       flex: 1,
@@ -378,6 +224,12 @@ const styles = StyleSheet.create({
       marginVertical: 10,
       borderRadius: 10,
       width: '100%',
-    }
-  });
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      bottom: 0,
+      width: '100%',
+    },
+});
 

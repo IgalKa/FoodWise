@@ -241,18 +241,6 @@ class Database:
         conn.close()
 
 
-
-    def add_product_to_tracking(self, refrigerator_id, barcode):
-        conn = sqlite3.connect(self.path)
-        cursor = conn.cursor()
-        data = (refrigerator_id, barcode)
-        cursor.execute(
-            "INSERT INTO refrigerator_track(refrigerator_id, barcode,amount)  "
-            "VALUES (?, ?,1)", data
-        )
-        conn.commit()
-        conn.close()
-
     def update_refrigerator_parameters(self, refrigerator_id, products):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
@@ -274,20 +262,16 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT product_name 
+            SELECT product_name,amount-COALESCE(product_quantity,0) AS lack
             FROM refrigerator_track 
-            NATURAL INNER JOIN product 
-            WHERE refrigerator_id = ? 
-            AND barcode NOT IN (
-                SELECT barcode 
-                FROM refrigerator_content 
-                WHERE refrigerator_id = ?
-            )
-        """, (refrigerator_id, refrigerator_id))
+            LEFT OUTER JOIN refrigerator_content ON refrigerator_track.barcode=refrigerator_content.barcode
+            NATURAL INNER JOIN product
+            WHERE refrigerator_track.refrigerator_id=? AND (product_quantity IS null OR amount>product_quantity)
+        """, (refrigerator_id,))
 
         result = cursor.fetchall()
         conn.close()
-        products_json = [row[0] for row in result]
+        products_json = [{'product_name': row[0],'lack': row[1]} for row in result]
         return products_json
 
 

@@ -263,33 +263,6 @@ def find_product_number():
     return jsonify(result), 200
 
 
-@app.route('/add_product_to_tracking', methods=['POST'])
-def add_product_to_tracking():
-    data = request.get_json()
-    database = app.extensions['database']
-    refrigerator_id = data['refrigerator_id']
-    barcode = data['barcode']
-
-    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
-        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
-        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
-        return jsonify(error_response), 404
-
-    if not database.check_value_exist(table_name="product", column_name="barcode", value=barcode):
-        app.logger.warning(f'product with barcode {barcode} that was not found in the database')
-        error_response = {'error': f"product with barcode {barcode} not found"}
-        return jsonify(error_response), 404
-
-    if database.check_2values_exist("refrigerator_track", "refrigerator_id", "barcode", refrigerator_id, barcode):
-        app.logger.info(f"product with barcode {barcode} already in tracking for refrigerator {refrigerator_id}")
-        message_response = {'message': "product already in tracking for this refrigerator"}
-        return jsonify(message_response), 200
-
-    database.add_product_to_tracking(refrigerator_id, barcode)
-    message_response = {'message': "The product was added successfully for tracking"}
-    return jsonify(message_response), 200
-
-
 @app.route('/update_refrigerator_parameters', methods=['POST'])
 def update_refrigerator_parameters():
     database = app.extensions['database']
