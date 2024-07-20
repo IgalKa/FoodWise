@@ -120,7 +120,7 @@ def scan():
 
 #     Frontend endpoints
 
-# /register , json={"email": "michaelsho@mta.ac.il", "password": "12345678", "first_name": "Michael", "last_name": "Shuster"}
+# /register , json={"email": "liorbaa@mta.ac.il", "password": "12345678", "first_name": "Lior", "last_name": "Barak"}
 @app.route('/register', methods=['POST'])
 def register_new_user():
     data = request.get_json()  # Get the Body JSON data from the request
@@ -201,14 +201,14 @@ def refrigerator_contents():
     refrigerator_id = request.args.get('refrigerator_id')
     database = app.extensions['database']
 
-    if database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
-        refrigerator_content = database.find_refrigerator_contents(refrigerator_id)
-        app.logger.info(f'Retrieved refrigerator contents for {refrigerator_id}')
-        return jsonify(refrigerator_content.__json__()), 200
-    else:
+    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
         app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return jsonify(error_response), 404
+
+    refrigerator_content = database.find_refrigerator_contents(refrigerator_id)
+    app.logger.info(f'Retrieved refrigerator contents for {refrigerator_id}')
+    return jsonify(refrigerator_content.__json__()), 200
 
 
 # /number_linked_refrigerators?user_id=1
@@ -262,15 +262,15 @@ def update_refrigerator_name():
     return jsonify(message_response), 200
 
 
-# /update_alert_date , json={"refrigerator_id": 1, "product_name": "Milk 1% 1L Tnuva", "alert_date": "2024-07-25"}
-@app.route('/update_alert_date', methods=['POST'])
-def update_alert_date():
+# /update_product_alert_date , json={"refrigerator_id": 1, "product_name": "Milk 1% 1L Tnuva", "alert_date": "2024-09-25"}
+@app.route('/update_product_alert_date', methods=['POST'])
+def update_product_alert_date():
     data = request.get_json()
     # If 'refrigerator_id' or 'product_name' or 'alert_date' keys are missing, return an error response
     if not ('refrigerator_id' in data and 'product_name' in data and 'alert_date' in data):
         app.logger.error("Invalid request of update_alert_date endpoint")
-        error_response = {'error': 'invalid request'}
-        return jsonify(error_response), 400
+        error_response = {'error': "invalid request"}
+        return error_response, 400
 
     refrigerator_id = data['refrigerator_id']
     product_name = data['product_name']
@@ -279,56 +279,73 @@ def update_alert_date():
 
     barcode = database.find_barcode(product_name)
     if barcode is None:
-        app.logger.warning(f'Attempt to get barcode of product_name {product_name} that was not found in the database')
+        app.logger.warning(f"Attempt to get barcode of product_name {product_name} that wasn't found in the database")
         error_response = {'error': f"Barcode of product_name {product_name} not found"}
-        return jsonify(error_response), 404
+        return error_response, 404
 
     if not database.check_2values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
                                         column_name2="barcode", value1=refrigerator_id, value2=barcode):
-        app.logger.warning(f'Attempt to update alert_date of refrigerator {refrigerator_id} with product barcode '
-                           f'{barcode} that was not found in the database')
-        error_response = {'error': f"Refrigerator {refrigerator_id} with product barcode {barcode} wasn't found in database"}
-        return jsonify(error_response), 404
+        app.logger.warning(f"Attempt to update alert_date of refrigerator {refrigerator_id} with product {product_name}"
+                           f" barcode {barcode} that was not found in the database")
+        error_response = {'error': f"Refrigerator {refrigerator_id} with product {product_name} barcode {barcode}"
+                                   f" wasn't found in database"}
+        return error_response, 404
 
     if not Functions.is_future_date(alert_date):
-        app.logger.warning(f'Attempt to update alert_date with date {alert_date} that is in the past')
+        app.logger.warning(f"Attempt to update alert_date with date {alert_date} that is in the past")
         error_response = {'error': f"Alert date {alert_date} is in the past"}
-        return jsonify(error_response), 400
+        return error_response, 400
 
     database.update_alert_date(refrigerator_id, barcode, alert_date)
-    app.logger.info(f"Alert date of refrigerator {refrigerator_id} with product barcode {barcode} updated successfully "
-                    f"to {alert_date}")
+    app.logger.info(f"Alert date of refrigerator {refrigerator_id} with product {product_name} barcode {barcode}"
+                    f" updated successfully to {alert_date}")
     message_response = {'message': f"Alert_date updated successfully"}
-    return jsonify(message_response), 200
+    return message_response, 200
 
 
-@app.route('/get_alert_date', methods=['GET'])
-def get_alert_date():
+# /get_product_alert_date?refrigerator_id=1&product_name=Eggs pack 12L free organic
+@app.route('/get_product_alert_date', methods=['GET'])
+def get_product_alert_date():
     refrigerator_id = request.args.get('refrigerator_id')
     product_name = request.args.get('product_name')
     database = app.extensions['database']
 
     barcode = database.find_barcode(product_name)
     if barcode is None:
-        app.logger.warning(f'Attempt to get barcode of product_name {product_name} that was not found in the database')
+        app.logger.warning(f"Attempt to get barcode of product_name {product_name} that wasn't found in the database")
         error_response = {'error': f"Barcode of product_name {product_name} not found"}
-        return jsonify(error_response), 404
+        return error_response, 404
 
     if not database.check_2values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
                                         column_name2="barcode", value1=refrigerator_id, value2=barcode):
-        app.logger.warning(f'Attempt to update alert_date of refrigerator {refrigerator_id} with product barcode '
-                           f'{barcode} that was not found in the database')
-        error_response = {'error': f"Refrigerator {refrigerator_id} with product barcode {barcode} wasn't found in database"}
-        return jsonify(error_response), 404
+        app.logger.warning(f"Attempt to get alert_date of refrigerator {refrigerator_id} with product {product_name}"
+                           f" barcode {barcode} wasn't found in the database")
+        error_response = {'error': f"Refrigerator {refrigerator_id} with product {product_name}"
+                                   f" barcode {barcode} wasn't found in database"}
+        return error_response, 404
 
-    result = database.get_alert_date(refrigerator_id, barcode)
-    if result:
-        app.logger.info(f'Alert date of refrigerator {refrigerator_id} with product barcode {barcode} is: {result}')
-        return jsonify(result), 200
-    else:
-        app.logger.warning(f'Alert date of refrigerator {refrigerator_id} with product barcode {barcode} is: NULL')
-        error_response = {'error': f"Alert_date is NULL"}
-        return error_response, 400
+    alert_date = database.get_alert_date(refrigerator_id, barcode)
+
+    app.logger.info(f"Alert date of refrigerator {refrigerator_id} with product {product_name} barcode {barcode}"
+                    f" updated to {alert_date}")
+    response = {'alert_date': alert_date}
+    return response, 200
+
+
+# /get_refrigerator_content_by_alert_date_passed?refrigerator_id=1
+@app.route('/get_refrigerator_content_by_alert_date_passed', methods=['GET'])
+def get_refrigerator_content_by_alert_date_passed():
+    refrigerator_id = request.args.get('refrigerator_id')
+    database = app.extensions['database']
+
+    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
+        app.logger.warning(f"Attempt to access refrigerator {refrigerator_id} that does not exist")
+        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+        return error_response, 404
+
+    refrigerator_content = database.find_refrigerator_contents_with_alerts_dates_in_the_past(refrigerator_id)
+    app.logger.info(f"Retrieved refrigerator {refrigerator_id} content with products there alert date isn't in future")
+    return refrigerator_content.__json__(), 200
 
 
 if __name__ == '__main__':

@@ -266,3 +266,22 @@ class Database:
         else:
             return None
 
+    def find_refrigerator_contents_with_alerts_dates_in_the_past(self, refrigerator_id):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT product_name,image,product_quantity,oldest_added_date,alert_date "
+                       "FROM refrigerator_content NATURAL INNER JOIN product "
+                       "WHERE refrigerator_id = ? "
+                       "AND alert_date IS NOT NULL "
+                       "AND alert_date <= DATE('now')",
+                       (refrigerator_id,))
+        result = cursor.fetchall()
+
+        refrigerator = Refrigerator(refrigerator_id)
+        for row in result:
+            product = Product(row[0], row[1], row[2], row[3], row[4])
+            refrigerator.add_product(product)
+
+        conn.close()
+        return refrigerator
