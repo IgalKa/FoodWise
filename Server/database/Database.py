@@ -92,6 +92,36 @@ class Database:
 
         conn.commit()
         conn.close()
+        self.statistics_add_product_to_table("entry_table", "entry_date", refrigerator_id, barcode)
+
+    def statistics_add_product_to_table(self, table_name, column_date,refrigerator_id, barcode):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        now = datetime.now()
+        formatted_current_date = now.strftime('%Y-%m-%d')
+
+        cursor.execute(f"SELECT quantity "
+                       f"FROM {table_name} "
+                       f"WHERE refrigerator_id = ? AND barcode = ? AND {column_date} = ?",
+                       (refrigerator_id, barcode, formatted_current_date))
+        result = cursor.fetchone()
+
+        if result:
+            cursor.execute(
+                f"UPDATE {table_name} "
+                f"SET quantity = ? "
+                f"WHERE refrigerator_id = ? AND barcode = ? AND {column_date} = ? ",
+                (result[0] + 1, refrigerator_id, barcode, formatted_current_date)
+            )
+        else:
+            cursor.execute(
+                f"INSERT INTO {table_name} (refrigerator_id,barcode,{column_date},quantity)"
+                f"VALUES (?,?,?,?)",
+                (refrigerator_id, barcode, formatted_current_date, 1))
+
+        conn.commit()
+        conn.close()
 
     def remove_product(self, refrigerator_id, barcode):
         # Connect to the SQLite database
@@ -117,6 +147,7 @@ class Database:
             conn.commit()
 
         conn.close()
+        self.statistics_add_product_to_table("exit_table", "exit_date", refrigerator_id, barcode)
         return result
 
     def check_value_exist(self, table_name, column_name, value):
