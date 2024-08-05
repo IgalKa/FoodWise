@@ -258,11 +258,30 @@ class Database:
         conn.close()
 
 
-    def get_shopping_list(self, refrigerator_id):
+    def save_shopping_list(self,refrigerator_id, products):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM shopping_list "
+            "WHERE refrigerator_id = ? ", (refrigerator_id,)
+        )
+
+        for product in products:
+            cursor.execute('''
+                        INSERT INTO shopping_list(refrigerator_id, product_name, amount) VALUES (?,?,?)
+                    ''', (refrigerator_id, product['product_name'], product['amount']))
+
+        conn.commit()
+        conn.close()
+
+
+
+
+    def generate_shopping_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT product_name,amount-COALESCE(product_quantity,0) AS lack
+            SELECT product_name,amount-COALESCE(product_quantity,0) AS amount
             FROM refrigerator_track 
             LEFT OUTER JOIN refrigerator_content ON refrigerator_track.barcode=refrigerator_content.barcode
             NATURAL INNER JOIN product
@@ -271,7 +290,7 @@ class Database:
 
         result = cursor.fetchall()
         conn.close()
-        products_json = [{'product_name': row[0],'lack': row[1]} for row in result]
+        products_json = [{'product_name': row[0],'amount': row[1]} for row in result]
         return products_json
 
 
@@ -290,6 +309,25 @@ class Database:
         # Format the result as a JSON array of objects
         products_json = [{'product_name': row[0], 'barcode': row[1],'amount': row[2]} for row in result]
         return products_json
+
+
+    def get_shopping_list(self, refrigerator_id):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT product_name,amount
+        FROM shopping_list
+        WHERE refrigerator_id = ?
+        """, (refrigerator_id,))
+        result = cursor.fetchall()
+        conn.close()
+
+        # Format the result as a JSON array of objects
+        products_json = [{'product_name': row[0],'amount': row[1]} for row in result]
+        return products_json
+
+
+
 
 
 

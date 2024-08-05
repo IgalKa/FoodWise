@@ -292,6 +292,33 @@ def update_refrigerator_parameters():
     return jsonify(message_response), 200
 
 
+
+@app.route('/save_shopping_list', methods=['POST'])
+def save_shopping_list():
+    database = app.extensions['database']
+    refrigerator_id = request.args.get('refrigerator_id')
+    data = request.get_json()
+
+    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
+        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+        return jsonify(error_response), 404
+
+
+    if not isinstance(data, list):
+        error_response = {'error': 'Invalid data format. Expected a list'}
+        return jsonify(error_response), 400
+
+    for product in data:
+        if 'product_name' not in product or 'amount' not in product:
+            error_response = {"error": "Each object must contain 'barcode' and 'amount' keys."}
+            return jsonify(error_response), 400
+
+    result = database.save_shopping_list(refrigerator_id,data)
+    return jsonify(result), 200
+
+
+
 @app.route('/create_shopping_list', methods=['GET'])
 def create_shopping_list():
     database = app.extensions['database']
@@ -302,8 +329,9 @@ def create_shopping_list():
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return jsonify(error_response), 404
 
-    result = database.get_shopping_list(refrigerator_id)
+    result = database.generate_shopping_list(refrigerator_id)
     return jsonify(result), 200
+
 
 
 @app.route('/parameter_list', methods=['GET'])
@@ -318,6 +346,21 @@ def parameter_list():
 
     result = database.get_parameter_list(refrigerator_id)
     return jsonify(result), 200
+
+
+@app.route('/shopping_list', methods=['GET'])
+def shopping_list():
+    database = app.extensions['database']
+    refrigerator_id = request.args.get('refrigerator_id')
+
+    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
+        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+        return jsonify(error_response), 404
+
+    result = database.get_shopping_list(refrigerator_id)
+    return jsonify(result), 200
+
 
 
 if __name__ == '__main__':
