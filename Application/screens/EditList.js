@@ -6,41 +6,54 @@ import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../components/CustomButton';
 
 
-export default function RefrigeratorParameters({route}){
-    const { fridgeId,selectedItem } = route.params;
+export default function EditList({route}){
     const navigation = useNavigation();
+
+    const [title,setTitle] = useState(route.params.title);
+    const [fridgeId,setFridgeId] = useState(route.params.fridgeId);
+    const [getUrl,setGetUrl] = useState(route.params.getUrl);
+    const [postUrl,setPostUrl] = useState(route.params.postUrl);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [ParametersList, setParametersList] = useState([]);
+    const [List, setList] = useState([]);
 
 
     useEffect(() => {
         const fetchData = async () => {
-          try {
-            const response = await axios.get('http://10.0.0.8:12345/parameter_list',{
-                params: { refrigerator_id:fridgeId },
-            });
-            setParametersList(response.data); 
-          } catch (error) {
-            console.error('Error fetching search results:', error);
-            setError('Failed to fetch search results. Please try again.');
-          } finally {
-            setLoading(false);
-          }
+            if (!getUrl || !fridgeId) {
+                console.error('Invalid URL or fridgeId');
+                setError('Invalid URL or fridgeId');
+                setLoading(false);
+                return;
+            }
+    
+            try {
+                console.log('Fetching data from:', getUrl);
+                const response = await axios.get(getUrl, {
+                    params: { refrigerator_id: fridgeId },
+                });
+                console.log('Response data:', response.data);
+                setList(response.data);
+            } catch (error) {
+                console.error('Error details:', error.response || error.message || error);
+                setError('Failed to fetch search results. Please try again.');
+            } finally {
+                setLoading(false);
+            }
         };
     
         fetchData();
-    }, []); 
+    }, []);
 
     useEffect(() => {
         if (route.params?.item) {
             const newItem = route.params.item;
 
-            const itemExists = ParametersList.some(item => item.barcode === newItem.barcode);
+            const itemExists = List.some(item => item.barcode === newItem.barcode);
         
             if(!itemExists){
-                setParametersList((prevParameters) => [...prevParameters, {   
+                setList((prevParameters) => [...prevParameters, {   
                         product_name:newItem.product_name,
                         barcode:newItem.barcode,
                         amount:1
@@ -58,39 +71,39 @@ export default function RefrigeratorParameters({route}){
     }
 
     
-    const handleRemoveParameter = (item)=>{
+    const handleRemoveList = (item)=>{
         if(item.amount==1){
-          const newParameterList=ParametersList.filter(currentItem => currentItem.product_name != item.product_name); 
-          setParametersList(newParameterList);
+          const newList=List.filter(currentItem => currentItem.product_name != item.product_name); 
+          setList(newList);
         }
         else{
           newAmount=item.amount-1;
-          updateParameterAmount(item.barcode,newAmount)
+          updateListAmount(item.product_name,newAmount)
         }
     };
     
-    const handleAddParameter = (item)=>{
+    const handleAddList = (item)=>{
         newAmount=item.amount+1;
-        updateParameterAmount(item.barcode,newAmount);
+        updateListAmount(item.product_name,newAmount);
     };
     
     
-    const updateParameterAmount = (barcode, newAmount) => {
-        setParametersList(prevParameters =>
-          prevParameters.map(item =>
-            item.barcode === barcode ? { ...item, amount: newAmount} : item
+    const updateListAmount = (product_name, newAmount) => {
+        setList(prevItems =>
+          prevItems.map(item =>
+            item.product_name === product_name ? { ...item, amount: newAmount} : item
           )
         );
     };
     
     const handleApplyChanges = async () =>{
         try{
-            await axios.post('http://10.0.0.8:12345/update_refrigerator_parameters', ParametersList,{
+            await axios.post(postUrl, List,{
                 params: {
                     refrigerator_id: fridgeId
                 }
             });
-            navigation.navigate('ShoppingList',{fridgeId:1})
+            navigation.navigate( 'Inventory', {screen: 'ShoppingList'} );
         }catch(error){
           console.error('Error fetching search results:', error);
           setError('Failed to fetch search results. Please try again.');
@@ -98,18 +111,18 @@ export default function RefrigeratorParameters({route}){
     }
 
 
-    const renderParameterItem = ({ item }) => (
+    const renderListItem = ({ item }) => (
         <View style={styles.parameterItemContainer}>
           <View style={styles.parameterItem}>
             <TouchableOpacity  
-              onPress={ ()=> handleAddParameter(item)}
+              onPress={ ()=> handleAddList(item)}
               style={styles.parameterButton}
             >
               <Text style={styles.plus}>+</Text>
             </TouchableOpacity>
             <Text style={styles.itemText}>{item.product_name}</Text>
             <TouchableOpacity  
-              onPress={ ()=> handleRemoveParameter(item)}
+              onPress={ ()=> handleRemoveList(item)}
               style={styles.parameterButton}
             >
               { item.amount==1 && <Text style={styles.remove}>X</Text> }
@@ -126,10 +139,10 @@ export default function RefrigeratorParameters({route}){
             style={styles.imageBackground}
         >
             <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>Parameters List:</Text>
+                <Text style={styles.modalTitle}>{title}:</Text>
                 <FlatList
-                    data={ParametersList}
-                    renderItem={renderParameterItem}
+                    data={List}
+                    renderItem={renderListItem}
                     keyExtractor={(item) => item.product_name}
                     contentContainerStyle={styles.listContent}
                 />

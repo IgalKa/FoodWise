@@ -4,8 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
-import ShoppingList from '../screens/ShoppingList';
 import SearchProduct from '../screens/SearchProduct';
+import EditList from '../screens/EditList';
 import RefrigeratorParameters from '../screens/RefrigeratorParameters';
 import DrawerNavigator from './DrawerNavigation';
 
@@ -22,8 +22,8 @@ export default function Navigation() {
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Signup" component={SignupScreen} />
             <Stack.Screen name="Inventory" component={DrawerNavigator} />
-            <Stack.Screen name="ShoppingList" component={ShoppingList} />
             <Stack.Screen name="SearchProduct" component={SearchProduct} />
+            <Stack.Screen name="EditList" component={EditList}/>
             <Stack.Screen name="RefrigeratorParameters" component={RefrigeratorParameters}/>
         </Stack.Navigator>
     );

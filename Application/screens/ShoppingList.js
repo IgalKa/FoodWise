@@ -1,69 +1,37 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, FlatList, 
-TouchableOpacity, Alert,Image ,Modal,ImageBackground} from 'react-native';
-import axios from 'axios';
+import React, { useState ,useEffect} from 'react';
+import { View, StyleSheet, Text, FlatList, Modal,ImageBackground} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Share from 'react-native-share';
 import CustomButton from '../components/CustomButton';
+import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ShoppingList ({route}) {
-  const { fridgeId } = route.params;
+  const { fridgeId } = useAuth();
   const navigation = useNavigation();
 
-  const [error, setError] = useState(null);
 
   const [modalVisible, setModalVisible] = useState(false);
+
   const [ShoppingList, setShoppingList] = useState([]);
-  const [ParametersList, setParametersList] = useState([]);
 
-
-  const handleGenrateShoppingList = async () => {
-    try{
-        const response = await axios.get('http://10.0.0.8:12345/create_shopping_list',{
-            params: { refrigerator_id:fridgeId },
-        });
-        setShoppingList(response.data); // Assuming response.data is an array of strings
-        setModalVisible(true); // Show the modal after data is fetched
-        
-    }catch(error){
-        console.error('Error fetching search results:', error);
-        setError('Failed to fetch search results. Please try again.');
+  
+  const handleShoppingList = async () => {
+    try {
+      const response = await axios.get('http://10.0.0.8:12345/shopping_list',{
+          params: { refrigerator_id:fridgeId },
+      });
+      setShoppingList(response.data); 
+      setModalVisible(true);
+    } 
+    catch (error) {
+      console.error('Error fetching search results:', error);
     }
-
-  };
-
-  const handleShoppingList = () => {
-      setModalVisible(true);      
-  };
-
-  const handleRemoveParameter = (item)=>{
-    if(item.amount==1){
-      const newParameterList=ParametersList.filter(currentItem => currentItem.product_name != item.product_name); 
-      setParametersList(newParameterList);
-    }
-    else{
-      newAmount=item.amount-1;
-      updateParameterAmount(item.barcode,newAmount)
-    }
-  };
-
-  const handleAddParameter = (item)=>{
-    newAmount=item.amount+1;
-    updateParameterAmount(item.barcode,newAmount);
-  };
-
-
-  const updateParameterAmount = (barcode, newAmount) => {
-    setParametersList(prevParameters =>
-      prevParameters.map(item =>
-        item.barcode === barcode ? { ...item, amount: newAmount} : item
-      )
-    );
   };
 
 
   const handleShareList = () => {
-    const listString = ShoppingList.map(item => `${item.product_name}, ${item.lack}`).join('\n');
+    const listString = ShoppingList.map(item => `${item.product_name}, ${item.amount}`).join('\n');
 
     const shareOptions = {
       title: 'My List',
@@ -79,7 +47,7 @@ export default function ShoppingList ({route}) {
   const renderShoppingItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemText}>{item.product_name}</Text>
-      <Text style={styles.itemText}>{item.lack}</Text>
+      <Text style={styles.itemText}>{item.amount}</Text>
     </View>
   );
 
@@ -96,21 +64,28 @@ export default function ShoppingList ({route}) {
         
         <CustomButton 
           title="generate shopping list" 
-          onPress={handleGenrateShoppingList} 
+          onPress={() => navigation.navigate('EditList',{
+            getUrl:"http://10.0.0.8:12345/create_shopping_list",
+            postUrl:"http://10.0.0.8:12345/save_shopping_list",
+            title:"shopping list creation",
+            fridgeId:1})} 
         />
 
         <CustomButton
           title="edit shopping list parameters" 
-          onPress={() => navigation.navigate('RefrigeratorParameters',{fridgeId:1})}  
+          onPress={() => navigation.navigate('EditList',{
+            getUrl:"http://10.0.0.8:12345/parameter_list",
+            postUrl:"http://10.0.0.8:12345/update_refrigerator_parameters",
+            title:"parameters list",
+            fridgeId:1
+            })}  
         />
 
         <Modal
           animationType="slide"
           transparent={false}
           visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(false); // Close modal when pressing hardware back button on Android
-          }}
+          onRequestClose={() => {setModalVisible(false); }}
         >    
           <ImageBackground
             source={require('../assets/images/background.jpg')}

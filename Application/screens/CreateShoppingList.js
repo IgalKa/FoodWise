@@ -1,27 +1,26 @@
 import React, { useState ,useEffect } from 'react';
-import { View, StyleSheet, Text, FlatList, 
-TouchableOpacity,ImageBackground, ActivityIndicator} from 'react-native';
+import { View, StyleSheet, Text, ImageBackground, ActivityIndicator} from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../components/CustomButton';
 
 
-export default function RefrigeratorParameters({route}){
-    const { fridgeId,selectedItem } = route.params;
+export default function CreateShoppingList({route}){
+    const { fridgeId, selectedItem } = route.params;
     const navigation = useNavigation();
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [ParametersList, setParametersList] = useState([]);
+    const [ShoppingList, setShoppingList] = useState([]);
 
 
     useEffect(() => {
         const fetchData = async () => {
           try {
-            const response = await axios.get('http://10.0.0.8:12345/parameter_list',{
+            const response = await axios.get('http://10.0.0.8:12345/create_shopping_list',{
                 params: { refrigerator_id:fridgeId },
             });
-            setParametersList(response.data); 
+            setShoppingList(response.data); 
           } catch (error) {
             console.error('Error fetching search results:', error);
             setError('Failed to fetch search results. Please try again.');
@@ -37,15 +36,16 @@ export default function RefrigeratorParameters({route}){
         if (route.params?.item) {
             const newItem = route.params.item;
 
-            const itemExists = ParametersList.some(item => item.barcode === newItem.barcode);
+            const itemExists = ShoppingList.some(item => item.barcode === newItem.barcode);
         
             if(!itemExists){
-                setParametersList((prevParameters) => [...prevParameters, {   
+                setShoppingList((prevParameters) => [...prevParameters, {   
                         product_name:newItem.product_name,
                         barcode:newItem.barcode,
                         amount:1
                 }]);
             }
+            console.log(ShoppingList);
         }
     }, [route.params?.item]);
     
@@ -58,34 +58,9 @@ export default function RefrigeratorParameters({route}){
     }
 
     
-    const handleRemoveParameter = (item)=>{
-        if(item.amount==1){
-          const newParameterList=ParametersList.filter(currentItem => currentItem.product_name != item.product_name); 
-          setParametersList(newParameterList);
-        }
-        else{
-          newAmount=item.amount-1;
-          updateParameterAmount(item.barcode,newAmount)
-        }
-    };
-    
-    const handleAddParameter = (item)=>{
-        newAmount=item.amount+1;
-        updateParameterAmount(item.barcode,newAmount);
-    };
-    
-    
-    const updateParameterAmount = (barcode, newAmount) => {
-        setParametersList(prevParameters =>
-          prevParameters.map(item =>
-            item.barcode === barcode ? { ...item, amount: newAmount} : item
-          )
-        );
-    };
-    
     const handleApplyChanges = async () =>{
         try{
-            await axios.post('http://10.0.0.8:12345/update_refrigerator_parameters', ParametersList,{
+            await axios.post('http://10.0.0.8:12345/update_refrigerator_parameters', ShoppingList,{
                 params: {
                     refrigerator_id: fridgeId
                 }
@@ -97,28 +72,10 @@ export default function RefrigeratorParameters({route}){
         }
     }
 
+    const handleDataChange= (newDataList)=> {
+        setShoppingList(newDataList);
+    }
 
-    const renderParameterItem = ({ item }) => (
-        <View style={styles.parameterItemContainer}>
-          <View style={styles.parameterItem}>
-            <TouchableOpacity  
-              onPress={ ()=> handleAddParameter(item)}
-              style={styles.parameterButton}
-            >
-              <Text style={styles.plus}>+</Text>
-            </TouchableOpacity>
-            <Text style={styles.itemText}>{item.product_name}</Text>
-            <TouchableOpacity  
-              onPress={ ()=> handleRemoveParameter(item)}
-              style={styles.parameterButton}
-            >
-              { item.amount==1 && <Text style={styles.remove}>X</Text> }
-              { item.amount!=1 && <View style={styles.minusSign} /> }
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.itemText}>{item.amount}</Text>
-        </View>
-    );
 
     return (
         <ImageBackground
@@ -126,18 +83,16 @@ export default function RefrigeratorParameters({route}){
             style={styles.imageBackground}
         >
             <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>Parameters List:</Text>
-                <FlatList
-                    data={ParametersList}
-                    renderItem={renderParameterItem}
-                    keyExtractor={(item) => item.product_name}
-                    contentContainerStyle={styles.listContent}
+                <Text style={styles.modalTitle}>Shopping List Creation:</Text>
+                <CustomList
+                    initialData={ShoppingList}
+                    onDataChange={handleDataChange}
                 />
                 <View style={styles.buttonContainer}>
                     <CustomButton title="Save" onPress={handleApplyChanges} />
                     <CustomButton
                         title="Search"
-                        onPress={() => navigation.navigate('SearchProduct',{fridgeId:1,from:"parametersList"})} 
+                        onPress={() => navigation.navigate('SearchProduct',{fridgeId:1 ,from:"CreateShoppingList"})} 
                     />
                 </View>
             </View>

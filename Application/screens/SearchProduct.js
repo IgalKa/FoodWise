@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 
 
 export default function SearchProduct({route}){
-    const { fridgeId } = route.params;
+    const { fridgeId} = route.params;
     const navigation = useNavigation();
 
     const [productName, setProductName] = useState('');
@@ -35,10 +35,9 @@ export default function SearchProduct({route}){
         }
     };
     
-    const handleSendSelected = (itme) => {
+    const handleSendSelected = (item) => {
         if (selectedItem) {
-            console.log(selectedItem);
-            navigation.navigate('RefrigeratorParameters',{fridgeId:fridgeId,item:selectedItem});
+            navigation.navigate('EditList',{fridgeId:fridgeId,item:selectedItem}) 
         } else {
           Alert.alert('Error', 'No item selected.');
         }
