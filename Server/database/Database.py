@@ -92,11 +92,16 @@ class Database:
 
         conn.commit()
         conn.close()
-        self.statistics_add_product_to_table("entry_table", "entry_date", refrigerator_id, barcode)
+        self.statistics_add_product_to_table("entry_table", refrigerator_id, barcode)
 
-    def statistics_add_product_to_table(self, table_name, column_date,refrigerator_id, barcode):
+    def statistics_add_product_to_table(self, table_name, refrigerator_id, barcode):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
+
+        if table_name == "entry_table":
+            column_date = "entry_date"
+        else:  # table_name == "exit_table"
+            column_date = "exit_date"
 
         now = datetime.now()
         formatted_current_date = now.strftime('%Y-%m-%d')
@@ -147,7 +152,7 @@ class Database:
             conn.commit()
 
         conn.close()
-        self.statistics_add_product_to_table("exit_table", "exit_date", refrigerator_id, barcode)
+        self.statistics_add_product_to_table("exit_table", refrigerator_id, barcode)
         return result
 
     def check_value_exist(self, table_name, column_name, value):
@@ -257,7 +262,9 @@ class Database:
                        "WHERE user_id = ? ", (user_id,))
         result = cursor.fetchall()
 
-        return {"refrigerators": [{"refrigerator_id": row[0], "nickname": row[1]} for row in result]}
+        linked_refrigerators = {"refrigerators": [{"refrigerator_id": row[0], "nickname": row[1]} for row in result]}
+        conn.close()
+        return linked_refrigerators
 
     def change_refrigerator_nickname(self, refrigerator_id, user_id, nickname):
         conn = sqlite3.connect(self.path)
@@ -316,3 +323,27 @@ class Database:
 
         conn.close()
         return refrigerator
+
+    def find_products_and_quantities_between_dates(self, table_name, refrigerator_id, start_date, end_date):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        if table_name == "entry_table":
+            column_date = "entry_date"
+        else:  # table_name == "exit_table"
+            column_date = "exit_date"
+
+        cursor.execute("SELECT product_name, Sum(quantity) "
+                       f"FROM {table_name} NATURAL INNER JOIN product "
+                       "WHERE refrigerator_id = ? "
+                       f"AND {column_date} >= ? AND {column_date} <= ? "
+                       "GROUP BY barcode, product_name",
+                       (refrigerator_id, start_date, end_date))
+        result = cursor.fetchall()
+
+        products = []
+        for row in result:
+            products.append({"product_name": row[0], "quantity": row[1]})
+
+        conn.close()
+        return {"products": products}

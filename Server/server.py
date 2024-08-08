@@ -327,7 +327,7 @@ def get_product_alert_date():
     alert_date = database.get_alert_date(refrigerator_id, barcode)
 
     app.logger.info(f"Alert date of refrigerator {refrigerator_id} with product {product_name} barcode {barcode}"
-                    f" updated to {alert_date}")
+                    f" is {alert_date}")
     response = {'alert_date': alert_date}
     return response, 200
 
@@ -344,8 +344,38 @@ def get_refrigerator_content_by_alert_date_passed():
         return error_response, 404
 
     refrigerator_content = database.find_refrigerator_contents_with_alerts_dates_in_the_past(refrigerator_id)
-    app.logger.info(f"Retrieved refrigerator {refrigerator_id} content with products there alert date isn't in future")
+    app.logger.info(f"Get refrigerator {refrigerator_id} contents with products there alert date passed")
     return refrigerator_content.__json__(), 200
+
+
+def get_statistics_by_table_name(table_name):
+    refrigerator_id = request.args.get('refrigerator_id')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    database = app.extensions['database']
+
+    if not start_date <= end_date:
+        app.logger.warning(f"Attempt to get {table_name} statistics when start_date={start_date} is after the end_date={end_date}")
+        error_response = {'error': f"Start date {start_date} is after end date {end_date}"}
+        return error_response, 400
+
+    products_and_quantities = database.find_products_and_quantities_between_dates(table_name, refrigerator_id,
+                                                                                  start_date, end_date)
+    app.logger.info(
+        f"Get {table_name} statistics of refrigerator={refrigerator_id} start_date={start_date} end_date={end_date}")
+    return products_and_quantities, 200
+
+
+# /get_entry_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
+@app.route('/get_entry_statistics', methods=['GET'])
+def get_entry_statistics():
+    return get_statistics_by_table_name(table_name="entry_table")
+
+
+# /get_exit_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
+@app.route('/get_exit_statistics', methods=['GET'])
+def get_exit_statistics():
+    return get_statistics_by_table_name(table_name="exit_table")
 
 
 if __name__ == '__main__':
