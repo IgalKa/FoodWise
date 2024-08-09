@@ -22,8 +22,12 @@ export default function SearchProduct({route}){
           });
           setResults(response.data);
         } catch (error) {
-          console.error('Error fetching search results:', error);
-          setError('Failed to fetch search results. Please try again.');
+            if (error.response.status === 404) {
+                setResults([]);
+            } else {
+                console.error('Error fetching search results:', error);
+                setError('An error occurred while fetching search results.');
+            }
         }
     };
     
