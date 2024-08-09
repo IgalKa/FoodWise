@@ -11,5 +11,3 @@ class Refrigerator:
                 'refrigerator_id': self.refrigerator_id,
                 'products': [product.__json__() for product in self.products]
         }
-
-
