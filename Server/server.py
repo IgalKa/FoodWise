@@ -263,15 +263,15 @@ def update_refrigerator_name():
     return jsonify(message_response), 200
 
 
-@app.route('/find_product_number', methods=['GET'])
-def find_product_number():
+@app.route('/search_products', methods=['GET'])
+def search_products():
     product_name = request.args.get('product_name')
     database = app.extensions['database']
 
     if not product_name:
         return {'message': "No products found"}, 404
 
-    result = database.find_barcode(product_name)
+    result = database.search_products_by_product_name(product_name)
     if not result:
         return {'message': "No products found"}, 404
     app.logger.info(f"The result of the search for {product_name} is {result}")
