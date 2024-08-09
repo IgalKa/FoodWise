@@ -42,7 +42,7 @@ class Database:
         conn.close()
 
         # Format the result as a JSON array of objects
-        products_json = [{'product_name': row[0], 'barcode': row[1]} for row in result]
+        products_json = [{'product_name': row[0], 'barcode': row[1]} for row in result[:10]]
         return products_json
 
 

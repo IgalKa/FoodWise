@@ -258,7 +258,12 @@ def find_product_number():
     product_name = request.args.get('product_name')
     database = app.extensions['database']
 
+    if not product_name:
+        return {'message': "No products found"}, 404
+
     result = database.find_barcode(product_name)
+    if not result:
+        return {'message': "No products found"}, 404
     app.logger.info(f"The result of the search for {product_name} is {result}")
     return jsonify(result), 200
 
