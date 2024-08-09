@@ -99,14 +99,13 @@ function InventoryScreen({ navigation }) {
             <Image source={{ uri: item.image }} style={styles.image} />
             <Text style={styles.name}>{item.name}</Text>
             <Text style={styles.quantity}>Quantity: {item.quantity}</Text>
-        </TouchableOpacity>
-    );
+        </TouchableOpacity>);
 
 
 
     return (
         <ScreenLayout>
-            {!loading && data && data.length > 0 && (
+            {!loading && data && data.length > 0 && fridgeId && (
                 <View style={styles.searchContainer}>
                     <Image source={require('../assets/search.png')} style={styles.searchIcon} />
                     <TextInput
@@ -121,15 +120,15 @@ function InventoryScreen({ navigation }) {
             {loading && fridgeId && (
                 <ActivityIndicator size="large" color="#fff" />
             )}
-            {!loading && data && data.length > 0 && (
+            {!loading && data && data.length > 0 && fridgeId && (
                 <FlatList
                     data={isSearching ? filteredData : data}
                     renderItem={renderItem}
-                    keyExtractor={item => item.id}
+                    keyExtractor={item => item.name}
                     numColumns={2}
                 />
             )}
-            {!loading && data && data.length === 0 && (
+            {!loading && data && data.length === 0 && fridgeId && (
                 <Text style={styles.defaultText}>No products</Text>
             )}
             {!fridgeId && (

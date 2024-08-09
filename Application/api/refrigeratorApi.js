@@ -26,3 +26,10 @@ export const updateRefrigeratorName = (newName, renameId, userId) => {
   return response;
 };
 
+export const getExpiringProducts = (fridgeId) => {
+  const response = apiClient.get('/get_refrigerator_content_by_alert_date_passed', {
+    params: { refrigerator_id: fridgeId }
+  });
+  return response;
+};
+
