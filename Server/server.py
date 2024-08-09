@@ -332,9 +332,9 @@ def get_product_alert_date():
     return response, 200
 
 
-# /get_refrigerator_content_by_alert_date_passed?refrigerator_id=1
-@app.route('/get_refrigerator_content_by_alert_date_passed', methods=['GET'])
-def get_refrigerator_content_by_alert_date_passed():
+# /get_refrigerator_content_expired?refrigerator_id=1
+@app.route('/get_refrigerator_content_expired', methods=['GET'])
+def get_refrigerator_content_expired():
     refrigerator_id = request.args.get('refrigerator_id')
     database = app.extensions['database']
 
