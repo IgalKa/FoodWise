@@ -6,8 +6,6 @@ import { View, FlatList, TouchableOpacity, Text, StyleSheet, ActivityIndicator, 
 import ScreenLayout from '../components/ScreenLayout';
 import { useAuth } from '../contexts/AuthContext';
 import QRCode from 'react-native-qrcode-svg';
-import axios from 'axios';
-import CONFIG from '../config';
 import { getLinkedRefrigerators, updateRefrigeratorName } from '../api/refrigeratorApi';
 
 const ItemSelectionScreen = () => {
@@ -152,7 +150,7 @@ const ItemSelectionScreen = () => {
             )}
             {!loading && data && data.length === 0 && (
                 <View style={styles.container}>
-                    <Text>No Refrigerators</Text>
+                    <Text style={styles.defaultText}>No Refrigerators</Text>
                 </View>
 
             )}
@@ -319,5 +317,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#c6cbef',
         borderRadius: 10,
         alignItems: 'center',
+    },
+    defaultText: {
+        color: '#ededed',
     },
 });
