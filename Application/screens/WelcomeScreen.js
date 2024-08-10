@@ -1,7 +1,6 @@
 import React from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Button } from '@rneui/base';
 
 
 export default function WelcomeScreen() {
@@ -33,14 +32,8 @@ export default function WelcomeScreen() {
                         <Text style={styles.signupButton}>Login</Text>
                     </TouchableOpacity>
                 </View>
-
-                <View style={{ alignItems: 'center' }}>
-                    <TouchableOpacity style={styles.startButton} onPress={() => navigation.navigate('ShoppingList',{fridgeId:1})}>
-                        <Text style={styles.buttonText}>Shooping list</Text>
-                    </TouchableOpacity>
+                <View style={styles.signupContainer}>
                 </View>
-
-                
             </View>
         </ImageBackground>
     )
@@ -100,5 +93,3 @@ const styles = StyleSheet.create({
         color: '#ededed',
     },
 });
-
-

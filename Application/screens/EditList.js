@@ -4,6 +4,7 @@ TouchableOpacity,ImageBackground, ActivityIndicator} from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../components/CustomButton';
+import apiClient from '../api/apiClient';
 
 
 export default function EditList({route}){
@@ -30,7 +31,7 @@ export default function EditList({route}){
     
             try {
                 console.log('Fetching data from:', getUrl);
-                const response = await axios.get(getUrl, {
+                const response = await apiClient.get(getUrl, {
                     params: { refrigerator_id: fridgeId },
                 });
                 console.log('Response data:', response.data);
@@ -98,7 +99,7 @@ export default function EditList({route}){
     
     const handleApplyChanges = async () =>{
         try{
-            await axios.post(postUrl, List,{
+            await apiClient.post(postUrl, List,{
                 params: {
                     refrigerator_id: fridgeId
                 }
