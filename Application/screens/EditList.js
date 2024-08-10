@@ -51,7 +51,9 @@ export default function EditList({route}){
         if (route.params?.item) {
             const newItem = route.params.item;
 
-            const itemExists = List.some(item => item.barcode === newItem.barcode);
+            const itemExists = List.some(item => item.product_name === newItem.product_name);
+
+            console.log("value of itemExists " + itemExists);
         
             if(!itemExists){
                 setList((prevParameters) => [...prevParameters, {   

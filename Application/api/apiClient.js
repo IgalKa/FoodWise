@@ -3,7 +3,7 @@ import CONFIG from '../config';
 
 
 const apiClient = axios.create({
-    baseURL: 'http://10.0.0.8:12345',
+    baseURL: 'https://michaelshu.pythonanywhere.com', 
     timeout: 20000,
 });
 
