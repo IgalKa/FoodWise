@@ -404,7 +404,7 @@ class Database:
 
 
 
-    def generate_shopping_list(self, refrigerator_id):
+    def generate_inital_shopping_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
         cursor.execute("""

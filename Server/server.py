@@ -263,19 +263,24 @@ def update_refrigerator_name():
     return jsonify(message_response), 200
 
 
+
 @app.route('/search_products', methods=['GET'])
 def search_products():
     product_name = request.args.get('product_name')
     database = app.extensions['database']
 
     if not product_name:
+        app.logger.info(f"There was a search for empty name")
         return {'message': "No products found"}, 404
 
     result = database.search_products_by_product_name(product_name)
     if not result:
+        app.logger.info(f"There was an unsuccessful search for {product_name}")
         return {'message': "No products found"}, 404
-    app.logger.info(f"The result of the search for {product_name} is {result}")
+
+    app.logger.info(f"There was a successful search for {product_name}")
     return jsonify(result), 200
+
 
 
 @app.route('/update_refrigerator_parameters', methods=['POST'])
@@ -291,19 +296,23 @@ def update_refrigerator_parameters():
 
     # Check if data is a list
     if not isinstance(data, list):
+        app.logger.warning(f'Invalid data format for update_refrigerator_parameters endpoint : not a list')
         error_response = {'error': 'Invalid data format. Expected a list'}
         return jsonify(error_response), 400
 
     for product in data:
         # Ensure each object has 'barcode' and 'amount' keys
         if 'barcode' not in product or 'amount' not in product:
+            app.logger.warning(f'Invalid data format for update_refrigerator_parameters endpoint : Each object must '
+                               f'contain barcode and amount keys')
             error_response ={"error": "Each object must contain 'barcode' and 'amount' keys."}
             return jsonify(error_response), 400
 
 
 
     database.update_refrigerator_parameters(refrigerator_id, data)
-    message_response = {'message': "The refrigerator parameters were updated successfully"}
+    app.logger.info(f'parameters for refrigerator {refrigerator_id} were updated successfully')
+    message_response = {'message': "The refrigerator's parameters were updated successfully"}
     return jsonify(message_response), 200
 
 
@@ -321,21 +330,27 @@ def save_shopping_list():
 
 
     if not isinstance(data, list):
+        app.logger.warning(f'Invalid data format for save_shopping_list endpoint : not a list')
         error_response = {'error': 'Invalid data format. Expected a list'}
         return jsonify(error_response), 400
 
     for product in data:
         if 'product_name' not in product or 'amount' not in product:
-            error_response = {"error": "Each object must contain 'barcode' and 'amount' keys."}
+            app.logger.warning(f'Invalid data format for save_shopping_list endpoint : Each object must '
+                               f'contain product_name and amount keys')
+            error_response = {"error": "Each object must contain 'product_name' and 'amount' keys."}
             return jsonify(error_response), 400
 
-    result = database.save_shopping_list(refrigerator_id,data)
-    return jsonify(result), 200
+
+    app.logger.info(f'A new shopping list was saved for refrigerator {refrigerator_id}')
+    database.save_shopping_list(refrigerator_id,data)
+    message_response = {'message': "The shopping list was saved successfully"}
+    return jsonify(message_response), 200
 
 
 
-@app.route('/create_shopping_list', methods=['GET'])
-def create_shopping_list():
+@app.route('/generate_initial_shopping_list', methods=['GET'])
+def generate_initial_shopping_list():
     database = app.extensions['database']
     refrigerator_id = request.args.get('refrigerator_id')
 
@@ -344,13 +359,14 @@ def create_shopping_list():
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return jsonify(error_response), 404
 
-    result = database.generate_shopping_list(refrigerator_id)
+    app.logger.info(f'An initial shopping list was generated for refrigerator {refrigerator_id}')
+    result = database.generate_inital_shopping_list(refrigerator_id)
     return jsonify(result), 200
 
 
 
-@app.route('/parameter_list', methods=['GET'])
-def parameter_list():
+@app.route('/get_refrigerator_parameters', methods=['GET'])
+def get_refrigerator_parameters():
     database = app.extensions['database']
     refrigerator_id = request.args.get('refrigerator_id')
 
@@ -359,12 +375,13 @@ def parameter_list():
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return jsonify(error_response), 404
 
+    app.logger.info(f'Request for the parameters of refrigerator {refrigerator_id}')
     result = database.get_parameter_list(refrigerator_id)
     return jsonify(result), 200
 
 
-@app.route('/shopping_list', methods=['GET'])
-def shopping_list():
+@app.route('/fetch_saved_shopping_list', methods=['GET'])
+def fetch_saved_shopping_list():
     database = app.extensions['database']
     refrigerator_id = request.args.get('refrigerator_id')
 
@@ -373,6 +390,7 @@ def shopping_list():
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return jsonify(error_response), 404
 
+    app.logger.info(f'Request for the saved shopping list for refrigerator {refrigerator_id}')
     result = database.get_shopping_list(refrigerator_id)
     return jsonify(result), 200
 
