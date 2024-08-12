@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, TouchableOpacity, ActivityIndicator, View, ScrollView, Dimensions, Image } from 'react-native';
 import ScreenLayout from '../components/ScreenLayout';
-import { getRefrigeratorContents } from '../api/refrigeratorApi';
+import { getStatistics } from '../api/refrigeratorApi';
 import { useAuth } from '../contexts/AuthContext';
 import {
     LineChart,
@@ -17,21 +17,6 @@ import calendarIcon from '../assets/images/calendar-svg.png';
 
 const screenWidth = Dimensions.get('window').width;
 
-const generateData = () => {
-    const labels = [];
-    const data = [];
-    for (let i = 1; i <= 10; i++) {
-        labels.push(`Day kfjk sdkj  ksjd ksdj ${i}`);
-        data.push(Math.floor(Math.random() * 100));
-    }
-    return { labels, data };
-};
-
-const chartData = generateData();
-
-const chartWidth = Math.max(screenWidth - 25, chartData.labels.length * 150); // Adjust width based on number of labels
-
-
 const chartConfig = {
     backgroundGradientFrom: '#ffffff',
     backgroundGradientTo: '#ffffff',
@@ -41,19 +26,26 @@ const chartConfig = {
     useShadowColorFromDataset: false
 };
 
-
+const minDate = new Date(2023, 0, 1);
+const maxDate = new Date;
 
 
 const ConsumptionScreen = () => {
 
     const [loading, setLoading] = useState(false);
-    const [value, setValue] = useState(true);
-    const [sortedData, setSortedData] = useState(chartData.data);
+    const [entrySort, setEntrySort] = useState(true);
+    const [exitSort, setExitSort] = useState(true);
+    const [sortedEntryData, setSortedEntryData] = useState(null);
+    const [sortedExitData, setSortedExitData] = useState(null);
     const { fridgeId } = useAuth();
     const [startDate, setStartDate] = useState(new Date());
     const [showStart, setShowStart] = useState(false);
     const [endDate, setEndDate] = useState(new Date());
     const [showEnd, setShowEnd] = useState(false);
+    const [chartEntryWidth, setChartEntryWidth] = useState(null);
+    const [chartExitWidth, setChartExitWidth] = useState(null);
+
+
 
     const onStartDateChange = (event, selectedDate) => {
         const currentDate = selectedDate || startDate;
@@ -76,29 +68,135 @@ const ConsumptionScreen = () => {
     };
 
     useEffect(() => {
-        const sorted = [...chartData.data];
-
-        if (value) {
-            sorted.sort((a, b) => b - a);
-        } else {
-            sorted.sort((a, b) => a - b);
+        if (sortedEntryData !== null) {
+            if (entrySort) {
+                setSortedEntryData(sortProducts(sortedEntryData, 'desc'));
+            } else {
+                setSortedEntryData(sortProducts(sortedEntryData, 'asc'));
+            }
         }
 
-        setSortedData(sorted);
-    }, [value]);
+    }, [entrySort]);
 
-    const data = {
-        labels: chartData.labels,
-        datasets: [
-            {
-                data: sortedData,
-            },
-        ],
+
+    useEffect(() => {
+        if (sortedExitData !== null) {
+            if (exitSort) {
+                setSortedExitData(sortProducts(sortedExitData, 'desc'));
+            } else {
+                setSortedExitData(sortProducts(sortedExitData, 'asc'));
+            }
+        }
+
+    }, [exitSort]);
+
+
+
+    function sortProducts(data, sortOrder = 'desc') {
+
+        const productNames = data.labels;
+        const quantities = data.datasets[0].data;
+
+        console.log("in function exit data:", sortedEntryData);
+        console.log("in function entry data", sortedExitData);
+
+
+        const sortedPairs = quantities
+            .map((quantity, index) => ({ quantity, product_name: productNames[index] }))
+            .sort((a, b) => {
+                return sortOrder === 'asc' ? a.quantity - b.quantity : b.quantity - a.quantity;
+            });
+
+
+        const sortedQuantities = sortedPairs.map(pair => pair.quantity);
+        const sortedProductNames = sortedPairs.map(pair => pair.product_name);
+
+        return {
+            labels: sortedProductNames,
+            datasets: [
+                {
+                    data: sortedQuantities,
+                },
+            ],
+        };
+    }
+
+    const transformData = (data) => {
+
+        const labels = data.map(item => item.product_name);
+        const dataPoints = data.map(item => item.quantity);
+
+        return {
+            labels,
+            datasets: [
+                {
+                    data: dataPoints,
+                },
+            ],
+        };
     };
+
+    const fetchStatistics = async () => {
+        try {
+            const response = await getStatistics(fridgeId, startDate.toLocaleDateString('en-CA'), endDate.toLocaleDateString('en-CA'));
+
+            if (response.status === 200) {
+                let entryData = response.data.entry_statistics.products;
+                let exitData = response.data.exit_statistics.products
+                console.log("in fetch exit data:", exitData);
+                console.log("in fetch entry data", entryData);
+                if (entryData !== undefined) {
+                    const transformedData = transformData(entryData);
+                    setSortedEntryData(sortProducts(transformedData));
+                    entryData = sortProducts(transformedData);
+                }
+                if (exitData !== undefined) {
+                    const transformedData = transformData(exitData);
+                    setSortedExitData(sortProducts(transformedData));
+                    exitData = sortProducts(transformedData);
+                }
+
+                if (entryData === undefined && exitData === undefined) {
+                    setSortedEntryData(null);
+                    setSortedExitData(null);
+                    return null;
+                }
+
+                console.log("in fetch exit data:", exitData);
+                console.log("in fetch entry data", entryData);
+
+                return {
+                    entry: entryData,
+                    exit: exitData,
+                };
+
+            }
+
+        } catch (error) {
+            console.log('Error fetching data:', error);
+            console.log(fridgeId);
+            return null
+        }
+    };
+
+
+    const handleApply = async () => {
+        setLoading(true);
+        const sortedData = await fetchStatistics();
+
+        if (sortedData) {
+            if (sortedData.entry)
+                setChartEntryWidth(Math.max(screenWidth - 25, sortedData.entry.labels.length * 150));
+            if (sortedData.exit)
+                setChartExitWidth(Math.max(screenWidth - 25, sortedData.exit.labels.length * 150));
+        }
+        setLoading(false);
+    };
+
 
     return (
         <ScreenLayout>
-            <ScrollView>
+            {fridgeId && (<ScrollView style={styles.scrollContainer}>
                 <View style={styles.container}>
                     <View style={styles.rowContainer}>
                         <Button icon={({ size, color }) => (
@@ -119,6 +217,8 @@ const ConsumptionScreen = () => {
                             mode="date"
                             display="spinner"
                             onChange={onStartDateChange}
+                            minimumDate={minDate}
+                            maximumDate={maxDate}
                         />
                     )}
                     {showEnd && (
@@ -128,6 +228,8 @@ const ConsumptionScreen = () => {
                             mode="date"
                             display="spinner"
                             onChange={onEndDateChange}
+                            minimumDate={minDate}
+                            maximumDate={maxDate}
                         />
                     )}
                     <View style={styles.rowContainer}>
@@ -139,80 +241,119 @@ const ConsumptionScreen = () => {
                         </Text>
                     </View>
                     <View style={styles.applyContainer}>
-                        <Button mode="contained" onPress={showDatepicker} style={styles.applyButton}>
+                        <Button mode="contained" onPress={handleApply} style={styles.applyButton}>
                             Apply
                         </Button>
                     </View>
-                    <Text style={styles.titleText}>Products Consumption</Text>
-                    <SegmentedButtons
-                        value={value}
-                        onValueChange={setValue}
-                        uncheckedColor={{
-                            textColor: '#fff',
-                        }}
-                        buttons={[
-                            {
-                                value: true,
-                                label: 'Most Used',
-                                uncheckedColor: '#fff',
-                            },
-                            {
-                                value: false,
-                                label: 'Least Used',
-                                uncheckedColor: '#fff',
-                            },
-                        ]}
-                    />
-                    <View style={styles.chartContainer}>
-                        <ScrollView horizontal style={styles.chartWrapper}>
-                            <LineChart
-                                data={data}
-                                width={chartWidth}
-                                height={220}
-                                chartConfig={chartConfig}
-                                style={{
-                                    marginVertical: 15,
-                                    borderRadius: 16,
-                                    marginHorizontal: 2,
-                                }}
-                                bezier
-                            />
-                        </ScrollView>
-                    </View>
-                    <View style={styles.chartContainer}>
-                        <ScrollView horizontal style={styles.chartWrapper}>
-                            <LineChart
-                                data={data}
-                                width={chartWidth}
-                                height={220}
-                                chartConfig={chartConfig}
-                                style={{
-                                    marginVertical: 15,
-                                    borderRadius: 16,
-                                    marginHorizontal: 2,
-                                }}
-                                bezier
-                            />
-                        </ScrollView>
-                    </View>
-                    <View style={styles.chartContainer}>
-                        <ScrollView horizontal style={styles.chartWrapper}>
-                            <LineChart
-                                data={data}
-                                width={chartWidth}
-                                height={220}
-                                chartConfig={chartConfig}
-                                style={{
-                                    marginVertical: 15,
-                                    borderRadius: 16,
-                                    marginHorizontal: 2,
-                                }}
-                                bezier
-                            />
-                        </ScrollView>
-                    </View>
+                    {!loading && (sortedEntryData !== null || sortedExitData !== null) && (
+                        <View style={styles.container}>
+                            <Text style={styles.titleText}>Products Entry</Text>
+                            {sortedEntryData !== null && (
+                                <View style={styles.container}>
+                                    <SegmentedButtons
+                                        value={entrySort}
+                                        onValueChange={setEntrySort}
+                                        uncheckedColor={{
+                                            textColor: '#fff',
+                                        }}
+                                        buttons={[
+                                            {
+                                                value: true,
+                                                label: 'Highest To Lowest',
+                                                uncheckedColor: '#fff',
+                                            },
+                                            {
+                                                value: false,
+                                                label: 'Lowest To Highest',
+                                                uncheckedColor: '#fff',
+                                            },
+                                        ]}
+                                    />
+
+                                    <View style={styles.chartContainer}>
+                                        <ScrollView horizontal style={styles.chartWrapper}>
+                                            <LineChart
+                                                data={sortedEntryData}
+                                                width={chartEntryWidth}
+                                                height={220}
+                                                chartConfig={chartConfig}
+                                                style={{
+                                                    marginVertical: 15,
+                                                    borderRadius: 16,
+                                                    marginHorizontal: 2,
+                                                }}
+                                                bezier
+                                            />
+                                        </ScrollView>
+                                    </View>
+                                </View>
+                            )}
+                            {sortedEntryData === null && (
+                                <Text style={styles.defaultText}>No Data</Text>
+                            )}
+                            <Text style={styles.titleText}>Products Exit</Text>
+                            {sortedExitData !== null && (
+                                <View style={styles.container}>
+                                    <SegmentedButtons
+                                        value={exitSort}
+                                        onValueChange={setExitSort}
+                                        uncheckedColor={{
+                                            textColor: '#fff',
+                                        }}
+                                        buttons={[
+                                            {
+                                                value: true,
+                                                label: 'Highest To Lowest',
+                                                uncheckedColor: '#fff',
+                                            },
+                                            {
+                                                value: false,
+                                                label: 'Lowest To Highest',
+                                                uncheckedColor: '#fff',
+                                            },
+                                        ]}
+                                    />
+                                    <View style={styles.chartContainer}>
+                                        <ScrollView horizontal style={styles.chartWrapper}>
+                                            <LineChart
+                                                data={sortedExitData}
+                                                width={chartExitWidth}
+                                                height={220}
+                                                chartConfig={chartConfig}
+                                                style={{
+                                                    marginVertical: 15,
+                                                    borderRadius: 16,
+                                                    marginHorizontal: 2,
+                                                }}
+                                                bezier
+                                            />
+                                        </ScrollView>
+                                    </View>
+                                </View>
+                            )}
+                            {sortedEntryData === null && (
+                                <Text style={styles.defaultText}>No Data</Text>
+                            )}
+                        </View>
+                    )}
                 </View>
             </ScrollView>
+            )}
+            {loading && (
+                <View style={styles.noDataContainer}>
+                    <ActivityIndicator size="large" color="#fff" />
+                </View>
+            )}
+            {!loading && sortedEntryData === null && sortedExitData === null && fridgeId && (
+                <View style={styles.noDataContainer}>
+                    <Text style={styles.defaultText}>No Data</Text>
+                </View>
+            )}
+            {!fridgeId && (
+                <View style={styles.container}>
+                    <Text style={styles.defaultText}>Please select a fridge.</Text>
+                </View>
+            )}
         </ScreenLayout>
     );
 };
@@ -268,6 +409,19 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         fontSize: 15,
     },
+    defaultText: {
+        color: '#ededed'
+    },
+    noDataContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 10,
+        marginBottom: 250,
+    },
+    scrollContainer: {
+        flexGrow: 1,
+    }
 });
 
 
