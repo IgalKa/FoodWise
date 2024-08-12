@@ -33,3 +33,27 @@ export const getExpiringProducts = (fridgeId) => {
   return response;
 };
 
+
+export const getAlertDate = (fridgeId,productName) => {
+  console.log(fridgeId);
+  console.log(productName);
+  const response = apiClient.get('/get_product_alert_date', {
+    params: { 
+              refrigerator_id: fridgeId ,
+              product_name: productName,
+            }
+  });
+  return response;
+}
+
+
+export const updateAlertDate = (fridgeId,productName,alertDate) => {
+  const response = apiClient.post('/update_product_alert_date', {
+      refrigerator_id: fridgeId,
+      product_name: productName,
+      alert_date: alertDate
+  });
+  return response;
+}
+
+
