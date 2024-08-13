@@ -5,6 +5,7 @@ import Share from 'react-native-share';
 import CustomButton from '../components/CustomButton';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchSavedShoppingList } from '../api/ShoppingListApi';
+import NoFridge from '../components/NoFridge';
 
 export default function ShoppingList ({route}) {
   const { fridgeId } = useAuth();
@@ -54,7 +55,7 @@ export default function ShoppingList ({route}) {
         source={require('../assets/images/background.jpg')}
         style={styles.imageBackground}
       >
-          {fridgeId!=null &&
+          {fridgeId != null &&
             <View>
               <CustomButton
                 title="saved shopping list"
@@ -108,10 +109,8 @@ export default function ShoppingList ({route}) {
             </View>
           }
 
-          {fridgeId==null&& 
-            <View style={styles.centeredView}>
-              <Text style={styles.title}> please choose a fridge first</Text>
-            </View>
+          {fridgeId === null && 
+            <NoFridge/>
           }
       </ImageBackground>
   );
