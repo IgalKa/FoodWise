@@ -63,8 +63,6 @@ class Database:
         products_json = [{'product_name': row[0], 'barcode': row[1]} for row in result[:10]]
         return products_json
 
-
-
     def find_refrigerator_contents(self, refrigerator_id):
         # Connect to the SQLite database
         conn = sqlite3.connect(self.path)
@@ -83,6 +81,15 @@ class Database:
 
         conn.close()
         return refrigerator
+
+    def add_barcode(self, barcode):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO pending_barcode (barcode) "
+                       "VALUES (?)",
+                       (barcode,))
+        conn.commit()
+        conn.close()
 
     def add_product(self, refrigerator_id, barcode):
         # Connect to the SQLite database
@@ -367,7 +374,6 @@ class Database:
         conn.close()
         return {"products": products}
 
-
     def update_refrigerator_parameters(self, refrigerator_id, products):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
@@ -383,7 +389,6 @@ class Database:
 
         conn.commit()
         conn.close()
-
 
     def save_shopping_list(self,refrigerator_id, products):
         conn = sqlite3.connect(self.path)
@@ -401,9 +406,6 @@ class Database:
         conn.commit()
         conn.close()
 
-
-
-
     def generate_inital_shopping_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
@@ -419,7 +421,6 @@ class Database:
         conn.close()
         products_json = [{'product_name': row[0],'amount': row[1]} for row in result]
         return products_json
-
 
     def get_parameter_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
@@ -437,7 +438,6 @@ class Database:
         products_json = [{'product_name': row[0], 'barcode': row[1],'amount': row[2]} for row in result]
         return products_json
 
-
     def get_shopping_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
@@ -452,10 +452,5 @@ class Database:
         # Format the result as a JSON array of objects
         products_json = [{'product_name': row[0],'amount': row[1]} for row in result]
         return products_json
-
-
-
-
-
 
 

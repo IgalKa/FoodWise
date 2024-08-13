@@ -3,6 +3,7 @@ import logging
 import sys
 from os.path import abspath, dirname, join
 from models import Functions
+from flask_mail import Mail, Message
 
 # Calculate the project root directory and add it to sys.path
 project_root = abspath(join(dirname(__file__), '..'))
@@ -16,6 +17,15 @@ app = Flask(__name__)
 # Set up basic configuration for logging to the console
 logging.basicConfig(level=logging.DEBUG,  # Log level
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# Configuration for Flask-Mail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'foodwiselmi@gmail.com'
+app.config['MAIL_PASSWORD'] = 'vjxm lhxk pmfa bzxu'
+app.config['MAIL_DEFAULT_SENDER'] = 'foodwiselmi@gmail.com'
+mail = Mail(app)
 
 app.extensions['database'] = Database("../Server/data/database.db")
 
@@ -66,6 +76,25 @@ def link():
     return jsonify(message_response), 200
 
 
+def scanned_new_product(barcode):
+    database = app.extensions['database']
+
+    if database.check_value_exist(table_name="pending_barcode", column_name="barcode", value=barcode):
+        app.logger.info(f"Barcode={barcode} already at pending_barcode table")
+    else:
+        database.add_barcode(barcode)
+        msg = Message(
+            subject="New barcode to add",
+            recipients=["foodwiselmi@gmail.com"],
+            body=f"Barcode: {barcode}"
+        )
+        mail.send(msg)
+        app.logger.info(f"Barcode={barcode} added to pending_barcode table and email sent")
+
+    message_response = {'message': f"Product with barcode={barcode} not at database, the adding request at pending"}
+    return message_response, 404
+
+
 # /scan , json={"barcode": 7290008757034, "mode": "add", "refrigerator_id": 1}
 @app.route('/scan', methods=['POST'])
 def scan():
@@ -84,9 +113,8 @@ def scan():
     product_name = database.find_product(barcode)
 
     if product_name is None:
-        app.logger.warning(f'Attempt to get product with barcode {barcode} that was not found in the database')
-        error_response = {'error': f"Product with barcode {barcode} not found"}
-        return jsonify(error_response), 404
+        app.logger.warning(f'Attempt to get product with barcode={barcode} that was not found in the database')
+        return scanned_new_product(barcode)
 
     # identify if the refrigerator id exists
     if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
@@ -263,7 +291,6 @@ def update_refrigerator_name():
     return jsonify(message_response), 200
 
 
-
 @app.route('/search_products', methods=['GET'])
 def search_products():
     product_name = request.args.get('product_name')
@@ -280,7 +307,6 @@ def search_products():
 
     app.logger.info(f"There was a successful search for {product_name}")
     return jsonify(result), 200
-
 
 
 @app.route('/update_refrigerator_parameters', methods=['POST'])
@@ -316,7 +342,6 @@ def update_refrigerator_parameters():
     return jsonify(message_response), 200
 
 
-
 @app.route('/save_shopping_list', methods=['POST'])
 def save_shopping_list():
     database = app.extensions['database']
@@ -348,7 +373,6 @@ def save_shopping_list():
     return jsonify(message_response), 200
 
 
-
 @app.route('/generate_initial_shopping_list', methods=['GET'])
 def generate_initial_shopping_list():
     database = app.extensions['database']
@@ -362,7 +386,6 @@ def generate_initial_shopping_list():
     app.logger.info(f'An initial shopping list was generated for refrigerator {refrigerator_id}')
     result = database.generate_inital_shopping_list(refrigerator_id)
     return jsonify(result), 200
-
 
 
 @app.route('/get_refrigerator_parameters', methods=['GET'])
@@ -509,6 +532,9 @@ def get_entry_statistics():
 @app.route('/get_exit_statistics', methods=['GET'])
 def get_exit_statistics():
     return get_statistics_by_table_name(table_name="exit_table")
+
+
+
 
 
 if __name__ == '__main__':
