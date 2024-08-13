@@ -65,13 +65,6 @@ export default function EditList({route}){
         }
     }, [route.params?.item]);
     
-    if (loading) {
-        return (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        );
-    }
 
     
     const handleRemoveList = (item)=>{
@@ -141,22 +134,28 @@ export default function EditList({route}){
             source={require('../assets/images/background.jpg')}
             style={styles.imageBackground}
         >
-            <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>{title}:</Text>
-                <FlatList
-                    data={List}
-                    renderItem={renderListItem}
-                    keyExtractor={(item) => item.product_name}
-                    contentContainerStyle={styles.listContent}
-                />
-                <View style={styles.buttonContainer}>
-                    <CustomButton title="Save" onPress={handleApplyChanges} />
-                    <CustomButton
-                        title="Search"
-                        onPress={() => navigation.navigate('SearchProduct',{fridgeId:1,from:"parametersList"})} 
-                    />
-                </View>
-            </View>
+
+            { !loading &&
+              <View style={styles.container}>
+                  <Text style={styles.title}>{title}:</Text>
+                  <FlatList
+                      data={List}
+                      renderItem={renderListItem}
+                      keyExtractor={(item) => item.product_name}
+                      contentContainerStyle={styles.listContent}
+                  />
+                  <View style={styles.buttonContainer}>
+                      <CustomButton title="Save" onPress={handleApplyChanges} />
+                      <CustomButton
+                          title="Search"
+                          onPress={() => navigation.navigate('SearchProduct',{fridgeId:1,from:"parametersList"})} 
+                      />
+                  </View>
+              </View>
+            }
+
+            {loading && <ActivityIndicator size="large" color="#fff" />}
+
         </ImageBackground>
     );
       
@@ -184,14 +183,14 @@ const styles = StyleSheet.create({
       color: 'red',
       marginVertical: 8,
     },
-    modalContainer: {
+    container: {
       flex: 1,
       borderRadius: 10,
       padding: 20,
       alignItems: 'flex-start',
       justifyContent: 'center',
     },
-    modalTitle: {
+    title: {
       fontSize: 20,
       fontWeight: 'bold',
       marginBottom: 10,

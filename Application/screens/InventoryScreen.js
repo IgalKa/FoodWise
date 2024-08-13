@@ -1,30 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, TextInput, ImageBackground, BackHandler, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, TextInput, 
+    ActivityIndicator, Modal} from 'react-native';
+import { Button } from '@rneui/themed';    
 import { useFocusEffect } from '@react-navigation/native';
 import ScreenLayout from '../components/ScreenLayout';
-import { getRefrigeratorContents } from '../api/refrigeratorApi';
+import { getRefrigeratorContents ,getAlertDate,updateAlertDate } from '../api/refrigeratorApi';
 import { useAuth } from '../contexts/AuthContext';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 
-
-const DATA = [
-    { id: '1', name: 'Itemm 1', quantity: 10, image: require('../assets/milk.jpg') },
-    { id: '2', name: 'Itemm 2', quantity: 15, image: require('../assets/milk.jpg') },
-    { id: '3', name: 'Item 3', quantity: 20, image: require('../assets/milk.jpg') },
-    { id: '4', name: 'Item 4', quantity: 8, image: require('../assets/milk.jpg') },
-    { id: '5', name: 'Item 5', quantity: 12, image: require('../assets/milk.jpg') },
-    { id: '6', name: 'Item 6', quantity: 5, image: require('../assets/milk.jpg') },
-    { id: '7', name: 'Item 6', quantity: 5, image: require('../assets/milk.jpg') },
-    { id: '8', name: 'Item 6', quantity: 5, image: require('../assets/milk.jpg') },
-    { id: '9', name: 'Item 6', quantity: 5, image: require('../assets/milk.jpg') },
-    { id: '10', name: 'Item 6', quantity: 5, image: require('../assets/milk.jpg') },
-    { id: '11', name: 'Item 6', quantity: 5, image: require('../assets/milk.jpg') },
-    { id: '12', name: 'Item 6', quantity: 5, image: require('../assets/milk.jpg') },
-    { id: '13', name: 'Item 6', quantity: 5, image: require('../assets/milk.jpg') },
-    { id: '14', name: 'Item 6', quantity: 5, image: require('../assets/milk.jpg') },
-    { id: '15', name: 'Item 6', quantity: 5, image: require('../assets/milk.jpg') },
-
-];
 
 function InventoryScreen({ navigation }) {
 
@@ -34,7 +18,11 @@ function InventoryScreen({ navigation }) {
     const [filteredData, setFilteredData] = useState(data);
     const [loading, setLoading] = useState(true);
     const { fridgeId } = useAuth();
-
+    const [isModalVisible, setModalVisible] = useState(false);
+    const [alertDate, setAlertDate] = useState('');
+    const [productName, setProductName] = useState(null);
+    const [date, setDate] = useState(new Date());
+    const [show, setShow] = useState(false);
 
 
     const fetchData = async () => {
@@ -93,13 +81,57 @@ function InventoryScreen({ navigation }) {
         }
     }, [searchQuery]);
 
+    const handleLongPress = async (item) => {
+        try{
+            const response = await getAlertDate(fridgeId,item.name);
+            if(response.status === 200 ){
+                console.log(response.data.alert_date);
+                console.log("***************************");
+                const dateString= response.data.alert_date;
+                setAlertDate(dateString);
+                setProductName(item.name);
+                setModalVisible(true);
+                dateString ? setDate(new Date(dateString)) : setDate(new Date());
+            }
+        }catch(error){
+            console.error(error);
+        }
+    };
+
+    const handleSaveAlertDate = async () =>{
+        try{
+            setModalVisible(false);
+            await updateAlertDate(fridgeId, productName , alertDate);
+        }catch(error){
+            console.log(error);
+            if (error.response.status = 400){
+                console.error("please choose a date in the future.");
+            }
+        }
+    };
+
+    const onChange = (event, selectedDate) => {
+        const currentDate = selectedDate || date;
+        setShow(false);
+        setDate(currentDate);
+    
+        // Format the date as needed (e.g., "YYYY-MM-DD")
+        const dateString = currentDate.toISOString().split('T')[0];
+        setAlertDate(dateString);
+    };
+
+
 
     const renderItem = ({ item }) => (
-        <TouchableOpacity style={styles.item}>
+        <TouchableOpacity 
+            style={styles.item}
+            onLongPress={() => handleLongPress(item)}
+        >
             <Image source={{ uri: item.image }} style={styles.image} />
             <Text style={styles.name}>{item.name}</Text>
             <Text style={styles.quantity}>Quantity: {item.quantity}</Text>
-        </TouchableOpacity>);
+        </TouchableOpacity>
+    );
 
 
 
@@ -136,6 +168,45 @@ function InventoryScreen({ navigation }) {
                     <Text style={styles.buttonText}>Select A Refrigerator</Text>
                 </TouchableOpacity>
             )}
+
+            <Modal
+                visible={isModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>alert date: </Text>
+
+                        <TouchableOpacity onPress={()=> setShow(true)}>
+                            <Text style={styles.dateText}>
+                                {alertDate ? alertDate : 'Select a date'}
+                            </Text>
+                        </TouchableOpacity>
+                        
+                        {show && (
+                             <DateTimePicker
+                                value={date}
+                                mode="date"
+                                display="default"
+                                onChange={onChange}
+                                minimumDate={new Date()} // This will block past dates
+                             />   
+                        )}  
+
+                        <View style={styles.buttonContainer}>
+                            <View style={styles.renameButton}>
+                                <Button color="#465881" title="Save" onPress={handleSaveAlertDate} />
+                            </View>
+                            <View style={styles.cancelButton}>
+                                <Button color="warning" title="Cancel" onPress={() => setModalVisible(false)} />
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
         </ScreenLayout>
     );
 }
@@ -220,5 +291,54 @@ const styles = StyleSheet.create({
     },
     defaultText: {
         color: '#ededed',
-    }
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalContent: {
+        width: '80%',
+        padding: 20,
+        backgroundColor: '#c6cbef',
+        borderRadius: 10,
+    },
+    modalTitle: {
+        color: '#465881',
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    input: {
+        height: 40,
+        borderColor: '#465881',
+        borderWidth: 2,
+        marginBottom: 10,
+        paddingHorizontal: 10,
+        color: '#465881',
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'flex-start'
+    },
+    renameButton: {
+        width: '50%',
+        paddingRight: 2.5,
+    },
+    cancelButton: {
+        width: '50%',
+        paddingLeft: 2.5,
+    },
+    dateText: {
+        width: '100%', // Make it span the entire width of the modal
+        height: 50, 
+        borderColor: 'black',
+        borderWidth: 2, 
+        marginBottom: 20, 
+        textAlign: 'center',
+        lineHeight: 50, 
+        borderRadius: 10, 
+     },
 });

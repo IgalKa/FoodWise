@@ -12,6 +12,7 @@ I18nManager.forceRTL(false);
 // const Drawer = createDrawerNavigator();
 
 function App() {
+
   return (
     <AuthProvider>
       <NavigationContainer>
@@ -19,6 +20,7 @@ function App() {
       </NavigationContainer>
     </AuthProvider>
   );
+  
 }
 
 
