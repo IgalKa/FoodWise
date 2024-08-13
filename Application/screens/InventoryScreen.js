@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, TextInput, 
-    ActivityIndicator, Modal} from 'react-native';
-import { Button } from '@rneui/themed';    
+import {
+    StyleSheet, Text, View, TouchableOpacity, FlatList, Image, TextInput,
+    ActivityIndicator, Modal
+} from 'react-native';
+import { Button } from '@rneui/themed';
 import { useFocusEffect } from '@react-navigation/native';
 import ScreenLayout from '../components/ScreenLayout';
-import { getRefrigeratorContents ,getAlertDate,updateAlertDate } from '../api/refrigeratorApi';
+import { getRefrigeratorContents, getAlertDate, updateAlertDate } from '../api/refrigeratorApi';
 import { useAuth } from '../contexts/AuthContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
-
+import Counter from '../components/Counter';
 
 
 function InventoryScreen({ navigation }) {
@@ -23,6 +25,7 @@ function InventoryScreen({ navigation }) {
     const [productName, setProductName] = useState(null);
     const [date, setDate] = useState(new Date());
     const [show, setShow] = useState(false);
+    const [quantity, setQuantity] = useState(null);
 
 
     const fetchData = async () => {
@@ -33,10 +36,11 @@ function InventoryScreen({ navigation }) {
                 name: item.product_name,
                 quantity: item.product_quantity,
                 image: `data:image/png;base64,${item.product_image}`,
-                date: item.product_addedTime,
+                alert: item.product_alert_date,
             }));
 
             setData(transformedItems);
+
         } catch (error) {
             console.log('Error fetching data:', error);
             console.log(fridgeId);
@@ -82,30 +86,45 @@ function InventoryScreen({ navigation }) {
     }, [searchQuery]);
 
     const handleLongPress = async (item) => {
-        try{
-            const response = await getAlertDate(fridgeId,item.name);
-            if(response.status === 200 ){
+        try {
+            const response = await getAlertDate(fridgeId, item.name);
+            if (response.status === 200) {
                 console.log(response.data.alert_date);
                 console.log("***************************");
-                const dateString= response.data.alert_date;
+                const dateString = response.data.alert_date;
+                setQuantity(item.quantity);
                 setAlertDate(dateString);
                 setProductName(item.name);
                 setModalVisible(true);
                 dateString ? setDate(new Date(dateString)) : setDate(new Date());
             }
-        }catch(error){
+        } catch (error) {
             console.error(error);
         }
     };
 
-    const handleSaveAlertDate = async () =>{
-        try{
+    const handleSaveAlertDate = async () => {
+        try {
             setModalVisible(false);
-            await updateAlertDate(fridgeId, productName , alertDate);
-        }catch(error){
+            await updateAlertDate(fridgeId, productName, alertDate);
+            fetchData();
+        } catch (error) {
             console.log(error);
-            if (error.response.status = 400){
+            if (error.response.status = 400) {
                 console.error("please choose a date in the future.");
+            }
+        }
+    };
+
+    const handleSaveQuantity = async () => {
+        try {
+            setModalVisible(false);
+            //await updateAlertDate(fridgeId, productName, alertDate);
+            fetchData();
+        } catch (error) {
+            console.log(error);
+            if (error.response.status = 400) {
+                console.error("error saving quantity.");
             }
         }
     };
@@ -114,7 +133,7 @@ function InventoryScreen({ navigation }) {
         const currentDate = selectedDate || date;
         setShow(false);
         setDate(currentDate);
-    
+
         // Format the date as needed (e.g., "YYYY-MM-DD")
         const dateString = currentDate.toISOString().split('T')[0];
         setAlertDate(dateString);
@@ -123,13 +142,17 @@ function InventoryScreen({ navigation }) {
 
 
     const renderItem = ({ item }) => (
-        <TouchableOpacity 
+        <TouchableOpacity
             style={styles.item}
             onLongPress={() => handleLongPress(item)}
+            activeOpacity={0.8}
         >
             <Image source={{ uri: item.image }} style={styles.image} />
             <Text style={styles.name}>{item.name}</Text>
             <Text style={styles.quantity}>Quantity: {item.quantity}</Text>
+            {item.alert !== null && (
+                <Text style={styles.quantity}>Alert: {item.alert}</Text>
+            )}
         </TouchableOpacity>
     );
 
@@ -177,28 +200,43 @@ function InventoryScreen({ navigation }) {
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>alert date: </Text>
+                        <Text style={styles.modalProduct}>{productName}</Text>
+                        <Text style={styles.modalTitle}>Set alert date </Text>
 
-                        <TouchableOpacity onPress={()=> setShow(true)}>
+                        <TouchableOpacity onPress={() => setShow(true)}>
                             <Text style={styles.dateText}>
                                 {alertDate ? alertDate : 'Select a date'}
                             </Text>
                         </TouchableOpacity>
-                        
+
                         {show && (
-                             <DateTimePicker
+                            <DateTimePicker
                                 value={date}
                                 mode="date"
                                 display="default"
                                 onChange={onChange}
                                 minimumDate={new Date()} // This will block past dates
-                             />   
-                        )}  
+                            />
+                        )}
+
+                        <View style={styles.buttonContainer}>
+                            <View style={styles.renameButton}>
+                                <Button color="#465881" title="Save" onPress={handleSaveAlertDate} disabled={alertDate === null} />
+                            </View>
+                        </View>
+
+                        <Text style={styles.modalTitle}>Edit quantity </Text>
+                        <View style={styles.buttonContainer}>
+                            <Counter initialValue={quantity} />
+                        </View>
 
                         <View style={styles.buttonContainer}>
                             <View style={styles.renameButton}>
                                 <Button color="#465881" title="Save" onPress={handleSaveAlertDate} />
                             </View>
+                        </View>
+
+                        <View style={styles.buttonContainer}>
                             <View style={styles.cancelButton}>
                                 <Button color="warning" title="Cancel" onPress={() => setModalVisible(false)} />
                             </View>
@@ -319,26 +357,32 @@ const styles = StyleSheet.create({
         color: '#465881',
     },
     buttonContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        alignItems: 'flex-start'
+        alignItems: 'center',
+        paddingBottom: 20,
     },
     renameButton: {
-        width: '50%',
-        paddingRight: 2.5,
+        width: '80%',
     },
     cancelButton: {
+        paddingTop: 20,
         width: '50%',
-        paddingLeft: 2.5,
     },
     dateText: {
         width: '100%', // Make it span the entire width of the modal
-        height: 50, 
+        height: 50,
         borderColor: 'black',
-        borderWidth: 2, 
-        marginBottom: 20, 
+        borderWidth: 2,
+        marginBottom: 20,
         textAlign: 'center',
-        lineHeight: 50, 
-        borderRadius: 10, 
-     },
+        lineHeight: 50,
+        borderRadius: 10,
+        fontWeight: "bold",
+        fontSize: 15,
+    },
+    modalProduct: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+        alignSelf: "center",
+    },
 });

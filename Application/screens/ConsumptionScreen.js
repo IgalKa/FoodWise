@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, StyleSheet, TouchableOpacity, ActivityIndicator, View, ScrollView, Dimensions, Image } from 'react-native';
+import { Text, StyleSheet, TouchableOpacity, ActivityIndicator, View, ScrollView, Dimensions, Image, Alert } from 'react-native';
 import ScreenLayout from '../components/ScreenLayout';
 import { getStatistics } from '../api/refrigeratorApi';
 import { useAuth } from '../contexts/AuthContext';
@@ -146,17 +146,27 @@ const ConsumptionScreen = () => {
                 console.log("in fetch exit data:", exitData);
                 console.log("in fetch entry data", entryData);
                 if (entryData !== undefined) {
-                    const transformedData = transformData(entryData);
-                    setSortedEntryData(sortProducts(transformedData));
-                    entryData = sortProducts(transformedData);
+                    if (entryData.length > 0) {
+                        const transformedData = transformData(entryData);
+                        setSortedEntryData(sortProducts(transformedData));
+                        entryData = sortProducts(transformedData);
+                    }
+                    else
+                        setSortedEntryData(null);
+
                 }
                 if (exitData !== undefined) {
-                    const transformedData = transformData(exitData);
-                    setSortedExitData(sortProducts(transformedData));
-                    exitData = sortProducts(transformedData);
+                    if (exitData.length > 0) {
+                        const transformedData = transformData(exitData);
+                        setSortedExitData(sortProducts(transformedData));
+                        exitData = sortProducts(transformedData);
+                    }
+                    else
+                        setSortedExitData(null);
+
                 }
 
-                if (entryData === undefined && exitData === undefined) {
+                if ((entryData === undefined && exitData === undefined)) {
                     setSortedEntryData(null);
                     setSortedExitData(null);
                     return null;
@@ -181,13 +191,16 @@ const ConsumptionScreen = () => {
 
 
     const handleApply = async () => {
+        if (startDate > endDate) {
+            Alert.alert("Error", "Start date cant be after end date");
+        }
         setLoading(true);
         const sortedData = await fetchStatistics();
-
+        console.log("sorted data in handleApply is:", sortedData);
         if (sortedData) {
-            if (sortedData.entry)
+            if (sortedData.entry !== null && sortedData.entry.length > 0)
                 setChartEntryWidth(Math.max(screenWidth - 25, sortedData.entry.labels.length * 150));
-            if (sortedData.exit)
+            if (sortedData.exit !== null && sortedData.exit.length > 0)
                 setChartExitWidth(Math.max(screenWidth - 25, sortedData.exit.labels.length * 150));
         }
         setLoading(false);

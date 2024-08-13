@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, StyleSheet, Text, FlatList, 
-TouchableOpacity, Alert, Image, ImageBackground ,ActivityIndicator } from 'react-native';
+import {
+    View, TextInput, StyleSheet, Text, FlatList,
+    TouchableOpacity, Alert, Image, ImageBackground, ActivityIndicator
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import apiClient from '../api/apiClient';
 import ScreenLayout from "../components/ScreenLayout";
@@ -8,8 +10,8 @@ import { useAuth } from '../contexts/AuthContext';
 import NoFridge from '../components/NoFridge';
 
 
-export default function NotificationsScreen () {
-    const [alerts, setAlerts] =useState([]);
+export default function NotificationsScreen() {
+    const [alerts, setAlerts] = useState([]);
     const [loading, setLoading] = useState(true);
     const { fridgeId } = useAuth();
 
@@ -37,12 +39,12 @@ export default function NotificationsScreen () {
                 setLoading(false);
             }
         };
-    
+
         fetchData();
 
         const intervalId = setInterval(() => {
             fetchData();
-        }, 15000); 
+        }, 15000);
 
         return () => clearInterval(intervalId); // Cleanup on component unmount
     }, [fridgeId]);
@@ -54,19 +56,19 @@ export default function NotificationsScreen () {
                 <Text style={styles.date}>Passed: {item.date}</Text>
             </View>
             <Image source={{ uri: item.image }} style={styles.image} />
-      </View>
+        </View>
     );
-           
-        
+
+
 
 
     return (
         <ImageBackground
             source={require('../assets/images/background.jpg')}
             style={styles.background}
-        >   
+        >
 
-            {!loading && fridgeId && alerts && alerts.length >0 &&
+            {!loading && fridgeId && alerts && alerts.length > 0 &&
                 <FlatList
                     data={alerts}
                     renderItem={renderItem}
@@ -79,11 +81,11 @@ export default function NotificationsScreen () {
                 <Text style={styles.defaultText}>No alerts</Text>
             )}
 
-            
+
 
             {loading && fridgeId && <ActivityIndicator size="large" color="#fff" />}
 
-            { !fridgeId && <NoFridge/>}
+            {!fridgeId && <NoFridge />}
 
         </ImageBackground>
     );
@@ -110,7 +112,7 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 18,
         color: '#fff',
-        marginBottom:30,
+        marginBottom: 30,
     },
     image: {
         justifyContent: 'center',
