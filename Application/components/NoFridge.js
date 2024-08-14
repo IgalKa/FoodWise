@@ -1,10 +1,10 @@
 
-import { View,Text,StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 
-const NoFridge = () =>{
+const NoFridge = () => {
     return (
         <View style={styles.centeredView}>
-              <Text style={styles.title}> please choose a fridge first</Text>
+            <Text style={styles.title}> Please select a fridge.</Text>
         </View>
     );
 }
@@ -16,12 +16,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',     // Centers content horizontally
     },
     title: {
-        fontSize: 20,
-        color: '#fff', // White color for the text
+        color: '#ededed', // White color for the text
         textAlign: 'center', // Centers text horizontally
     },
-  });
-  
+});
+
 
 
 export default NoFridge;

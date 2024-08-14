@@ -42,8 +42,8 @@ const ConsumptionScreen = () => {
     const [showStart, setShowStart] = useState(false);
     const [endDate, setEndDate] = useState(new Date());
     const [showEnd, setShowEnd] = useState(false);
-    const [chartEntryWidth, setChartEntryWidth] = useState(null);
-    const [chartExitWidth, setChartExitWidth] = useState(null);
+    const [chartEntryWidth, setChartEntryWidth] = useState(screenWidth - 25);
+    const [chartExitWidth, setChartExitWidth] = useState(screenWidth - 25);
 
 
 
@@ -125,7 +125,6 @@ const ConsumptionScreen = () => {
 
         const labels = data.map(item => item.product_name);
         const dataPoints = data.map(item => item.quantity);
-
         return {
             labels,
             datasets: [
@@ -196,15 +195,33 @@ const ConsumptionScreen = () => {
         }
         setLoading(true);
         const sortedData = await fetchStatistics();
-        console.log("sorted data in handleApply is:", sortedData);
+        // console.log("sorted data in handleApply is:", sortedData);
+        console.log(sortedData.entry.length == 0);
         if (sortedData) {
-            if (sortedData.entry !== null && sortedData.entry.length > 0)
-                setChartEntryWidth(Math.max(screenWidth - 25, sortedData.entry.labels.length * 150));
-            if (sortedData.exit !== null && sortedData.exit.length > 0)
-                setChartExitWidth(Math.max(screenWidth - 25, sortedData.exit.labels.length * 150));
+            if (sortedData.entry !== null && sortedData.entry.length != 0 && sortedData.entry.labels.length > 0) {
+                console.log("im in entry width");
+                const newEntryWidth = Math.max(screenWidth - 25, sortedData.entry.labels.length * 150);
+                console.log("new entry width", newEntryWidth);
+                setChartEntryWidth(newEntryWidth);
+            }
+            if (sortedData.exit !== null && sortedData.exit.length != 0 && sortedData.exit.labels.length > 0) {
+                const newExitWidth = Math.max(screenWidth - 25, sortedData.exit.labels.length * 150);
+                setChartExitWidth(newExitWidth);
+            }
+            // console.log("exit width:", chartExitWidth);
+            // console.log("exit length:", sortedData.exit.labels.length);
+            // console.log("entry width:", chartEntryWidth);
+            // console.log("entry length:", sortedData.entry.length);
+            // console.log("entry data:", sortedData.entry.labels.length);
         }
+        //console.log(Math.max(screenWidth - 25, sortedData.entry.labels.length * 150));
+        console.log("entry width is:", chartEntryWidth);
         setLoading(false);
     };
+
+    useEffect(() => {
+        console.log("Updated entry width:");
+    }, [chartEntryWidth]);
 
 
     return (
@@ -344,7 +361,7 @@ const ConsumptionScreen = () => {
                                     </View>
                                 </View>
                             )}
-                            {sortedEntryData === null && (
+                            {sortedExitData === null && (
                                 <Text style={styles.defaultText}>No Data</Text>
                             )}
                         </View>
@@ -405,7 +422,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        gap: 25,
+        gap: 30,
     },
     applyButton: {
         width: '90%',

@@ -2,11 +2,14 @@ import React from 'react';
 import { StyleSheet, ImageBackground, BackHandler, View } from 'react-native';
 import { useDoubleBackPressExit } from '../hooks/DoubleBackExit';
 
-function ScreenLayout({ children }) {
+function ScreenLayout({ children, enableBackPressExit = true }) {
 
-    useDoubleBackPressExit(() => {
-        BackHandler.exitApp();
-    });
+
+    if (enableBackPressExit) {
+        useDoubleBackPressExit(() => {
+            BackHandler.exitApp();
+        });
+    }
 
     return (
         <ImageBackground
