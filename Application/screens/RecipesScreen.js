@@ -5,6 +5,7 @@ import RecipeCard from '../components/RecipeCard';
 import { getRecipes } from '../api/recipeApi';
 import { getRefrigeratorContents } from '../api/refrigeratorApi';
 import { useAuth } from '../contexts/AuthContext';
+import NoFridge from '../components/NoFridge';
 
 
 
@@ -108,15 +109,15 @@ const RecipesScreen = () => {
 
     return (
         <ScreenLayout>
-            {!loading && !isGenerated && (
+            {fridgeId && !loading && !isGenerated && (
                 <TouchableOpacity style={styles.generateButton} onPress={handleGeneratePress}  >
                     <Text style={styles.generateText}>Generate Recipes</Text>
                 </TouchableOpacity>
             )}
-            {loading && (
+            {fridgeId && loading && (
                 <ActivityIndicator size="large" color="#fff" />
             )}
-            {!loading && data && data.length > 0 && (
+            {fridgeId && !loading && data && data.length > 0 && (
                 <View style={styles.container}>
                     <FlatList
                         data={data}
@@ -126,16 +127,19 @@ const RecipesScreen = () => {
                     />
                 </View>
             )}
-            {((!loading && data && data.length === 0) || (!data && !loading)) && (
+            {((fridgeId && !loading && data && data.length === 0) || (fridgeId && !data && !loading)) && (
                 <View style={styles.container}>
                     <Text style={styles.defaultText}>No Recipes</Text>
                 </View>
 
             )}
-            {!loading && isGenerated && (
+            {fridgeId && !loading && isGenerated && (
                 <TouchableOpacity style={styles.clearButton} onPress={handleClearPress} >
                     <Text style={styles.clearText}>Clear</Text>
                 </TouchableOpacity>
+            )}
+            {!fridgeId && (
+                <NoFridge></NoFridge>
             )}
         </ScreenLayout>
     );

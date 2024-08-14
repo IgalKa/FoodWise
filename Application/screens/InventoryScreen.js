@@ -10,6 +10,8 @@ import { getRefrigeratorContents, getAlertDate, updateAlertDate } from '../api/r
 import { useAuth } from '../contexts/AuthContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Counter from '../components/Counter';
+import NoFridge from '../components/NoFridge';
+
 
 
 function InventoryScreen({ navigation }) {
@@ -187,9 +189,10 @@ function InventoryScreen({ navigation }) {
                 <Text style={styles.defaultText}>No products</Text>
             )}
             {!fridgeId && (
-                <TouchableOpacity style={styles.selectButton} onPress={() => { navigation.navigate('MyRefrigerators'); }} >
-                    <Text style={styles.buttonText}>Select A Refrigerator</Text>
-                </TouchableOpacity>
+                // <TouchableOpacity style={styles.selectButton} onPress={() => { navigation.navigate('MyRefrigerators'); }} >
+                //     <Text style={styles.buttonText}>Select A Refrigerator</Text>
+                // </TouchableOpacity>
+                <NoFridge></NoFridge>
             )}
 
             <Modal

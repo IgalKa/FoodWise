@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, FlatList, Modal, ImageBackground, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, FlatList, Modal, ImageBackground, TouchableOpacity, LinearGradient } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Share from 'react-native-share';
 import CustomButton from '../components/CustomButton';
@@ -7,6 +7,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { fetchSavedShoppingList } from '../api/ShoppingListApi';
 import NoFridge from '../components/NoFridge';
 import ScreenLayout from '../components/ScreenLayout';
+import ShoppingIcon from '../assets/images/shopping-basket.png';
+import SparklesIcon from '../assets/images/sparkles.png';
+import SettingsIcon from '../assets/images/settings.png';
+
 
 
 
@@ -65,10 +69,12 @@ export default function ShoppingList({ route }) {
             <CustomButton
               title="Saved shopping list"
               onPress={handleShoppingList}
+              icon={ShoppingIcon}
             />
 
             <CustomButton
               title="Generate shopping list"
+              icon={SparklesIcon}
               onPress={() => navigation.navigate('EditList', {
                 getUrl: "/generate_initial_shopping_list",
                 postUrl: "/save_shopping_list",
@@ -79,6 +85,7 @@ export default function ShoppingList({ route }) {
 
             <CustomButton
               title="Edit shopping list preferences"
+              icon={SettingsIcon}
               onPress={() => navigation.navigate('EditList', {
                 getUrl: "/get_refrigerator_parameters",
                 postUrl: "/update_refrigerator_parameters",
@@ -86,6 +93,7 @@ export default function ShoppingList({ route }) {
                 fridgeId: 1
               })}
             />
+
 
             <Modal
               animationType="slide"

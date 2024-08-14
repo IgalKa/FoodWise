@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, Text, FlatList, 
-TouchableOpacity, Alert,Image,ImageBackground} from 'react-native';
+import {
+    View, TextInput, StyleSheet, Text, FlatList,
+    TouchableOpacity, Alert, Image, ImageBackground
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import apiClient from '../api/apiClient';
 
 
-export default function SearchProduct({route}){
-    const { fridgeId} = route.params;
+export default function SearchProduct({ route }) {
+    const { fridgeId } = route.params;
     const navigation = useNavigation();
 
     const [productName, setProductName] = useState('');
@@ -16,11 +18,11 @@ export default function SearchProduct({route}){
 
     const handleSearch = async () => {
         try {
-          setError(null); // Clear previous errors
-          const response = await apiClient.get('/search_products', {
-            params: { product_name: productName },
-          });
-          setResults(response.data);
+            setError(null); // Clear previous errors
+            const response = await apiClient.get('/search_products', {
+                params: { product_name: productName },
+            });
+            setResults(response.data);
         } catch (error) {
             if (error.response.status === 404) {
                 setResults([]);
@@ -30,32 +32,32 @@ export default function SearchProduct({route}){
             }
         }
     };
-    
+
     const handleItemPress = (item) => {
         if (selectedItem && selectedItem.barcode === item.barcode) {
-          setSelectedItem(null); // Deselect if the same item is pressed again
+            setSelectedItem(null); // Deselect if the same item is pressed again
         } else {
-          setSelectedItem(item);
+            setSelectedItem(item);
         }
     };
-    
+
     const handleSendSelected = (item) => {
         if (selectedItem) {
-            navigation.navigate('EditList',{fridgeId:fridgeId,item:selectedItem}) 
+            navigation.navigate('EditList', { fridgeId: fridgeId, item: selectedItem })
         } else {
-          Alert.alert('Error', 'No item selected.');
+            Alert.alert('Error', 'No item selected.');
         }
     };
 
 
     const renderSearchItem = ({ item }) => (
         <TouchableOpacity
-          style={[styles.itemContainer, selectedItem && selectedItem.barcode === item.barcode && styles.selectedItem]}
-          onPress={() => handleItemPress(item)}
+            style={[styles.itemContainer, selectedItem && selectedItem.barcode === item.barcode && styles.selectedItem]}
+            onPress={() => handleItemPress(item)}
         >
-          <Text style={styles.itemText}>{item.product_name}</Text>
+            <Text style={styles.itemText}>{item.product_name}</Text>
         </TouchableOpacity>
-      );
+    );
 
 
     return (
@@ -77,7 +79,7 @@ export default function SearchProduct({route}){
             </View>
             {error && <Text style={styles.error}>{error}</Text>}
 
-            
+
             <FlatList
                 style={styles.flatList}
                 data={results}
@@ -90,7 +92,7 @@ export default function SearchProduct({route}){
                 <TouchableOpacity style={styles.addButton} onPress={handleSendSelected}>
                     <Text style={styles.buttonText}> Add </Text>
                 </TouchableOpacity>
-                
+
             )}
         </ImageBackground>
     );
@@ -99,7 +101,7 @@ export default function SearchProduct({route}){
 
 const styles = StyleSheet.create({
     buttonText: {
-        color: '#fff',
+        color: '#201d59',
         fontSize: 20,
         fontWeight: 'bold',
         textAlign: 'center',
@@ -110,7 +112,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         borderRadius: 10,
         width: '100%',
-      },
+    },
     itemText: {
         fontSize: 16,
         color: '#fff',
@@ -119,8 +121,8 @@ const styles = StyleSheet.create({
     imageBackground: {
         width: '100%',
         height: '100%',
-        alignItems:"center",
-      },
+        alignItems: "center",
+    },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -146,7 +148,7 @@ const styles = StyleSheet.create({
     list: {
         marginTop: 16,
     },
-    flatList:{
+    flatList: {
         maxHeight: '65%',
     },
     item: {
@@ -162,7 +164,7 @@ const styles = StyleSheet.create({
         color: 'red',
         marginVertical: 8,
     },
-    button:{
+    button: {
         marginTop: 20,
         marginBottom: 20,
     },
@@ -170,7 +172,8 @@ const styles = StyleSheet.create({
         position: 'absolute',
         left: 16,
         bottom: 16,
-        backgroundColor: '#ab73f0',
+        backgroundColor: '#f2dbff',
         padding: 16,
+        borderRadius: 50,
     },
 });

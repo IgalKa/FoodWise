@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from "react-native";
 const NoFridge = () => {
     return (
         <View style={styles.centeredView}>
-            <Text style={styles.title}> Please select a fridge.</Text>
+            <Text style={styles.title}> Please select a fridge in My Refrigerators Screen.</Text>
         </View>
     );
 }

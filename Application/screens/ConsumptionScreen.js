@@ -14,6 +14,7 @@ import {
 import { SegmentedButtons, Button } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import calendarIcon from '../assets/images/calendar-svg.png';
+import NoFridge from '../components/NoFridge';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -231,13 +232,13 @@ const ConsumptionScreen = () => {
                     <View style={styles.rowContainer}>
                         <Button icon={({ size, color }) => (
                             <Image source={calendarIcon} style={{ width: size, height: size, tintColor: color }} />
-                        )} mode="contained" onPress={() => showDatepicker(true)}>
-                            Pick Start Date
+                        )} mode="contained-tonal" onPress={() => showDatepicker(true)}>
+                            From: {startDate.toLocaleDateString()}
                         </Button>
                         <Button icon={({ size, color }) => (
                             <Image source={calendarIcon} style={{ width: size, height: size, tintColor: color }} />
-                        )} mode="contained" onPress={() => showDatepicker(false)}>
-                            Pick End Date
+                        )} mode="contained-tonal" onPress={() => showDatepicker(false)}>
+                            To: {endDate.toLocaleDateString()}
                         </Button>
                     </View>
                     {showStart && (
@@ -262,22 +263,22 @@ const ConsumptionScreen = () => {
                             maximumDate={maxDate}
                         />
                     )}
-                    <View style={styles.rowContainer}>
+                    {/* <View style={styles.rowContainer}>
                         <Text style={styles.dateText}>
                             Start Date: {startDate.toLocaleDateString()}
                         </Text>
                         <Text style={styles.dateText}>
                             End Date: {endDate.toLocaleDateString()}
                         </Text>
-                    </View>
+                    </View> */}
                     <View style={styles.applyContainer}>
-                        <Button mode="contained" onPress={handleApply} style={styles.applyButton}>
-                            Apply
+                        <Button mode="contained-tonal" onPress={handleApply} style={styles.applyButton}>
+                            Get Consumption Data
                         </Button>
                     </View>
                     {!loading && (sortedEntryData !== null || sortedExitData !== null) && (
                         <View style={styles.container}>
-                            <Text style={styles.titleText}>Products Entry</Text>
+                            <Text style={styles.titleText}>Added Products</Text>
                             {sortedEntryData !== null && (
                                 <View style={styles.container}>
                                     <SegmentedButtons
@@ -321,7 +322,7 @@ const ConsumptionScreen = () => {
                             {sortedEntryData === null && (
                                 <Text style={styles.defaultText}>No Data</Text>
                             )}
-                            <Text style={styles.titleText}>Products Exit</Text>
+                            <Text style={styles.titleText}>Discarded Products</Text>
                             {sortedExitData !== null && (
                                 <View style={styles.container}>
                                     <SegmentedButtons
@@ -380,9 +381,10 @@ const ConsumptionScreen = () => {
                 </View>
             )}
             {!fridgeId && (
-                <View style={styles.container}>
-                    <Text style={styles.defaultText}>Please select a fridge.</Text>
-                </View>
+                // <View style={styles.container}>
+                //     <Text style={styles.defaultText}>Please select a fridge.</Text>
+                // </View>
+                <NoFridge></NoFridge>
             )}
         </ScreenLayout>
     );
@@ -432,6 +434,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingBottom: 10,
         marginBottom: 10,
+        marginTop: 20,
     },
     titleText: {
         color: '#ededed',

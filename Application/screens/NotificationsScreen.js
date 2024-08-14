@@ -63,31 +63,33 @@ export default function NotificationsScreen() {
 
 
     return (
-        <ImageBackground
-            source={require('../assets/images/background.jpg')}
-            style={styles.background}
-        >
-
-            {!loading && fridgeId && alerts && alerts.length > 0 &&
-                <FlatList
-                    data={alerts}
-                    renderItem={renderItem}
-                    keyExtractor={item => item.name}
-                />
-            }
-
-
-            {!loading && alerts && alerts.length === 0 && fridgeId && (
-                <Text style={styles.defaultText}>No alerts</Text>
-            )}
+        // <ImageBackground
+        //     source={require('../assets/images/background.jpg')}
+        //     style={styles.background}
+        // >
+        <ScreenLayout>
+            <View style={styles.container}>
+                {!loading && fridgeId && alerts && alerts.length > 0 &&
+                    <FlatList
+                        data={alerts}
+                        renderItem={renderItem}
+                        keyExtractor={item => item.name}
+                    />
+                }
 
 
+                {!loading && alerts && alerts.length === 0 && fridgeId && (
+                    <Text style={styles.defaultText}>No alerts</Text>
+                )}
 
-            {loading && fridgeId && <ActivityIndicator size="large" color="#fff" />}
 
-            {!fridgeId && <NoFridge />}
 
-        </ImageBackground>
+                {loading && fridgeId && <ActivityIndicator size="large" color="#fff" />}
+
+                {!fridgeId && <NoFridge />}
+            </View>
+        </ScreenLayout >
+        // {/* </ImageBackground > */ }
     );
 }
 
@@ -98,7 +100,8 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 10,
         borderRadius: 10,
-        width: '100%',
+        width: '95%',
+        alignSelf: "center",
     },
     textContainer: {
         flex: 1, // Take up available space
@@ -122,6 +125,10 @@ const styles = StyleSheet.create({
     background: {
         flex: 1,
         resizeMode: 'cover',
+    },
+    container: {
+        flex: 1,
+        flexDirection: "row",
     },
 })
 

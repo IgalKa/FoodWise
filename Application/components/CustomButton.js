@@ -1,12 +1,23 @@
 // CustomButton.js
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import { Button } from 'react-native-paper';
 
-const CustomButton = ({ onPress, title, style }) => {
+const CustomButton = ({ onPress, title, style, icon }) => {
   return (
-    <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
-      <Text style={styles.buttonText}> {title}</Text>
-    </TouchableOpacity>
+    // <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
+    //   <Text style={styles.buttonText}> {title}</Text>
+    // </TouchableOpacity>
+    <View style={styles.container}>
+      <Button
+        mode="contained-tonal"
+        onPress={onPress}
+        labelStyle={{ fontSize: 18 }}
+        icon={icon}
+      >
+        {title}
+      </Button>
+    </View>
   );
 };
 
@@ -25,6 +36,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  container: {
+    marginVertical: 10,
+  }
 });
 
 export default CustomButton;
