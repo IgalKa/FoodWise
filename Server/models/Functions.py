@@ -9,3 +9,5 @@ class Functions:
         now = datetime.now()
         # Check if the alert_date is in the future
         return alert_date > now
+
+

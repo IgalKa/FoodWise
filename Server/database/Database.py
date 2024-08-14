@@ -1,6 +1,6 @@
 import random
 import sqlite3
-from datetime import datetime , timedelta
+from datetime import datetime, timedelta
 from Server.models.Refrigerator import Refrigerator
 from Server.models.Product import Product
 
@@ -46,15 +46,14 @@ class Database:
         else:
             return None
 
-    def search_products_by_product_name(self,product_name):
+    def search_products_by_product_name(self, product_name):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
         cursor.execute("SELECT product_name,barcode "
-                        "FROM product "
-                        "WHERE product_name LIKE ? || '%'"
-                       ,(product_name,))
-
+                       "FROM product "
+                       "WHERE product_name LIKE ? || '%'"
+                       , (product_name,))
 
         result = cursor.fetchall()
         conn.close()
@@ -62,8 +61,6 @@ class Database:
         # Format the result as a JSON array of objects
         products_json = [{'product_name': row[0], 'barcode': row[1]} for row in result[:10]]
         return products_json
-
-
 
     def find_refrigerator_contents(self, refrigerator_id):
         # Connect to the SQLite database
@@ -204,6 +201,16 @@ class Database:
         else:
             return False
 
+    def validate_request(self, user_id, refrigerator_id):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT *"
+                       "FROM link "
+                       "WHERE refrigerator_id = ? AND user_id = ?", (refrigerator_id, user_id))
+        result = cursor.fetchone()
+        conn.close()
+        return result is not None
+
     def add_user(self, email, password, first_name, last_name):
         # Connect to the SQLite database
         conn = sqlite3.connect(self.path)
@@ -228,7 +235,17 @@ class Database:
                        "WHERE email = ? AND password = ?", data)
         result = cursor.fetchone()
         conn.close()
-        return result
+        # Check if result is not None
+        if result:
+            user_object = {
+                'id': result[0],
+                'first_name': result[1],
+                'last_name': result[2]
+            }
+            return user_object
+        else:
+            print("no user")
+            return None  # Explicitly return None if no user is found
 
     def generate_refrigerator_id(self):
         conn = sqlite3.connect(self.path)
@@ -367,7 +384,6 @@ class Database:
         conn.close()
         return {"products": products}
 
-
     def update_refrigerator_parameters(self, refrigerator_id, products):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
@@ -379,13 +395,12 @@ class Database:
         for product in products:
             cursor.execute('''
                 INSERT INTO refrigerator_track(refrigerator_id,barcode, amount) VALUES (?,?,?)
-            ''', (refrigerator_id,product['barcode'],product['amount']))
+            ''', (refrigerator_id, product['barcode'], product['amount']))
 
         conn.commit()
         conn.close()
 
-
-    def save_shopping_list(self,refrigerator_id, products):
+    def save_shopping_list(self, refrigerator_id, products):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
         cursor.execute(
@@ -401,9 +416,6 @@ class Database:
         conn.commit()
         conn.close()
 
-
-
-
     def generate_inital_shopping_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
@@ -417,9 +429,8 @@ class Database:
 
         result = cursor.fetchall()
         conn.close()
-        products_json = [{'product_name': row[0],'amount': row[1]} for row in result]
+        products_json = [{'product_name': row[0], 'amount': row[1]} for row in result]
         return products_json
-
 
     def get_parameter_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
@@ -434,9 +445,8 @@ class Database:
         conn.close()
 
         # Format the result as a JSON array of objects
-        products_json = [{'product_name': row[0], 'barcode': row[1],'amount': row[2]} for row in result]
+        products_json = [{'product_name': row[0], 'barcode': row[1], 'amount': row[2]} for row in result]
         return products_json
-
 
     def get_shopping_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
@@ -450,12 +460,17 @@ class Database:
         conn.close()
 
         # Format the result as a JSON array of objects
-        products_json = [{'product_name': row[0],'amount': row[1]} for row in result]
+        products_json = [{'product_name': row[0], 'amount': row[1]} for row in result]
         return products_json
 
-
-
-
-
-
-
+    def get_password_of_user(self, email):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT password 
+        FROM user
+        WHERE email = ?
+        """, (email,))
+        result = cursor.fetchall()
+        conn.close()
+        return result[0][0]

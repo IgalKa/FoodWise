@@ -3,6 +3,9 @@ import logging
 import sys
 from os.path import abspath, dirname, join
 from models import Functions
+from datetime import timedelta
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
 # Calculate the project root directory and add it to sys.path
 project_root = abspath(join(dirname(__file__), '..'))
@@ -18,6 +21,13 @@ logging.basicConfig(level=logging.DEBUG,  # Log level
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 app.extensions['database'] = Database("../Server/data/database.db")
+
+app.config[
+    'JWT_SECRET_KEY'] = '3e2a1b5c4d6f8e9a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4'  # Change this to a random secret key
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=3650)  # 10 years
+
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
 
 
 #     Embedded endpoints
@@ -144,7 +154,8 @@ def register_new_user():
         return jsonify(error_response), 400
     else:
         app.logger.info(f'Adding user with email {email} to the database')
-        database.add_user(email, password, first_name, last_name)
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        database.add_user(email, hashed_password, first_name, last_name)
         message_response = {
             'message': f"The user {first_name} {last_name} has been successfully added to the database"}
         return jsonify(message_response), 200
@@ -169,21 +180,36 @@ def user_login():
         error_response = {'error': f"User with email {user_email} does not exist"}
         return jsonify(error_response), 404
 
-    if not database.check_2values_exist(table_name="user", column_name1="email", column_name2="password",
-                                        value1=user_email, value2=user_password):
+    saved_password = database.get_password_of_user(user_email)
+    if not bcrypt.check_password_hash(saved_password, user_password):
         app.logger.warning(f"Attempt to access user with email: {user_email} and wrong password: {user_password}")
         error_response = {'error': f"Wrong password for user with email {user_email}"}
         return jsonify(error_response), 404
 
-    result = database.get_user(user_email, user_password)
+    ##if not database.check_2values_exist(table_name="user", column_name1="email", column_name2="password",
+    ##                                    value1=user_email, value2=user_password):
+    ##    app.logger.warning(f"Attempt to access user with email: {user_email} and wrong password: {user_password}")
+    ##    error_response = {'error': f"Wrong password for user with email {user_email}"}
+    ##    return jsonify(error_response), 404
+
+    user = database.get_user(user_email, saved_password)
+    access_token = create_access_token(identity=user['id'])
     app.logger.info("User logged successfully")
-    return jsonify(result), 200
+    return jsonify(
+        access_token=access_token,
+        user_id=user['id'],
+        first_name=user['first_name'],
+        last_name=user['last_name'],
+    ), 200
 
 
-# /linked_refrigerators?user_id=1
+# /linked_refrigerators?user_id=1\
+
 @app.route('/linked_refrigerators', methods=['GET'])
+@jwt_required()
 def linked_refrigerators():
-    user_id = request.args.get('user_id')
+    #user_id = request.args.get('user_id')
+    user_id = get_jwt_identity()
     database = app.extensions['database']
 
     if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
@@ -195,16 +221,18 @@ def linked_refrigerators():
     return database.find_linked_refrigerators(user_id), 200
 
 
-# /refrigerator_contents?refrigerator_id=1
+# /refrigerator_contents?refrigerator_id= ,
 @app.route('/refrigerator_contents', methods=['GET'])
+@jwt_required()
 def refrigerator_contents():
+    user_id = get_jwt_identity()
     # Get the QueryParam 'refrigerator_id' from the request
     refrigerator_id = request.args.get('refrigerator_id')
     database = app.extensions['database']
 
-    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
-        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
-        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
         return jsonify(error_response), 404
 
     refrigerator_content = database.find_refrigerator_contents(refrigerator_id)
@@ -214,14 +242,10 @@ def refrigerator_contents():
 
 # /number_linked_refrigerators?user_id=1
 @app.route('/number_linked_refrigerators', methods=['GET'])
+@jwt_required()
 def number_linked_refrigerators():
-    user_id = request.args.get('user_id')
+    user_id = get_jwt_identity()
     database = app.extensions['database']
-
-    if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
-        app.logger.warning(f'Attempt to access user {user_id} that does not exist')
-        error_response = {'error': f"User with id {user_id} does not exist"}
-        return jsonify(error_response), 404
 
     result = database.find_linked_refrigerators(user_id)
     number_refrigerators = len(result['refrigerators'])
@@ -234,9 +258,10 @@ def number_linked_refrigerators():
 
 # /update_refrigerator_name?user_id=1 , json={"refrigerator_id": 1, "new_name": "Main Refrigerator"}
 @app.route('/update_refrigerator_name', methods=['POST'])
+@jwt_required()
 def update_refrigerator_name():
     database = app.extensions['database']
-    user_id = request.args.get('user_id')
+    user_id = get_jwt_identity()
     data = request.get_json()
     # If 'new_name' or 'refrigerator_id' keys are missing, return an error response
     if not ('new_name' in data and 'refrigerator_id' in data):
@@ -247,14 +272,9 @@ def update_refrigerator_name():
     refrigerator_id = data['refrigerator_id']
     new_name = data['new_name']
 
-    if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
-        app.logger.warning(f'Attempt to access user {user_id} that does not exist')
-        error_response = {'error': f"User with id {user_id} does not exist"}
-        return jsonify(error_response), 404
-
-    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
-        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
-        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
         return jsonify(error_response), 404
 
     database.change_refrigerator_nickname(refrigerator_id, user_id, new_name)
@@ -263,11 +283,17 @@ def update_refrigerator_name():
     return jsonify(message_response), 200
 
 
-
 @app.route('/search_products', methods=['GET'])
+@jwt_required()
 def search_products():
+    user_id = get_jwt_identity()
     product_name = request.args.get('product_name')
     database = app.extensions['database']
+
+    if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
+        app.logger.warning(f'Attempt to access user {user_id} that does not exist')
+        error_response = {'error': f"User with id {user_id} does not exist"}
+        return jsonify(error_response), 404
 
     if not product_name:
         app.logger.info(f"There was a search for empty name")
@@ -282,16 +308,17 @@ def search_products():
     return jsonify(result), 200
 
 
-
 @app.route('/update_refrigerator_parameters', methods=['POST'])
+@jwt_required()
 def update_refrigerator_parameters():
+    user_id = get_jwt_identity()
     database = app.extensions['database']
     refrigerator_id = request.args.get('refrigerator_id')
     data = request.get_json()
 
-    if not database.check_value_exist("refrigerator","refrigerator_id" ,refrigerator_id):
-        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
-        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
         return jsonify(error_response), 404
 
     # Check if data is a list
@@ -305,10 +332,8 @@ def update_refrigerator_parameters():
         if 'barcode' not in product or 'amount' not in product:
             app.logger.warning(f'Invalid data format for update_refrigerator_parameters endpoint : Each object must '
                                f'contain barcode and amount keys')
-            error_response ={"error": "Each object must contain 'barcode' and 'amount' keys."}
+            error_response = {"error": "Each object must contain 'barcode' and 'amount' keys."}
             return jsonify(error_response), 400
-
-
 
     database.update_refrigerator_parameters(refrigerator_id, data)
     app.logger.info(f'parameters for refrigerator {refrigerator_id} were updated successfully')
@@ -316,18 +341,18 @@ def update_refrigerator_parameters():
     return jsonify(message_response), 200
 
 
-
 @app.route('/save_shopping_list', methods=['POST'])
+@jwt_required()
 def save_shopping_list():
+    user_id = get_jwt_identity()
     database = app.extensions['database']
     refrigerator_id = request.args.get('refrigerator_id')
     data = request.get_json()
 
-    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
-        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
-        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
         return jsonify(error_response), 404
-
 
     if not isinstance(data, list):
         app.logger.warning(f'Invalid data format for save_shopping_list endpoint : not a list')
@@ -341,22 +366,22 @@ def save_shopping_list():
             error_response = {"error": "Each object must contain 'product_name' and 'amount' keys."}
             return jsonify(error_response), 400
 
-
     app.logger.info(f'A new shopping list was saved for refrigerator {refrigerator_id}')
-    database.save_shopping_list(refrigerator_id,data)
+    database.save_shopping_list(refrigerator_id, data)
     message_response = {'message': "The shopping list was saved successfully"}
     return jsonify(message_response), 200
 
 
-
 @app.route('/generate_initial_shopping_list', methods=['GET'])
+@jwt_required()
 def generate_initial_shopping_list():
+    user_id = get_jwt_identity()
     database = app.extensions['database']
     refrigerator_id = request.args.get('refrigerator_id')
 
-    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
-        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
-        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
         return jsonify(error_response), 404
 
     app.logger.info(f'An initial shopping list was generated for refrigerator {refrigerator_id}')
@@ -364,15 +389,16 @@ def generate_initial_shopping_list():
     return jsonify(result), 200
 
 
-
 @app.route('/get_refrigerator_parameters', methods=['GET'])
+@jwt_required()
 def get_refrigerator_parameters():
+    user_id = get_jwt_identity()
     database = app.extensions['database']
     refrigerator_id = request.args.get('refrigerator_id')
 
-    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
-        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
-        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
         return jsonify(error_response), 404
 
     app.logger.info(f'Request for the parameters of refrigerator {refrigerator_id}')
@@ -381,13 +407,15 @@ def get_refrigerator_parameters():
 
 
 @app.route('/fetch_saved_shopping_list', methods=['GET'])
+@jwt_required()
 def fetch_saved_shopping_list():
+    user_id = get_jwt_identity()
     database = app.extensions['database']
     refrigerator_id = request.args.get('refrigerator_id')
 
-    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
-        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
-        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
         return jsonify(error_response), 404
 
     app.logger.info(f'Request for the saved shopping list for refrigerator {refrigerator_id}')
@@ -397,8 +425,11 @@ def fetch_saved_shopping_list():
 
 # /update_product_alert_date , json={"refrigerator_id": 1, "product_name": "Milk 1% 1L Tnuva", "alert_date": "2024-09-25"}
 @app.route('/update_product_alert_date', methods=['POST'])
+@jwt_required()
 def update_product_alert_date():
+    user_id = get_jwt_identity()
     data = request.get_json()
+
     # If 'refrigerator_id' or 'product_name' or 'alert_date' keys are missing, return an error response
     if not ('refrigerator_id' in data and 'product_name' in data and 'alert_date' in data):
         app.logger.error("Invalid request of update_alert_date endpoint")
@@ -409,6 +440,11 @@ def update_product_alert_date():
     product_name = data['product_name']
     alert_date = data['alert_date']
     database = app.extensions['database']
+
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
+        return jsonify(error_response), 404
 
     barcode = database.find_barcode(product_name)
     if barcode is None:
@@ -438,10 +474,17 @@ def update_product_alert_date():
 
 # /get_product_alert_date?refrigerator_id=1&product_name=Eggs pack 12L free organic
 @app.route('/get_product_alert_date', methods=['GET'])
+@jwt_required()
 def get_product_alert_date():
+    user_id = get_jwt_identity()
     refrigerator_id = request.args.get('refrigerator_id')
     product_name = request.args.get('product_name')
     database = app.extensions['database']
+
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
+        return jsonify(error_response), 404
 
     barcode = database.find_barcode(product_name)
     if barcode is None:
@@ -467,9 +510,16 @@ def get_product_alert_date():
 
 # /get_refrigerator_content_expired?refrigerator_id=1
 @app.route('/get_refrigerator_content_expired', methods=['GET'])
+@jwt_required()
 def get_refrigerator_content_expired():
+    user_id = get_jwt_identity()
     refrigerator_id = request.args.get('refrigerator_id')
     database = app.extensions['database']
+
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
+        return jsonify(error_response), 404
 
     if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
         app.logger.warning(f"Attempt to access refrigerator {refrigerator_id} that does not exist")
@@ -482,13 +532,20 @@ def get_refrigerator_content_expired():
 
 
 def get_statistics_by_table_name(table_name):
+    user_id = get_jwt_identity()
     refrigerator_id = request.args.get('refrigerator_id')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     database = app.extensions['database']
 
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
+        return jsonify(error_response), 404
+
     if not start_date <= end_date:
-        app.logger.warning(f"Attempt to get {table_name} statistics when start_date={start_date} is after the end_date={end_date}")
+        app.logger.warning(
+            f"Attempt to get {table_name} statistics when start_date={start_date} is after the end_date={end_date}")
         error_response = {'error': f"Start date {start_date} is after end date {end_date}"}
         return error_response, 400
 
@@ -501,12 +558,14 @@ def get_statistics_by_table_name(table_name):
 
 # /get_entry_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
 @app.route('/get_entry_statistics', methods=['GET'])
+@jwt_required()
 def get_entry_statistics():
     return get_statistics_by_table_name(table_name="entry_table")
 
 
 # /get_exit_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
 @app.route('/get_exit_statistics', methods=['GET'])
+@jwt_required()
 def get_exit_statistics():
     return get_statistics_by_table_name(table_name="exit_table")
 
