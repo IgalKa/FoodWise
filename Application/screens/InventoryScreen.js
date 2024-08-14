@@ -215,7 +215,7 @@ function InventoryScreen({ navigation }) {
                                 mode="date"
                                 display="default"
                                 onChange={onChange}
-                                minimumDate={new Date()} // This will block past dates
+                                minimumDate={new Date(new Date().setDate(new Date().getDate() + 1))}
                             />
                         )}
 
