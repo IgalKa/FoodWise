@@ -1,5 +1,6 @@
 import axios from 'axios';
 import CONFIG from '../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const apiClient = axios.create({

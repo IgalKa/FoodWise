@@ -43,7 +43,7 @@ const LoginScreen = () => {
             if (response.status === 200) {
                 await setToken(response.data.access_token);
                 await setUserName(response.data.first_name);
-                await setUserLastName(response.last_name);
+                await setUserLastName(response.data.last_name);
                 await clearFridgeId();
                 navigation.navigate('Inventory');
             } else {
