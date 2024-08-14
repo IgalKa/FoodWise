@@ -1,10 +1,12 @@
-import React, { useState ,useEffect} from 'react';
+import React, { useState} from 'react';
 import { View, StyleSheet, Text, FlatList, Modal,ImageBackground} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Share from 'react-native-share';
 import CustomButton from '../components/CustomButton';
-import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import { fetchSavedShoppingList } from '../api/ShoppingListApi';
+import NoFridge from '../components/NoFridge';
+import Loading from '../components/Loading';
 
 export default function ShoppingList ({route}) {
   const { fridgeId } = useAuth();
@@ -12,17 +14,17 @@ export default function ShoppingList ({route}) {
 
 
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const [ShoppingList, setShoppingList] = useState([]);
 
   
   const handleShoppingList = async () => {
     try {
-      const response = await axios.get('http://10.0.0.8:12345/shopping_list',{
-          params: { refrigerator_id:fridgeId },
-      });
-      setShoppingList(response.data); 
       setModalVisible(true);
+      setLoading(true);
+      const response= await fetchSavedShoppingList(fridgeId);
+      setShoppingList(response.data); 
+      setLoading(false);
     } 
     catch (error) {
       console.error('Error fetching search results:', error);
@@ -52,62 +54,71 @@ export default function ShoppingList ({route}) {
   );
 
   return (
-    <ImageBackground
-      source={require('../assets/images/background.jpg')}
-      style={styles.imageBackground}
-    >
-
-        <CustomButton
-          title="saved shopping list"
-          onPress={handleShoppingList}
-        />
-        
-        <CustomButton 
-          title="generate shopping list" 
-          onPress={() => navigation.navigate('EditList',{
-            getUrl:"http://10.0.0.8:12345/create_shopping_list",
-            postUrl:"http://10.0.0.8:12345/save_shopping_list",
-            title:"shopping list creation",
-            fridgeId:1})} 
-        />
-
-        <CustomButton
-          title="edit shopping list parameters" 
-          onPress={() => navigation.navigate('EditList',{
-            getUrl:"http://10.0.0.8:12345/parameter_list",
-            postUrl:"http://10.0.0.8:12345/update_refrigerator_parameters",
-            title:"parameters list",
-            fridgeId:1
-            })}  
-        />
-
-        <Modal
-          animationType="slide"
-          transparent={false}
-          visible={modalVisible}
-          onRequestClose={() => {setModalVisible(false); }}
-        >    
-          <ImageBackground
-            source={require('../assets/images/background.jpg')}
-            style={styles.imageBackground}
-          >
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Shopping List:</Text>
-              <FlatList
-                data={ShoppingList}
-                renderItem={renderShoppingItem}
-                keyExtractor={(item, index) => index.toString()}
-                contentContainerStyle={styles.listContent}
+      <ImageBackground
+        source={require('../assets/images/background.jpg')}
+        style={styles.imageBackground}
+      >
+          {fridgeId != null &&
+            <View>
+              <CustomButton
+                title="saved shopping list"
+                onPress={handleShoppingList}
               />
-              <View style={styles.buttonContainer}>
-                <CustomButton title="Close" onPress={() => setModalVisible(false)} />
-                <CustomButton title="Share" onPress={handleShareList} />
-              </View>
+              
+              <CustomButton 
+                title="generate shopping list" 
+                onPress={() => navigation.navigate('EditList',{
+                  getUrl: "/generate_initial_shopping_list",
+                  postUrl: "/save_shopping_list",
+                  title:"shopping list creation",
+                  fridgeId:fridgeId})} 
+              />
+
+              <CustomButton
+                title="edit shopping list parameters" 
+                onPress={() => navigation.navigate('EditList',{
+                  getUrl:"/get_refrigerator_parameters",
+                  postUrl:"/update_refrigerator_parameters",
+                  title:"parameters list",
+                  fridgeId:fridgeId})}  
+              />
+
+              <Modal
+                animationType="slide"
+                transparent={false}
+                visible={modalVisible}
+                onRequestClose={() => {setModalVisible(false); }}
+              >    
+                <ImageBackground
+                  source={require('../assets/images/background.jpg')}
+                  style={styles.imageBackground}
+                >
+                  {loading && <Loading/>}
+                  
+                  {!loading &&
+                    <View style={styles.modalContainer}>
+                      <Text style={styles.modalTitle}>Shopping List:</Text>
+                      <FlatList
+                        data={ShoppingList}
+                        renderItem={renderShoppingItem}
+                        keyExtractor={(item, index) => index.toString()}
+                        contentContainerStyle={styles.listContent}
+                      />
+                      <View style={styles.buttonContainer}>
+                        <CustomButton title="Close" onPress={() => setModalVisible(false)} />
+                        <CustomButton title="Share" onPress={handleShareList} />
+                      </View>
+                    </View>
+                  }
+                </ImageBackground>       
+              </Modal>
             </View>
-          </ImageBackground>       
-        </Modal>
-     
-    </ImageBackground>
+          }
+
+          {fridgeId === null && 
+            <NoFridge/>
+          }
+      </ImageBackground>
   );
 };
 
@@ -205,6 +216,16 @@ const styles = StyleSheet.create({
       justifyContent: 'space-between',
       bottom: 0,
       width: '100%',
+    },
+    centeredView: {
+      flex: 1,
+      justifyContent: 'center', // Centers content vertically
+      alignItems: 'center',     // Centers content horizontally
+    },
+    title: {
+      fontSize: 20,
+      color: '#fff', // White color for the text
+      textAlign: 'center', // Centers text horizontally
     },
 });
 

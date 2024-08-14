@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Text, FlatList, 
 TouchableOpacity, Alert,Image,ImageBackground} from 'react-native';
-import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
+import apiClient from '../api/apiClient';
 
 
 export default function SearchProduct({route}){
@@ -17,7 +17,7 @@ export default function SearchProduct({route}){
     const handleSearch = async () => {
         try {
           setError(null); // Clear previous errors
-          const response = await axios.get('http://10.0.0.8:12345/find_product_number', {
+          const response = await apiClient.get('/search_products', {
             params: { product_name: productName },
           });
           setResults(response.data);

@@ -4,6 +4,8 @@ TouchableOpacity,ImageBackground, ActivityIndicator} from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../components/CustomButton';
+import apiClient from '../api/apiClient';
+import Loading from '../components/Loading';
 
 
 export default function EditList({route}){
@@ -30,7 +32,7 @@ export default function EditList({route}){
     
             try {
                 console.log('Fetching data from:', getUrl);
-                const response = await axios.get(getUrl, {
+                const response = await apiClient.get(getUrl, {
                     params: { refrigerator_id: fridgeId },
                 });
                 console.log('Response data:', response.data);
@@ -50,7 +52,9 @@ export default function EditList({route}){
         if (route.params?.item) {
             const newItem = route.params.item;
 
-            const itemExists = List.some(item => item.barcode === newItem.barcode);
+            const itemExists = List.some(item => item.product_name === newItem.product_name);
+
+            console.log("value of itemExists " + itemExists);
         
             if(!itemExists){
                 setList((prevParameters) => [...prevParameters, {   
@@ -62,13 +66,6 @@ export default function EditList({route}){
         }
     }, [route.params?.item]);
     
-    if (loading) {
-        return (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        );
-    }
 
     
     const handleRemoveList = (item)=>{
@@ -98,7 +95,7 @@ export default function EditList({route}){
     
     const handleApplyChanges = async () =>{
         try{
-            await axios.post(postUrl, List,{
+            await apiClient.post(postUrl, List,{
                 params: {
                     refrigerator_id: fridgeId
                 }
@@ -138,22 +135,28 @@ export default function EditList({route}){
             source={require('../assets/images/background.jpg')}
             style={styles.imageBackground}
         >
-            <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>{title}:</Text>
-                <FlatList
-                    data={List}
-                    renderItem={renderListItem}
-                    keyExtractor={(item) => item.product_name}
-                    contentContainerStyle={styles.listContent}
-                />
-                <View style={styles.buttonContainer}>
-                    <CustomButton title="Save" onPress={handleApplyChanges} />
-                    <CustomButton
-                        title="Search"
-                        onPress={() => navigation.navigate('SearchProduct',{fridgeId:1,from:"parametersList"})} 
-                    />
-                </View>
-            </View>
+
+            { !loading &&
+              <View style={styles.container}>
+                  <Text style={styles.title}>{title}:</Text>
+                  <FlatList
+                      data={List}
+                      renderItem={renderListItem}
+                      keyExtractor={(item) => item.product_name}
+                      contentContainerStyle={styles.listContent}
+                  />
+                  <View style={styles.buttonContainer}>
+                      <CustomButton title="Save" onPress={handleApplyChanges} />
+                      <CustomButton
+                          title="Search"
+                          onPress={() => navigation.navigate('SearchProduct',{fridgeId:1,from:"parametersList"})} 
+                      />
+                  </View>
+              </View>
+            }
+
+            {loading && <Loading/>}
+
         </ImageBackground>
     );
       
@@ -181,14 +184,14 @@ const styles = StyleSheet.create({
       color: 'red',
       marginVertical: 8,
     },
-    modalContainer: {
+    container: {
       flex: 1,
       borderRadius: 10,
       padding: 20,
       alignItems: 'flex-start',
       justifyContent: 'center',
     },
-    modalTitle: {
+    title: {
       fontSize: 20,
       fontWeight: 'bold',
       marginBottom: 10,

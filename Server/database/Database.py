@@ -24,19 +24,36 @@ class Database:
         conn.close()
         # If a row was found, return the name, otherwise return None
         if result:
-            return result[0]  # Return the first column of the result (name)
+            return result[0]  # Return the first column of the result (product_name)
         else:
             return None
 
-    def find_barcode(self,product_name):
+    def find_barcode(self, product_name):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT barcode "
+                       "FROM product "
+                       "WHERE product_name = ? ",
+                       (product_name,)
+                       )
+        result = cursor.fetchone()
+
+        conn.close()
+        # If a row was found, return the name, otherwise return None
+        if result:
+            return result[0]  # Return the first column of the result (barcode)
+        else:
+            return None
+
+    def search_products_by_product_name(self, product_name):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
         cursor.execute("SELECT product_name,barcode "
-                        "FROM product "
-                        "WHERE product_name LIKE ? || '%'"
-                       ,(product_name,))
-
+                       "FROM product "
+                       "WHERE product_name LIKE ? || '%'"
+                       , (product_name,))
 
         result = cursor.fetchall()
         conn.close()
@@ -44,8 +61,6 @@ class Database:
         # Format the result as a JSON array of objects
         products_json = [{'product_name': row[0], 'barcode': row[1]} for row in result[:10]]
         return products_json
-
-
 
     def find_refrigerator_contents(self, refrigerator_id):
         # Connect to the SQLite database
@@ -86,12 +101,45 @@ class Database:
         else:
             now = datetime.now()
             formatted_current_date = now.strftime('%Y-%m-%d')
-            two_weeks_later = now + timedelta(weeks=2)
-            formatted_two_weeks_date = two_weeks_later.strftime('%Y-%m-%d')
-            data = (refrigerator_id, barcode, 1, formatted_current_date,formatted_two_weeks_date)
+            data = (refrigerator_id, barcode, 1, formatted_current_date)
             cursor.execute(
-                "INSERT INTO refrigerator_content (refrigerator_id,barcode,product_quantity,oldest_added_date,alert_date)"
-                "VALUES (?,?,?,?,?)", data)
+                "INSERT INTO refrigerator_content (refrigerator_id,barcode,product_quantity,oldest_added_date)"
+                "VALUES (?,?,?,?)", data)
+
+        conn.commit()
+        conn.close()
+        self.statistics_add_product_to_table("entry_table", refrigerator_id, barcode)
+
+    def statistics_add_product_to_table(self, table_name, refrigerator_id, barcode):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        if table_name == "entry_table":
+            column_date = "entry_date"
+        else:  # table_name == "exit_table"
+            column_date = "exit_date"
+
+        now = datetime.now()
+        formatted_current_date = now.strftime('%Y-%m-%d')
+
+        cursor.execute(f"SELECT quantity "
+                       f"FROM {table_name} "
+                       f"WHERE refrigerator_id = ? AND barcode = ? AND {column_date} = ?",
+                       (refrigerator_id, barcode, formatted_current_date))
+        result = cursor.fetchone()
+
+        if result:
+            cursor.execute(
+                f"UPDATE {table_name} "
+                f"SET quantity = ? "
+                f"WHERE refrigerator_id = ? AND barcode = ? AND {column_date} = ? ",
+                (result[0] + 1, refrigerator_id, barcode, formatted_current_date)
+            )
+        else:
+            cursor.execute(
+                f"INSERT INTO {table_name} (refrigerator_id,barcode,{column_date},quantity)"
+                f"VALUES (?,?,?,?)",
+                (refrigerator_id, barcode, formatted_current_date, 1))
 
         conn.commit()
         conn.close()
@@ -120,6 +168,7 @@ class Database:
             conn.commit()
 
         conn.close()
+        self.statistics_add_product_to_table("exit_table", refrigerator_id, barcode)
         return result
 
     def check_value_exist(self, table_name, column_name, value):
@@ -152,6 +201,16 @@ class Database:
         else:
             return False
 
+    def validate_request(self, user_id, refrigerator_id):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT *"
+                       "FROM link "
+                       "WHERE refrigerator_id = ? AND user_id = ?", (refrigerator_id, user_id))
+        result = cursor.fetchone()
+        conn.close()
+        return result is not None
+
     def add_user(self, email, password, first_name, last_name):
         # Connect to the SQLite database
         conn = sqlite3.connect(self.path)
@@ -176,7 +235,17 @@ class Database:
                        "WHERE email = ? AND password = ?", data)
         result = cursor.fetchone()
         conn.close()
-        return result
+        # Check if result is not None
+        if result:
+            user_object = {
+                'id': result[0],
+                'first_name': result[1],
+                'last_name': result[2]
+            }
+            return user_object
+        else:
+            print("no user")
+            return None  # Explicitly return None if no user is found
 
     def generate_refrigerator_id(self):
         conn = sqlite3.connect(self.path)
@@ -205,6 +274,7 @@ class Database:
         result = cursor.fetchall()
 
         if result:
+            conn.close()
             return "The link already exists", 0
 
         cursor.execute("SELECT * "
@@ -214,7 +284,7 @@ class Database:
         nickname = f"Refrigerator {len(result) + 1}"
 
         cursor.execute("INSERT INTO link (user_id, refrigerator_id,nickname) "
-                       "VALUES (?, ?,?)", (user_id, refrigerator_id, nickname))
+                       "VALUES (?,?,?)", (user_id, refrigerator_id, nickname))
         conn.commit()
         conn.close()
         return "Link created", 1
@@ -228,7 +298,9 @@ class Database:
                        "WHERE user_id = ? ", (user_id,))
         result = cursor.fetchall()
 
-        return {"refrigerators": [{"refrigerator_id": row[0], "nickname": row[1]} for row in result]}
+        linked_refrigerators = {"refrigerators": [{"refrigerator_id": row[0], "nickname": row[1]} for row in result]}
+        conn.close()
+        return linked_refrigerators
 
     def change_refrigerator_nickname(self, refrigerator_id, user_id, nickname):
         conn = sqlite3.connect(self.path)
@@ -240,6 +312,77 @@ class Database:
         conn.commit()
         conn.close()
 
+    def update_alert_date(self, refrigerator_id, barcode, alert_date):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("UPDATE refrigerator_content "
+                       "SET alert_date = ?"
+                       "WHERE refrigerator_id = ? AND barcode = ?",
+                       (alert_date, refrigerator_id, barcode))
+        conn.commit()
+        conn.close()
+
+    def get_alert_date(self, refrigerator_id, barcode):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT alert_date "
+                       "FROM refrigerator_content "
+                       "WHERE refrigerator_id = ? AND barcode = ?",
+                       (refrigerator_id, barcode)
+                       )
+        result = cursor.fetchone()
+        conn.close()
+
+        if result:
+            return result[0]
+        else:
+            return None
+
+    def find_refrigerator_contents_with_alerts_dates_in_the_past(self, refrigerator_id):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT product_name,image,product_quantity,oldest_added_date,alert_date "
+                       "FROM refrigerator_content NATURAL INNER JOIN product "
+                       "WHERE refrigerator_id = ? "
+                       "AND alert_date IS NOT NULL "
+                       "AND alert_date <= DATE('now')",
+                       (refrigerator_id,))
+        result = cursor.fetchall()
+
+        refrigerator = Refrigerator(refrigerator_id)
+        for row in result:
+            product = Product(row[0], row[1], row[2], row[3], row[4])
+            refrigerator.add_product(product)
+
+        conn.close()
+        return refrigerator
+
+    def find_products_and_quantities_between_dates(self, table_name, refrigerator_id, start_date, end_date):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        if table_name == "entry_table":
+            column_date = "entry_date"
+        else:  # table_name == "exit_table"
+            column_date = "exit_date"
+
+        cursor.execute("SELECT product_name, Sum(quantity) "
+                       f"FROM {table_name} NATURAL INNER JOIN product "
+                       "WHERE refrigerator_id = ? "
+                       f"AND {column_date} >= ? AND {column_date} <= ? "
+                       "GROUP BY barcode, product_name",
+                       (refrigerator_id, start_date, end_date))
+        result = cursor.fetchall()
+
+        products = []
+        for row in result:
+            products.append({"product_name": row[0], "quantity": row[1]})
+
+        conn.close()
+        return {"products": products}
 
     def update_refrigerator_parameters(self, refrigerator_id, products):
         conn = sqlite3.connect(self.path)
@@ -252,13 +395,12 @@ class Database:
         for product in products:
             cursor.execute('''
                 INSERT INTO refrigerator_track(refrigerator_id,barcode, amount) VALUES (?,?,?)
-            ''', (refrigerator_id,product['barcode'],product['amount']))
+            ''', (refrigerator_id, product['barcode'], product['amount']))
 
         conn.commit()
         conn.close()
 
-
-    def save_shopping_list(self,refrigerator_id, products):
+    def save_shopping_list(self, refrigerator_id, products):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
         cursor.execute(
@@ -274,10 +416,7 @@ class Database:
         conn.commit()
         conn.close()
 
-
-
-
-    def generate_shopping_list(self, refrigerator_id):
+    def generate_inital_shopping_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
         cursor.execute("""
@@ -290,9 +429,8 @@ class Database:
 
         result = cursor.fetchall()
         conn.close()
-        products_json = [{'product_name': row[0],'amount': row[1]} for row in result]
+        products_json = [{'product_name': row[0], 'amount': row[1]} for row in result]
         return products_json
-
 
     def get_parameter_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
@@ -307,9 +445,8 @@ class Database:
         conn.close()
 
         # Format the result as a JSON array of objects
-        products_json = [{'product_name': row[0], 'barcode': row[1],'amount': row[2]} for row in result]
+        products_json = [{'product_name': row[0], 'barcode': row[1], 'amount': row[2]} for row in result]
         return products_json
-
 
     def get_shopping_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
@@ -323,12 +460,17 @@ class Database:
         conn.close()
 
         # Format the result as a JSON array of objects
-        products_json = [{'product_name': row[0],'amount': row[1]} for row in result]
+        products_json = [{'product_name': row[0], 'amount': row[1]} for row in result]
         return products_json
 
-
-
-
-
-
-
+    def get_password_of_user(self, email):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT password 
+        FROM user
+        WHERE email = ?
+        """, (email,))
+        result = cursor.fetchall()
+        conn.close()
+        return result[0][0]

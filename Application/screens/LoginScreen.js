@@ -12,7 +12,7 @@ const LoginScreen = () => {
     const [password, setPassword] = useState('');
     const navigation = useNavigation();
     const [error, setError] = useState('');
-    const { setUserId, clearFridgeId, setUserName, setUserLastName } = useAuth();
+    const { clearFridgeId, setUserName, setUserLastName ,setToken } = useAuth();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -41,9 +41,9 @@ const LoginScreen = () => {
             const response = await userLogin(email, password);
 
             if (response.status === 200) {
-                await setUserId(response.data[0].toString());
-                await setUserName(response.data[1]);
-                await setUserLastName(response.data[2]);
+                await setToken(response.data.access_token);
+                await setUserName(response.data.first_name);
+                await setUserLastName(response.last_name);
                 await clearFridgeId();
                 navigation.navigate('Inventory');
             } else {

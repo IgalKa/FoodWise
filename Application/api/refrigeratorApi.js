@@ -26,3 +26,46 @@ export const updateRefrigeratorName = (newName, renameId, userId) => {
   return response;
 };
 
+export const getExpiringProducts = (fridgeId) => {
+  const response = apiClient.get('/get_refrigerator_content_expired', {
+    params: { refrigerator_id: fridgeId }
+  });
+  return response;
+};
+
+
+export const getStatistics = (fridgeId, startDate, endDate) => {
+  const response = apiClient.get('/get_statistics', {
+    params: {
+      refrigerator_id: fridgeId,
+      start_date: startDate,
+      end_date: endDate
+    }
+  });
+  return response;
+};
+
+
+export const getAlertDate = (fridgeId, productName) => {
+  console.log(fridgeId);
+  console.log(productName);
+  const response = apiClient.get('/get_product_alert_date', {
+    params: {
+      refrigerator_id: fridgeId,
+      product_name: productName,
+    }
+  });
+  return response;
+}
+
+
+export const updateAlertDate = (fridgeId, productName, alertDate) => {
+  const response = apiClient.post('/update_product_alert_date', {
+    refrigerator_id: fridgeId,
+    product_name: productName,
+    alert_date: alertDate
+  });
+  return response;
+}
+
+

@@ -6,7 +6,6 @@ import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import SearchProduct from '../screens/SearchProduct';
 import EditList from '../screens/EditList';
-import RefrigeratorParameters from '../screens/RefrigeratorParameters';
 import DrawerNavigator from './DrawerNavigation';
 
 
@@ -24,7 +23,6 @@ export default function Navigation() {
             <Stack.Screen name="Inventory" component={DrawerNavigator} />
             <Stack.Screen name="SearchProduct" component={SearchProduct} />
             <Stack.Screen name="EditList" component={EditList}/>
-            <Stack.Screen name="RefrigeratorParameters" component={RefrigeratorParameters}/>
         </Stack.Navigator>
     );
 

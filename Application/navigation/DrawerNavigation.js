@@ -6,6 +6,9 @@ import WelcomeScreen from '../screens/WelcomeScreen';
 import MyRefrigeratorsScreen from '../screens/MyRefrigeratorsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ShoppingList from '../screens/ShoppingList';
+import RecipesScreen from '../screens/RecipesScreen';
+import ConsumptionScreen from '../screens/ConsumptionScreen';
+import NotificationsScreen from '../screens/NotificationsScreen';
 
 
 
@@ -39,6 +42,18 @@ const DrawerNavigator = () => {
             <Drawer.Screen name='MyRefrigerators' component={MyRefrigeratorsScreen} options={{
                 drawerLabel: 'My Refrigerators',
                 headerTitle: 'My Refrigerators',
+            }} />
+            <Drawer.Screen name='Recipes' component={RecipesScreen} options={{
+                drawerLabel: 'Recipes',
+                headerTitle: 'Recipes',
+            }} />
+            <Drawer.Screen name='Consumption' component={ConsumptionScreen} options={{
+                drawerLabel: 'Consumption Reports',
+                headerTitle: 'Consumption Reports',
+            }} />
+            <Drawer.Screen name=' Alerts' component={NotificationsScreen} options={{
+                drawerLabel: 'Alerts',
+                headerTitle: 'Alerts',
             }} />
             <Drawer.Screen name='Settings' component={SettingsScreen} options={{
                 drawerLabel: 'Settings',
