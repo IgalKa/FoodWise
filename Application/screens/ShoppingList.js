@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, FlatList, Modal, ImageBackground, TouchableOpacity, Dimensions } from 'react-native';
+import { View, StyleSheet, Text, FlatList, Modal, ImageBackground, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Share from 'react-native-share';
 import CustomButton from '../components/CustomButton';
@@ -9,7 +9,6 @@ import NoFridge from '../components/NoFridge';
 import ScreenLayout from '../components/ScreenLayout';
 
 
-const { height } = Dimensions.get('window');
 
 export default function ShoppingList({ route }) {
   const { fridgeId } = useAuth();
