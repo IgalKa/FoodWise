@@ -6,6 +6,7 @@ import CustomButton from '../components/CustomButton';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchSavedShoppingList } from '../api/ShoppingListApi';
 import NoFridge from '../components/NoFridge';
+import Loading from '../components/Loading';
 
 export default function ShoppingList ({route}) {
   const { fridgeId } = useAuth();
@@ -13,15 +14,17 @@ export default function ShoppingList ({route}) {
 
 
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const [ShoppingList, setShoppingList] = useState([]);
 
   
   const handleShoppingList = async () => {
     try {
+      setModalVisible(true);
+      setLoading(true);
       const response= await fetchSavedShoppingList(fridgeId);
       setShoppingList(response.data); 
-      setModalVisible(true);
+      setLoading(false);
     } 
     catch (error) {
       console.error('Error fetching search results:', error);
@@ -68,7 +71,7 @@ export default function ShoppingList ({route}) {
                   getUrl: "/generate_initial_shopping_list",
                   postUrl: "/save_shopping_list",
                   title:"shopping list creation",
-                  fridgeId:1})} 
+                  fridgeId:fridgeId})} 
               />
 
               <CustomButton
@@ -77,8 +80,7 @@ export default function ShoppingList ({route}) {
                   getUrl:"/get_refrigerator_parameters",
                   postUrl:"/update_refrigerator_parameters",
                   title:"parameters list",
-                  fridgeId:1
-                  })}  
+                  fridgeId:fridgeId})}  
               />
 
               <Modal
@@ -91,19 +93,23 @@ export default function ShoppingList ({route}) {
                   source={require('../assets/images/background.jpg')}
                   style={styles.imageBackground}
                 >
-                  <View style={styles.modalContainer}>
-                    <Text style={styles.modalTitle}>Shopping List:</Text>
-                    <FlatList
-                      data={ShoppingList}
-                      renderItem={renderShoppingItem}
-                      keyExtractor={(item, index) => index.toString()}
-                      contentContainerStyle={styles.listContent}
-                    />
-                    <View style={styles.buttonContainer}>
-                      <CustomButton title="Close" onPress={() => setModalVisible(false)} />
-                      <CustomButton title="Share" onPress={handleShareList} />
+                  {loading && <Loading/>}
+                  
+                  {!loading &&
+                    <View style={styles.modalContainer}>
+                      <Text style={styles.modalTitle}>Shopping List:</Text>
+                      <FlatList
+                        data={ShoppingList}
+                        renderItem={renderShoppingItem}
+                        keyExtractor={(item, index) => index.toString()}
+                        contentContainerStyle={styles.listContent}
+                      />
+                      <View style={styles.buttonContainer}>
+                        <CustomButton title="Close" onPress={() => setModalVisible(false)} />
+                        <CustomButton title="Share" onPress={handleShareList} />
+                      </View>
                     </View>
-                  </View>
+                  }
                 </ImageBackground>       
               </Modal>
             </View>

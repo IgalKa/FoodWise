@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../components/CustomButton';
 import apiClient from '../api/apiClient';
+import Loading from '../components/Loading';
 
 
 export default function EditList({route}){
@@ -154,7 +155,7 @@ export default function EditList({route}){
               </View>
             }
 
-            {loading && <ActivityIndicator size="large" color="#fff" />}
+            {loading && <Loading/>}
 
         </ImageBackground>
     );

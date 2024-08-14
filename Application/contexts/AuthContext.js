@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [userId, setUserId] = useState(null);
+    const [token, setToken] = useState(null);
     const [userName, setUserName] = useState(null);
     const [userLastName, setUserLastName] = useState(null);
     const [fridgeId, setFridgeId] = useState(null);
@@ -12,12 +12,12 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const fetchAuthData = async () => {
-            const id = await AsyncStorage.getItem('userId');
+            const token = await AsyncStorage.getItem('token');
             const fridge = await AsyncStorage.getItem('fridgeId');
             const name = await AsyncStorage.getItem('userName');
             const lastName = await AsyncStorage.getItem('userLastName');
-            if (id) {
-                setUserId(id);
+            if (token) {
+                setToken(token);
             }
             if (fridge) {
                 setFridgeId(fridge);
@@ -33,9 +33,9 @@ export const AuthProvider = ({ children }) => {
         fetchAuthData();
     }, []);
 
-    const saveUserId = async (id) => {
-        setUserId(id);
-        await AsyncStorage.setItem('userId', id);
+    const saveToken = async (id) => {
+        setToken(id);
+        await AsyncStorage.setItem('token', id);
     };
 
     const saveFridgeId = async (id) => {
@@ -57,9 +57,9 @@ export const AuthProvider = ({ children }) => {
         await AsyncStorage.setItem('userLastName', lastName);
     };
 
-    const clearUserId = async () => {
-        setUserId(null);
-        await AsyncStorage.removeItem('userId');
+    const clearToken = async () => {
+        setToken(null);
+        await AsyncStorage.removeItem('token');
     };
 
     const clearFridgeId = async () => {
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ userId, fridgeId, userName, userLastName, setUserId: saveUserId, setFridgeId: saveFridgeId, setUserName: saveUserName, setUserLastName: saveUserLastName, clearUserId, clearFridgeId, clearUserName, clearUserLastName, isLoading }}>
+        <AuthContext.Provider value={{ token: token, fridgeId, userName, userLastName, setToken: saveToken, setFridgeId: saveFridgeId, setUserName: saveUserName, setUserLastName: saveUserLastName, clearToken: clearToken, clearFridgeId, clearUserName, clearUserLastName, isLoading }}>
             {children}
         </AuthContext.Provider>
     );

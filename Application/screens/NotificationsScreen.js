@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View, TextInput, StyleSheet, Text, FlatList,
-    TouchableOpacity, Alert, Image, ImageBackground, ActivityIndicator
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {View, StyleSheet, Text, FlatList,Image, ImageBackground} from 'react-native';
 import apiClient from '../api/apiClient';
-import ScreenLayout from "../components/ScreenLayout";
 import { useAuth } from '../contexts/AuthContext';
 import NoFridge from '../components/NoFridge';
+import Loading from '../components/Loading';
 
 
 export default function NotificationsScreen() {
@@ -41,13 +37,7 @@ export default function NotificationsScreen() {
         };
 
         fetchData();
-
-        const intervalId = setInterval(() => {
-            fetchData();
-        }, 15000);
-
-        return () => clearInterval(intervalId); // Cleanup on component unmount
-    }, [fridgeId]);
+    }, []);
 
     const renderItem = ({ item }) => (
         <View style={styles.itemContainer}>
@@ -83,7 +73,7 @@ export default function NotificationsScreen() {
 
 
 
-            {loading && fridgeId && <ActivityIndicator size="large" color="#fff" />}
+            {loading && fridgeId && <Loading/>}
 
             {!fridgeId && <NoFridge />}
 
