@@ -15,11 +15,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center', // Centers content vertically
         alignItems: 'center',     // Centers content horizontally
     },
-    title: {
-        fontSize: 20,
-        color: '#fff', // White color for the text
-        textAlign: 'center', // Centers text horizontally
-    },
 });
 
 export default Loading;
