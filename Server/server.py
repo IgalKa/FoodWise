@@ -553,7 +553,7 @@ def get_statistics_by_table_name(table_name):
                                                                                   start_date, end_date)
     app.logger.info(
         f"Get {table_name} statistics of refrigerator={refrigerator_id} start_date={start_date} end_date={end_date}")
-    return products_and_quantities, 200
+    return products_and_quantities
 
 
 # /get_entry_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
@@ -568,6 +568,19 @@ def get_entry_statistics():
 @jwt_required()
 def get_exit_statistics():
     return get_statistics_by_table_name(table_name="exit_table")
+
+
+@app.route('/get_statistics', methods=['GET'])
+def get_statistics():
+    entry_stats = get_statistics_by_table_name(table_name="entry_table")
+    exit_stats = get_statistics_by_table_name(table_name="exit_table")
+
+    combined_stats = {
+        "entry_statistics": entry_stats,
+        "exit_statistics": exit_stats
+    }
+
+    return jsonify(combined_stats), 200
 
 
 if __name__ == '__main__':
