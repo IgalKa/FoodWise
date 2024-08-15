@@ -535,7 +535,7 @@ def update_product_quantity(refrigerator_id, barcode, quantity):
         error_response = {'error': f"quantity is negative"}
         return error_response, 400
     elif quantity == 0:
-        database.delete_alert_date(refrigerator_id, barcode)
+        database.delete_product(refrigerator_id, barcode)
         app.logger.info(f'Deleted product barcode={barcode} from refrigerator number={refrigerator_id}')
         message_response = {
             'message': f"The product has been successfully deleted from refrigerator number={refrigerator_id}"}
