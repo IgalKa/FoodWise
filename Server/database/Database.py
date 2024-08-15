@@ -14,7 +14,6 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        # Execute a SELECT query to find the name of the product with the given barcode
         cursor.execute("SELECT product_name "
                        "FROM product "
                        "WHERE barcode = ? ",
@@ -35,8 +34,7 @@ class Database:
         cursor.execute("SELECT barcode "
                        "FROM product "
                        "WHERE product_name = ? ",
-                       (product_name,)
-                       )
+                       (product_name,))
         result = cursor.fetchone()
 
         conn.close()
@@ -55,7 +53,6 @@ class Database:
                         "WHERE product_name LIKE ? || '%'"
                        ,(product_name,))
 
-
         result = cursor.fetchall()
         conn.close()
 
@@ -64,7 +61,6 @@ class Database:
         return products_json
 
     def find_refrigerator_contents(self, refrigerator_id):
-        # Connect to the SQLite database
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
@@ -92,7 +88,6 @@ class Database:
         conn.close()
 
     def add_product(self, refrigerator_id, barcode):
-        # Connect to the SQLite database
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
@@ -143,8 +138,7 @@ class Database:
                 f"UPDATE {table_name} "
                 f"SET quantity = ? "
                 f"WHERE refrigerator_id = ? AND barcode = ? AND {column_date} = ? ",
-                (result[0] + 1, refrigerator_id, barcode, formatted_current_date)
-            )
+                (result[0] + 1, refrigerator_id, barcode, formatted_current_date))
         else:
             cursor.execute(
                 f"INSERT INTO {table_name} (refrigerator_id,barcode,{column_date},quantity)"
@@ -155,7 +149,6 @@ class Database:
         conn.close()
 
     def remove_product(self, refrigerator_id, barcode):
-        # Connect to the SQLite database
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
@@ -164,55 +157,90 @@ class Database:
                        "WHERE refrigerator_id = ? and barcode = ?",
                        (refrigerator_id, barcode))
         result = cursor.fetchone()  # Fetch the first row of the result
+        conn.close()
 
         if result:
             if result[0] == 1:
-                cursor.execute("DELETE FROM refrigerator_content "
-                               "WHERE refrigerator_id = ? and barcode = ?",
-                               (refrigerator_id, barcode))
-            else:
-                cursor.execute("UPDATE refrigerator_content "
-                               "SET product_quantity = ? "
-                               "WHERE refrigerator_id = ? and barcode = ?",
-                               (result[0] - 1, refrigerator_id, barcode))
-            conn.commit()
+                self.delete_product(refrigerator_id, barcode)
+            else:  # result[0] > 1
+                self.remove_one_product(refrigerator_id, barcode, result[0])
 
-        conn.close()
         self.statistics_add_product_to_table("exit_table", refrigerator_id, barcode)
         return result
 
-    def check_value_exist(self, table_name, column_name, value):
-        # Connect to the SQLite database
+    def delete_product(self, refrigerator_id, barcode):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
-        cursor.execute("SELECT * "
-                       "FROM " + table_name +
-                       " WHERE " + column_name + " = ? ", (value,))
 
+        cursor.execute("DELETE FROM refrigerator_content "
+                   "WHERE refrigerator_id = ? and barcode = ?",
+                   (refrigerator_id, barcode))
+        conn.commit()
+        conn.close()
+
+    def remove_one_product(self, refrigerator_id, barcode, current_quantity):
+        self.set_product_quantity(refrigerator_id, barcode, current_quantity - 1)
+
+    def set_product_quantity(self, refrigerator_id, barcode, quantity):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("UPDATE refrigerator_content "
+                       "SET product_quantity = ? "
+                       "WHERE refrigerator_id = ? and barcode = ?",
+                       (quantity, refrigerator_id, barcode))
+        conn.commit()
+        conn.close()
+
+    def check_value_exist(self, table_name, column_name, value):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * "
+                       f"FROM {table_name} " 
+                       f"WHERE {column_name} = ? ",
+                       (value,))
         result = cursor.fetchone()
         conn.close()
+
         if result:
             return True
         else:
             return False
 
     def check_2values_exist(self, table_name, column_name1, column_name2, value1, value2):
-        # Connect to the SQLite database
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
-        cursor.execute("SELECT * "
-                       "FROM " + table_name +
-                       " WHERE " + column_name1 + " = ? AND " + column_name2 + " = ? ", (value1, value2))
 
+        cursor.execute("SELECT * "
+                       f"FROM {table_name} "
+                       f"WHERE {column_name1} = ? AND {column_name2} = ? ",
+                       (value1, value2))
         result = cursor.fetchone()
         conn.close()
+
+        if result:
+            return True
+        else:
+            return False
+
+    def check_3values_exist(self, table_name, column_name1, column_name2, column_name3, value1, value2, value3):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * "
+                       f"FROM {table_name} "
+                       f"WHERE {column_name1} = ? AND {column_name2} = ? AND {column_name3} = ? ",
+                       (value1, value2, value3))
+        result = cursor.fetchone()
+        conn.close()
+
         if result:
             return True
         else:
             return False
 
     def add_user(self, email, password, first_name, last_name):
-        # Connect to the SQLite database
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
@@ -225,7 +253,6 @@ class Database:
         conn.close()
 
     def get_user(self, email, password):
-        # Connect to the SQLite database
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
@@ -298,7 +325,8 @@ class Database:
 
         cursor.execute("UPDATE link "
                        "SET nickname = ? "
-                       "WHERE user_id = ? AND refrigerator_id = ?", (nickname, user_id, refrigerator_id))
+                       "WHERE user_id = ? AND refrigerator_id = ?",
+                       (nickname, user_id, refrigerator_id))
         conn.commit()
         conn.close()
 
@@ -320,8 +348,7 @@ class Database:
         cursor.execute("SELECT alert_date "
                        "FROM refrigerator_content "
                        "WHERE refrigerator_id = ? AND barcode = ?",
-                       (refrigerator_id, barcode)
-                       )
+                       (refrigerator_id, barcode))
         result = cursor.fetchone()
         conn.close()
 
@@ -330,7 +357,7 @@ class Database:
         else:
             return None
 
-    def find_refrigerator_contents_with_alerts_dates_in_the_past(self, refrigerator_id):
+    def find_refrigerator_contents_expired(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
@@ -377,15 +404,15 @@ class Database:
     def update_refrigerator_parameters(self, refrigerator_id, products):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
+
         cursor.execute(
             "DELETE FROM refrigerator_track "
-            "WHERE refrigerator_id = ? ", (refrigerator_id,)
-        )
+            "WHERE refrigerator_id = ? ", (refrigerator_id,))
 
         for product in products:
             cursor.execute('''
                 INSERT INTO refrigerator_track(refrigerator_id,barcode, amount) VALUES (?,?,?)
-            ''', (refrigerator_id,product['barcode'],product['amount']))
+            ''', (refrigerator_id, product['barcode'], product['amount']))
 
         conn.commit()
         conn.close()
@@ -395,8 +422,7 @@ class Database:
         cursor = conn.cursor()
         cursor.execute(
             "DELETE FROM shopping_list "
-            "WHERE refrigerator_id = ? ", (refrigerator_id,)
-        )
+            "WHERE refrigerator_id = ? ", (refrigerator_id,))
 
         for product in products:
             cursor.execute('''
@@ -406,7 +432,7 @@ class Database:
         conn.commit()
         conn.close()
 
-    def generate_inital_shopping_list(self, refrigerator_id):
+    def generate_initial_shopping_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
         cursor.execute("""
@@ -425,6 +451,7 @@ class Database:
     def get_parameter_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
+
         cursor.execute("""
         SELECT product_name,barcode,amount
         FROM refrigerator_track
@@ -441,6 +468,7 @@ class Database:
     def get_shopping_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
+
         cursor.execute("""
         SELECT product_name,amount
         FROM shopping_list

@@ -384,7 +384,7 @@ def generate_initial_shopping_list():
         return jsonify(error_response), 404
 
     app.logger.info(f'An initial shopping list was generated for refrigerator {refrigerator_id}')
-    result = database.generate_inital_shopping_list(refrigerator_id)
+    result = database.generate_initial_shopping_list(refrigerator_id)
     return jsonify(result), 200
 
 
@@ -416,47 +416,6 @@ def fetch_saved_shopping_list():
     app.logger.info(f'Request for the saved shopping list for refrigerator {refrigerator_id}')
     result = database.get_shopping_list(refrigerator_id)
     return jsonify(result), 200
-
-
-# /update_product_alert_date , json={"refrigerator_id": 1, "product_name": "Milk 1% 1L Tnuva", "alert_date": "2024-09-25"}
-@app.route('/update_product_alert_date', methods=['POST'])
-def update_product_alert_date():
-    data = request.get_json()
-    # If 'refrigerator_id' or 'product_name' or 'alert_date' keys are missing, return an error response
-    if not ('refrigerator_id' in data and 'product_name' in data and 'alert_date' in data):
-        app.logger.error("Invalid request of update_alert_date endpoint")
-        error_response = {'error': "invalid request"}
-        return error_response, 400
-
-    refrigerator_id = data['refrigerator_id']
-    product_name = data['product_name']
-    alert_date = data['alert_date']
-    database = app.extensions['database']
-
-    barcode = database.find_barcode(product_name)
-    if barcode is None:
-        app.logger.warning(f"Attempt to get barcode of product_name {product_name} that wasn't found in the database")
-        error_response = {'error': f"Barcode of product_name {product_name} not found"}
-        return error_response, 404
-
-    if not database.check_2values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
-                                        column_name2="barcode", value1=refrigerator_id, value2=barcode):
-        app.logger.warning(f"Attempt to update alert_date of refrigerator {refrigerator_id} with product {product_name}"
-                           f" barcode {barcode} that was not found in the database")
-        error_response = {'error': f"Refrigerator {refrigerator_id} with product {product_name} barcode {barcode}"
-                                   f" wasn't found in database"}
-        return error_response, 404
-
-    if not Functions.is_future_date(alert_date):
-        app.logger.warning(f"Attempt to update alert_date with date {alert_date} that is in the past")
-        error_response = {'error': f"Alert date {alert_date} is in the past"}
-        return error_response, 400
-
-    database.update_alert_date(refrigerator_id, barcode, alert_date)
-    app.logger.info(f"Alert date of refrigerator {refrigerator_id} with product {product_name} barcode {barcode}"
-                    f" updated successfully to {alert_date}")
-    message_response = {'message': f"Alert_date updated successfully"}
-    return message_response, 200
 
 
 # /get_product_alert_date?refrigerator_id=1&product_name=Eggs pack 12L free organic
@@ -499,9 +458,106 @@ def get_refrigerator_content_expired():
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return error_response, 404
 
-    refrigerator_content = database.find_refrigerator_contents_with_alerts_dates_in_the_past(refrigerator_id)
+    refrigerator_content = database.find_refrigerator_contents_expired(refrigerator_id)
     app.logger.info(f"Get refrigerator {refrigerator_id} contents with products there alert date passed")
     return refrigerator_content.__json__(), 200
+
+
+# /update_alert_date_and_quantity , json={"refrigerator_id": 1, "product_name": "Milk 1% 1L Tnuva", "alert_date": "2024-09-25", "product_quantity": 3}
+@app.route("/update_alert_date_and_quantity", methods=['POST'])
+def update_alert_date_and_quantity():
+    database = app.extensions['database']
+    data = request.get_json()
+
+    if not ('refrigerator_id' in data and 'product_name' in data and 'alert_date' and 'product_quantity' in data):
+        app.logger.error("Invalid request of update_alert_date_and_quantity endpoint")
+        error_response = {'error': "invalid request"}
+        return error_response, 400
+
+    refrigerator_id = data['refrigerator_id']
+    product_name = data['product_name']
+    alert_date = data['alert_date']
+    product_quantity = data['product_quantity']
+
+    barcode = database.find_barcode(product_name)
+    if barcode is None:
+        app.logger.warning(f"Attempt to get barcode of product_name={product_name} that wasn't found in the database")
+        error_response = {'error': f"Barcode of product_name={product_name} not found"}
+        return error_response, 404
+
+    if not database.check_2values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
+                                        column_name2="barcode", value1=refrigerator_id, value2=barcode):
+        app.logger.warning(f"Attempt to update refrigerator={refrigerator_id} with product barcode={barcode} that"
+                           f" was not found in the database")
+        error_response = {
+            'error': f"Refrigerator={refrigerator_id} with product={product_name} wasn't found in database"}
+        return error_response, 404
+
+    if not database.check_3values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
+                                        column_name2="barcode", column_name3="alert_date", value1=refrigerator_id,
+                                        value2=barcode, value3=alert_date):
+        response, status_code = update_product_alert_date(refrigerator_id, barcode, alert_date)
+        if status_code != 200:
+            return response, status_code
+
+    if not database.check_3values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
+                                        column_name2="barcode", column_name3="product_quantity", value1=refrigerator_id,
+                                        value2=barcode, value3=product_quantity):
+        response, status_code = update_product_quantity(refrigerator_id, barcode, product_quantity)
+        if status_code != 200:
+            return response, status_code
+
+    message_response = {'message': f"Refrigerator={refrigerator_id} with product={product_name} "
+                                   f"quantity={product_quantity} alert_date={alert_date} was updated successfully"}
+    return message_response, 200
+
+
+def update_product_alert_date(refrigerator_id, barcode, alert_date):
+    database = app.extensions['database']
+
+    if not Functions.is_future_date(alert_date):
+        app.logger.warning(f"Attempt to update alert_date with date {alert_date} that is in the past")
+        error_response = {'error': f"Alert date {alert_date} is in the past"}
+        return error_response, 400
+
+    database.update_alert_date(refrigerator_id, barcode, alert_date)
+    app.logger.info(f"Alert date of refrigerator={refrigerator_id} with product barcode={barcode} updated successfully"
+                    f" to alert_date={alert_date}")
+    message_response = {'message': f"Alert_date updated successfully"}
+    return message_response, 200
+
+
+def update_product_quantity(refrigerator_id, barcode, quantity):
+    database = app.extensions['database']
+
+    if quantity < 0:
+        app.logger.warning(f"Attempt to update quantity with negative quantity, quantity={quantity}")
+        error_response = {'error': f"quantity is negative"}
+        return error_response, 400
+    elif quantity == 0:
+        database.delete_alert_date(refrigerator_id, barcode)
+        app.logger.info(f'Deleted product barcode={barcode} from refrigerator number={refrigerator_id}')
+        message_response = {
+            'message': f"The product has been successfully deleted from refrigerator number={refrigerator_id}"}
+        return message_response, 200
+    else:  # quantity > 0
+        database.set_product_quantity(refrigerator_id, barcode, quantity)
+        app.logger.info(f'Set quantity for product barcode={barcode} from refrigerator number={refrigerator_id}')
+        message_response = {
+            'message': f"The product quantity has been successfully updated at refrigerator number={refrigerator_id}"}
+        return message_response, 200
+
+
+# /get_entry_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
+@app.route('/get_entry_statistics', methods=['GET'])
+def get_entry_statistics():
+    return get_statistics_by_table_name(table_name="entry_table")
+
+
+# /get_exit_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
+@app.route('/get_exit_statistics', methods=['GET'])
+def get_exit_statistics():
+    return get_statistics_by_table_name(table_name="exit_table")
 
 
 def get_statistics_by_table_name(table_name):
@@ -520,21 +576,6 @@ def get_statistics_by_table_name(table_name):
     app.logger.info(
         f"Get {table_name} statistics of refrigerator={refrigerator_id} start_date={start_date} end_date={end_date}")
     return products_and_quantities, 200
-
-
-# /get_entry_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
-@app.route('/get_entry_statistics', methods=['GET'])
-def get_entry_statistics():
-    return get_statistics_by_table_name(table_name="entry_table")
-
-
-# /get_exit_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
-@app.route('/get_exit_statistics', methods=['GET'])
-def get_exit_statistics():
-    return get_statistics_by_table_name(table_name="exit_table")
-
-
-
 
 
 if __name__ == '__main__':
