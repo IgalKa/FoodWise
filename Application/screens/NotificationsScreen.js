@@ -79,7 +79,9 @@ export default function NotificationsScreen() {
 
 
                 {!loading && alerts && alerts.length === 0 && fridgeId && (
-                    <Text style={styles.defaultText}>No alerts</Text>
+                    <View style={styles.centeredContainer}>
+                        <Text style={styles.defaultText}>No alerts</Text>
+                    </View>
                 )}
 
 
@@ -130,6 +132,13 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: "row",
     },
+    defaultText: {
+        color: '#ededed',
+    },
+    centeredContainer: {
+        alignContent: "center",
+        justifyContent: "center",
+    }
 })
 
 

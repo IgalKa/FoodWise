@@ -17,6 +17,7 @@ import DangerIcon from '../assets/images/danger-triangle.png';
 import FridgeIcon from '../assets/images/fridge.png';
 import LinkIcon from '../assets/images/link.png';
 import SettingsIcon from '../assets/images/setting-d.png';
+import { StatusBar, View } from 'react-native';
 
 
 
@@ -26,19 +27,24 @@ const DrawerNavigator = () => {
 
 
     return (
-        <Drawer.Navigator screenOptions={{
-            drawerStyle: {
-                backgroundColor: '#c6cbef',
-                width: 240,
-            },
-            headerShown: true,
-            headerTransparent: false,
-            headerStyle: {
-                backgroundColor: '#505a91',
+        <Drawer.Navigator
+            screenOptions={{
+                drawerStyle: {
+                    backgroundColor: '#c6cbef',
+                    width: 240,
+                },
+                headerShown: true,
+                headerTransparent: false,
+                headerStyle: {
+                    backgroundColor: '#293858',
+                    elevation: 0,
+                    borderWidth: 0,
 
-            },
-            headerTintColor: '#fff',
-        }}>
+                },
+                headerTintColor: '#fff',
+            }}
+
+        >
             <Drawer.Screen name='InventoryScreen' component={InventoryScreen} options={{
                 drawerLabel: 'Inventory',
                 headerTitle: 'Inventory',

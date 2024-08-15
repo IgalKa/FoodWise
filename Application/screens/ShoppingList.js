@@ -170,11 +170,12 @@ const styles = StyleSheet.create({
   itemContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#100000',
+    backgroundColor: '#08062e',
     padding: 10,
     marginVertical: 10,
     borderRadius: 10,
     width: '100%',
+    elevation: 5,
   },
   itemText: {
     fontSize: 16,

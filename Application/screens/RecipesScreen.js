@@ -110,7 +110,7 @@ const RecipesScreen = () => {
     return (
         <ScreenLayout>
             {fridgeId && !loading && !isGenerated && (
-                <TouchableOpacity style={styles.generateButton} onPress={handleGeneratePress}  >
+                <TouchableOpacity style={styles.generateButton} onPress={handleGeneratePress} activeOpacity={0.8} >
                     <Text style={styles.generateText}>Generate Recipes</Text>
                 </TouchableOpacity>
             )}
@@ -159,8 +159,11 @@ const styles = StyleSheet.create({
     generateButton: {
         backgroundColor: '#c6cbef',
         paddingVertical: 12,
-        width: '100%',
+        width: '90%',
         alignItems: 'center',
+        borderRadius: 10,
+        elevation: 5,
+        marginTop: 10,
     },
     generateText: {
         color: '#465881',
@@ -168,11 +171,14 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     clearButton: {
-        backgroundColor: '#C75B7A',
+        backgroundColor: '#c985b5',
         paddingVertical: 12,
-        width: '100%',
+        width: '45%',
         alignItems: 'center',
-        marginTop: 10
+        marginTop: 10,
+        marginBottom: 10,
+        borderRadius: 15,
+        elevation: 1,
     },
     clearText: {
         color: '#fff',

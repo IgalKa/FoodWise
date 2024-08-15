@@ -252,11 +252,12 @@ const styles = StyleSheet.create({
   parameterItemContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#100000',
+    backgroundColor: '#08062e',
     padding: 10,
     marginVertical: 10,
     borderRadius: 10,
     width: '100%',
+    elevation: 5,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -266,7 +267,7 @@ const styles = StyleSheet.create({
   },
   outerContainer: {
     flex: 1,
-    paddingTop: 20,
+    paddingTop: 5,
     alignItems: 'center',
   },
   loadingContainer: {

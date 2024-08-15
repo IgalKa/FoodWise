@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Text, StyleSheet, TouchableOpacity, ActivityIndicator, View, ScrollView, Dimensions, Image, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { Text, StyleSheet, TouchableOpacity, ActivityIndicator, View, ScrollView, Dimensions, Image, Alert, Animated } from 'react-native';
 import ScreenLayout from '../components/ScreenLayout';
 import { getStatistics } from '../api/refrigeratorApi';
 import { useAuth } from '../contexts/AuthContext';
@@ -45,6 +45,9 @@ const ConsumptionScreen = () => {
     const [showEnd, setShowEnd] = useState(false);
     const [chartEntryWidth, setChartEntryWidth] = useState(screenWidth - 25);
     const [chartExitWidth, setChartExitWidth] = useState(screenWidth - 25);
+    const fadeAnimEntry = useRef(new Animated.Value(0)).current; // Initial opacity of 0 for entry chart
+    const fadeAnimExit = useRef(new Animated.Value(0)).current;  // Initial opacity of 0 for exit chart
+
 
 
 
@@ -225,6 +228,28 @@ const ConsumptionScreen = () => {
     }, [chartEntryWidth]);
 
 
+    const animateChart = (fadeAnim) => {
+        fadeAnim.setValue(0); // Reset the opacity to 0 before starting the animation
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    useEffect(() => {
+        if (sortedEntryData) {
+            animateChart(fadeAnimEntry);
+        }
+    }, [sortedEntryData]);
+
+    useEffect(() => {
+        if (sortedExitData) {
+            animateChart(fadeAnimExit);
+        }
+    }, [sortedExitData]);
+
+
     return (
         <ScreenLayout>
             {fridgeId && (<ScrollView style={styles.scrollContainer}>
@@ -280,7 +305,7 @@ const ConsumptionScreen = () => {
                         <View style={styles.container}>
                             <Text style={styles.titleText}>Added Products</Text>
                             {sortedEntryData !== null && (
-                                <View style={styles.container}>
+                                <Animated.View style={{ ...styles.container, opacity: fadeAnimEntry }}>
                                     <SegmentedButtons
                                         value={entrySort}
                                         onValueChange={setEntrySort}
@@ -317,14 +342,14 @@ const ConsumptionScreen = () => {
                                             />
                                         </ScrollView>
                                     </View>
-                                </View>
+                                </Animated.View>
                             )}
                             {sortedEntryData === null && (
                                 <Text style={styles.defaultText}>No Data</Text>
                             )}
                             <Text style={styles.titleText}>Discarded Products</Text>
                             {sortedExitData !== null && (
-                                <View style={styles.container}>
+                                <Animated.View style={{ ...styles.container, opacity: fadeAnimExit }}>
                                     <SegmentedButtons
                                         value={exitSort}
                                         onValueChange={setExitSort}
@@ -360,7 +385,7 @@ const ConsumptionScreen = () => {
                                             />
                                         </ScrollView>
                                     </View>
-                                </View>
+                                </Animated.View>
                             )}
                             {sortedExitData === null && (
                                 <Text style={styles.defaultText}>No Data</Text>

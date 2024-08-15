@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { Button } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
-import { View, FlatList, TouchableOpacity, Text, StyleSheet, ActivityIndicator, Modal, TextInput } from 'react-native';
+import { View, FlatList, TouchableOpacity, Text, StyleSheet, ActivityIndicator, Modal, TextInput, Image } from 'react-native';
 import ScreenLayout from '../components/ScreenLayout';
 import { useAuth } from '../contexts/AuthContext';
 import QRCode from 'react-native-qrcode-svg';
@@ -128,9 +128,13 @@ const ItemSelectionScreen = () => {
     return (
         <ScreenLayout>
             {!loading && (
-                <TouchableOpacity style={styles.syncButton} onPress={handleLinkPress} >
-                    <Text style={styles.syncText}>Link A New Refrigerator</Text>
+                <TouchableOpacity style={styles.syncButton} onPress={handleLinkPress} activeOpacity={0.8}>
+                    <View style={styles.buttonContent}>
+                        <Image source={require('../assets/images/link.png')} style={styles.buttonImage} />
+                        <Text style={styles.syncText}>Link A New Refrigerator</Text>
+                    </View>
                 </TouchableOpacity>
+
             )}
             {loading && (
                 <ActivityIndicator size="large" color="#fff" />
@@ -138,7 +142,7 @@ const ItemSelectionScreen = () => {
             {!loading && data && (
                 <View style={styles.container}>
                     {data && data.length > 0 && (
-                        <Text style={styles.selectTitle}>Select A Refrigerator:</Text>
+                        <Text style={styles.selectTitle}>Select A Refrigerator</Text>
                     )}
                     <FlatList
                         data={data}
@@ -230,6 +234,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#465881',
         borderRadius: 10,
         width: '90%',
+        elevation: 5,
     },
     selectedItem: {
         borderWidth: 2,
@@ -254,8 +259,11 @@ const styles = StyleSheet.create({
     syncButton: {
         backgroundColor: '#c6cbef',
         paddingVertical: 12,
-        width: '100%',
+        width: '90%',
         alignItems: 'center',
+        borderRadius: 10,
+        elevation: 5,
+        marginTop: 10,
     },
     syncText: {
         color: '#465881',
@@ -320,5 +328,14 @@ const styles = StyleSheet.create({
     },
     defaultText: {
         color: '#ededed',
+    },
+    buttonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    buttonImage: {
+        width: 20,
+        height: 20,
+        marginRight: 15,
     },
 });

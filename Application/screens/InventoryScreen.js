@@ -293,12 +293,16 @@ const styles = StyleSheet.create({
     },
     item: {
         backgroundColor: '#465881',
+        //backgroundColor: "#5B99C2",
         padding: 20,
         marginVertical: 8,
         marginHorizontal: 8,
         borderRadius: 10,
         width: 150,
         alignItems: 'center',
+        borderWidth: 0.5,
+        borderColor: "#fff",
+        elevation: 5,
     },
     image: {
         width: 80,
