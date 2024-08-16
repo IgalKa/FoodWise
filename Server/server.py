@@ -13,10 +13,9 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from database.Database import Database
-#from Utils import Utils
+from Utils import Utils
 
 app = Flask(__name__)
-#utils = Utils(app)  # Create an instance of the Utils class
 
 # Set up basic configuration for logging to the console
 logging.basicConfig(level=logging.DEBUG,  # Log level
@@ -24,11 +23,13 @@ logging.basicConfig(level=logging.DEBUG,  # Log level
 
 app.extensions['database'] = Database("../Server/data/database.db")
 
-app.config['JWT_SECRET_KEY'] = '3e2a1b5c4d6f8e9a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4'  # Change this to a random secret key
+app.config[
+    'JWT_SECRET_KEY'] = '3e2a1b5c4d6f8e9a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4'  # Change this to a random secret key
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=3650)  # 10 years
 
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
+utils = Utils(app)  # Create an instance of the Utils class
 
 
 #     Embedded endpoints
@@ -90,45 +91,26 @@ def scan():
     barcode = data['barcode']
     mode = data['mode']
     refrigerator_id = data['refrigerator_id']
-    database = app.extensions['database']
-    # identify the product by the given barcode
-    product_name = database.find_product(barcode)
 
-    if product_name is None:
-        app.logger.warning(f'Attempt to get product with barcode {barcode} that was not found in the database')
-        error_response = {'error': f"Product with barcode {barcode} not found"}
-        return jsonify(error_response), 404
+    product_name = utils.find_product_by_barcode(barcode)
 
-    # identify if the refrigerator id exists
-    if not database.check_value_exist(table_name="refrigerator", column_name="refrigerator_id", value=refrigerator_id):
-        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
-        error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
-        return jsonify(error_response), 404
+    if not product_name:
+        return utils.product_not_found(barcode)
 
-    #check_result = utils.check_refrigerator_exist(refrigerator_id)
-    #if check_result:
-    #    return jsonify(check_result), 404
-
+    check_result = utils.check_refrigerator_exist(refrigerator_id)
+    if check_result:
+        return jsonify(check_result), 404
 
     if mode == 'add':
-        app.logger.info(f'Adding {product_name} to refrigerator number: {refrigerator_id}')
-        database.add_product(refrigerator_id, barcode)
-        message_response = {
-            'message': f"The product has been successfully added to the refrigerator number {refrigerator_id}"}
-        return jsonify(message_response), 200
+        return utils.add_product_to_refrigerator(product_name=product_name,
+                                                 refrigerator_id=refrigerator_id,
+                                                 barcode=barcode)
+
     elif mode == 'remove':
-        app.logger.info(f'Removing {product_name} from refrigerator number: {refrigerator_id}')
-        result = database.remove_product(refrigerator_id, barcode)
-        if result:
-            app.logger.info(f'The product has been successfully removed from refrigerator number {refrigerator_id}')
-            message_response = {
-                'message': f"The product has been successfully removed from refrigerator number {refrigerator_id}"}
-            return jsonify(message_response), 200
-        else:
-            app.logger.warning(f'Product with barcode {barcode} not found in the refrigerator number {refrigerator_id}')
-            error_response = {
-                'error': f"Product with barcode {barcode} not found in the refrigerator number {refrigerator_id}"}
-            return jsonify(error_response), 404
+        return utils.remove_product_from_refrigerator(product_name=product_name,
+                                                      refrigerator_id=refrigerator_id,
+                                                      barcode=barcode)
+
     else:
         app.logger.error(f'Attempt to use mode {mode} that does not exist')
         error_response = {'error': f"Mode {mode} not supported"}
@@ -138,9 +120,9 @@ def scan():
 #     Frontend endpoints
 
 
-@app.route('/add_product_from_app',  methods=['POST'])
+@app.route('/add_product_with_app', methods=['POST'])
 @jwt_required()
-def add_product_from_app():
+def add_product_with_app():
     user_id = get_jwt_identity()
     data = request.get_json()
     database = app.extensions['database']
@@ -153,19 +135,49 @@ def add_product_from_app():
     barcode = data['barcode']
     refrigerator_id = data['refrigerator_id']
 
+    product_name = utils.find_product_by_barcode(barcode)
+
+    if not product_name:
+        return utils.product_not_found(barcode)
+
     if not database.validate_request(user_id, refrigerator_id):
         app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
         error_response = {'error': f"Invalid authentication "}
         return jsonify(error_response), 404
 
-
-    app.logger.info(f'Adding {product_name} to refrigerator number: {refrigerator_id}')
-    database.add_product(refrigerator_id, barcode)
-    message_response = {
-        'message': f"The product has been successfully added to the refrigerator number {refrigerator_id}"}
-    return jsonify(message_response), 200
+    return utils.add_product_to_refrigerator(product_name=product_name,
+                                             refrigerator_id=refrigerator_id,
+                                             barcode=barcode)
 
 
+@app.route('/remove_product_wtih_app', methods=['POST'])
+@jwt_required()
+def remove_product_with_app():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    database = app.extensions['database']
+
+    if not ('barcode' in data and 'refrigerator_id' in data):
+        app.logger.error("Invalid request of add_product_from_app endpoint")
+        error_response = {'error': 'Invalid request'}
+        return jsonify(error_response), 400
+
+    barcode = data['barcode']
+    refrigerator_id = data['refrigerator_id']
+
+    product_name = utils.find_product_by_barcode(barcode)
+
+    if not product_name:
+        return utils.product_not_found(barcode)
+
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
+        return jsonify(error_response), 404
+
+    return utils.remove_product_from_refrigerator(product_name=product_name,
+                                                  refrigerator_id=refrigerator_id,
+                                                  barcode=barcode)
 
 
 # /register , json={"email": "liorbaa@mta.ac.il", "password": "12345678", "first_name": "Lior", "last_name": "Barak"}
@@ -336,7 +348,7 @@ def search_products():
         app.logger.info(f"There was a search for empty name")
         return {'message': "No products found"}, 404
 
-    result = database.search_products_by_product_name(product_name,all)
+    result = database.search_products_by_product_name(product_name, all)
     if not result:
         app.logger.info(f"There was an unsuccessful search for {product_name}")
         return {'message': "No products found"}, 404
