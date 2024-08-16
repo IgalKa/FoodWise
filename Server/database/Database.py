@@ -18,7 +18,7 @@ class Database:
         cursor.execute("SELECT product_name "
                        "FROM product "
                        "WHERE barcode = ? ",
-                       (int(barcode),))
+                       (barcode,))
         result = cursor.fetchone()
 
         conn.close()
@@ -46,14 +46,23 @@ class Database:
         else:
             return None
 
-    def search_products_by_product_name(self, product_name):
+    def search_products_by_product_name(self, product_name,all):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT product_name,barcode "
-                       "FROM product "
-                       "WHERE product_name LIKE ? || '%'"
-                       , (product_name,))
+        print(all)
+
+        if all == '1':
+            print("test")
+            cursor.execute("SELECT product_name,barcode "
+                           "FROM product "
+                           "WHERE product_name LIKE ? || '%'"
+                           , (product_name,))
+        else:
+            cursor.execute("SELECT product_name,barcode "
+                           "FROM product "
+                           "WHERE product_name LIKE ? || '%' AND barcode LIKE ? || '%'"
+                           , (product_name,"#"))
 
         result = cursor.fetchall()
         conn.close()
@@ -230,7 +239,7 @@ class Database:
         cursor = conn.cursor()
 
         data = (email, password)
-        cursor.execute("SELECT user_id, first_name, last_name "
+        cursor.execute("SELECT user_id,first_name, last_name "
                        "FROM user "
                        "WHERE email = ? AND password = ?", data)
         result = cursor.fetchone()

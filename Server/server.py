@@ -13,8 +13,10 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from database.Database import Database
+#from Utils import Utils
 
 app = Flask(__name__)
+#utils = Utils(app)  # Create an instance of the Utils class
 
 # Set up basic configuration for logging to the console
 logging.basicConfig(level=logging.DEBUG,  # Log level
@@ -22,8 +24,7 @@ logging.basicConfig(level=logging.DEBUG,  # Log level
 
 app.extensions['database'] = Database("../Server/data/database.db")
 
-app.config[
-    'JWT_SECRET_KEY'] = '3e2a1b5c4d6f8e9a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4'  # Change this to a random secret key
+app.config['JWT_SECRET_KEY'] = '3e2a1b5c4d6f8e9a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4'  # Change this to a random secret key
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=3650)  # 10 years
 
 bcrypt = Bcrypt(app)
@@ -104,6 +105,11 @@ def scan():
         error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
         return jsonify(error_response), 404
 
+    #check_result = utils.check_refrigerator_exist(refrigerator_id)
+    #if check_result:
+    #    return jsonify(check_result), 404
+
+
     if mode == 'add':
         app.logger.info(f'Adding {product_name} to refrigerator number: {refrigerator_id}')
         database.add_product(refrigerator_id, barcode)
@@ -130,6 +136,37 @@ def scan():
 
 
 #     Frontend endpoints
+
+
+@app.route('/add_product_from_app',  methods=['POST'])
+@jwt_required()
+def add_product_from_app():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    database = app.extensions['database']
+
+    if not ('barcode' in data and 'refrigerator_id' in data):
+        app.logger.error("Invalid request of add_product_from_app endpoint")
+        error_response = {'error': 'Invalid request'}
+        return jsonify(error_response), 400
+
+    barcode = data['barcode']
+    refrigerator_id = data['refrigerator_id']
+
+    if not database.validate_request(user_id, refrigerator_id):
+        app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not linked to user {user_id}')
+        error_response = {'error': f"Invalid authentication "}
+        return jsonify(error_response), 404
+
+
+    app.logger.info(f'Adding {product_name} to refrigerator number: {refrigerator_id}')
+    database.add_product(refrigerator_id, barcode)
+    message_response = {
+        'message': f"The product has been successfully added to the refrigerator number {refrigerator_id}"}
+    return jsonify(message_response), 200
+
+
+
 
 # /register , json={"email": "liorbaa@mta.ac.il", "password": "12345678", "first_name": "Lior", "last_name": "Barak"}
 @app.route('/register', methods=['POST'])
@@ -197,7 +234,6 @@ def user_login():
     app.logger.info("User logged successfully")
     return jsonify(
         access_token=access_token,
-        user_id=user['id'],
         first_name=user['first_name'],
         last_name=user['last_name'],
     ), 200
@@ -288,6 +324,7 @@ def update_refrigerator_name():
 def search_products():
     user_id = get_jwt_identity()
     product_name = request.args.get('product_name')
+    all = request.args.get('all')
     database = app.extensions['database']
 
     if not database.check_value_exist(table_name="user", column_name="user_id", value=user_id):
@@ -299,7 +336,7 @@ def search_products():
         app.logger.info(f"There was a search for empty name")
         return {'message': "No products found"}, 404
 
-    result = database.search_products_by_product_name(product_name)
+    result = database.search_products_by_product_name(product_name,all)
     if not result:
         app.logger.info(f"There was an unsuccessful search for {product_name}")
         return {'message': "No products found"}, 404
@@ -571,6 +608,7 @@ def get_exit_statistics():
 
 
 @app.route('/get_statistics', methods=['GET'])
+@jwt_required()
 def get_statistics():
     entry_stats = get_statistics_by_table_name(table_name="entry_table")
     exit_stats = get_statistics_by_table_name(table_name="exit_table")
