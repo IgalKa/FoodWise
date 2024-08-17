@@ -6,7 +6,7 @@ import {
 import { Button } from '@rneui/themed';
 import { useFocusEffect } from '@react-navigation/native';
 import ScreenLayout from '../components/ScreenLayout';
-import { getRefrigeratorContents, getAlertDate, updateAlertDate } from '../api/refrigeratorApi';
+import { getRefrigeratorContents, getAlertDate, updateAlertAndQuantity } from '../api/refrigeratorApi';
 import { useAuth } from '../contexts/AuthContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Counter from '../components/Counter';
@@ -87,6 +87,7 @@ function InventoryScreen({ navigation }) {
         }
     }, [searchQuery]);
 
+
     const handleLongPress = async (item) => {
         try {
             const response = await getAlertDate(fridgeId, item.name);
@@ -130,6 +131,22 @@ function InventoryScreen({ navigation }) {
             }
         }
     };
+
+    const handleSaveModal = async () => {
+        try {
+            console.log(alertDate);
+            setModalVisible(false);
+            await updateAlertAndQuantity(fridgeId, productName, alertDate, quantity);
+            fetchData();
+        } catch (error) {
+            console.log(error);
+            if (error.response.status = 400) {
+                console.error("error updating product data.");
+            }
+        }
+    };
+
+
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
@@ -222,11 +239,11 @@ function InventoryScreen({ navigation }) {
                             />
                         )}
 
-                        <View style={styles.buttonContainer}>
+                        {/* <View style={styles.buttonContainer}>
                             <View style={styles.renameButton}>
                                 <Button color="#465881" title="Save" onPress={handleSaveAlertDate} disabled={alertDate === null} />
                             </View>
-                        </View>
+                        </View> */}
 
                         <Text style={styles.modalTitle}>Edit quantity </Text>
                         <View style={styles.buttonContainer}>
@@ -235,7 +252,7 @@ function InventoryScreen({ navigation }) {
 
                         <View style={styles.buttonContainer}>
                             <View style={styles.renameButton}>
-                                <Button color="#465881" title="Save" onPress={handleSaveAlertDate} />
+                                <Button color="#465881" title="Save" onPress={handleSaveModal} />
                             </View>
                         </View>
 

@@ -69,3 +69,22 @@ export const updateAlertDate = (fridgeId, productName, alertDate) => {
 }
 
 
+export const updateAlertAndQuantity = (fridgeId, productName, alertDate, quantity) => {
+  const response = apiClient.post('/update_product_alert_date', {
+    refrigerator_id: fridgeId,
+    product_name: productName,
+    alert_date: alertDate,
+    product_quantity: quantity,
+  });
+  return response;
+}
+
+export const addProduct = (barcode, fridgeId) => {
+  const response = apiClient.post('/add_product_with_app', {
+    refrigerator_id: fridgeId,
+    barcode: barcode,
+  });
+  return response;
+}
+
+

@@ -18,6 +18,7 @@ export default function EditList({ route }) {
   const [getUrl, setGetUrl] = useState(route.params.getUrl);
   const [postUrl, setPostUrl] = useState(route.params.postUrl);
 
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [List, setList] = useState([]);
@@ -51,6 +52,7 @@ export default function EditList({ route }) {
   }, []);
 
   useEffect(() => {
+    console.log("in editList useEffect");
     if (route.params?.item) {
       const newItem = route.params.item;
 
@@ -152,7 +154,7 @@ export default function EditList({ route }) {
               <CustomButton title="Save" onPress={handleApplyChanges} />
               <CustomButton
                 title="Search"
-                onPress={() => navigation.navigate('SearchProduct', { fridgeId: 1, from: "parametersList" })}
+                onPress={() => navigation.navigate('SearchProduct', { fridgeId: fridgeId, action: 1 })}
               />
             </View>
           </View>

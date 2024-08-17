@@ -1,35 +1,44 @@
 import React, { useState } from 'react';
 import {
     View, TextInput, StyleSheet, Text, FlatList,
-    TouchableOpacity, Alert, Image, ImageBackground
+    TouchableOpacity, Alert, Image, ImageBackground, ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import apiClient from '../api/apiClient';
+import { addProduct } from '../api/refrigeratorApi';
 
 
 export default function SearchProduct({ route }) {
-    const { fridgeId } = route.params;
+    const { fridgeId, action } = route.params;
     const navigation = useNavigation();
 
     const [productName, setProductName] = useState('');
     const [results, setResults] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const handleSearch = async () => {
         try {
             setError(null); // Clear previous errors
+            setLoading(true);
             const response = await apiClient.get('/search_products', {
-                params: { product_name: productName },
+                params: {
+                    product_name: productName,
+                    all: action,
+                },
             });
             setResults(response.data);
         } catch (error) {
-            if (error.response.status === 404) {
+            if (error.response !== undefined && error.response.status === 404) {
                 setResults([]);
             } else {
                 console.error('Error fetching search results:', error);
                 setError('An error occurred while fetching search results.');
             }
+        }
+        finally {
+            setLoading(false);
         }
     };
 
@@ -41,9 +50,35 @@ export default function SearchProduct({ route }) {
         }
     };
 
+    const addNewProduct = async (barcode) => {
+        try {
+            const response = await addProduct(barcode, fridgeId);
+
+            if (response.status === 200) {
+                console.log("added item succesfully");
+                setLoading(false);
+                navigation.navigate('Inventory', { fridgeId: fridgeId, item: selectedItem });
+            }
+
+        } catch (error) {
+            console.log('Error adding product:', error);
+            console.log(fridgeId);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+
     const handleSendSelected = (item) => {
         if (selectedItem) {
-            navigation.navigate('EditList', { fridgeId: fridgeId, item: selectedItem })
+            if (action === 1)
+                navigation.navigate('EditList', { fridgeId: fridgeId, item: selectedItem });
+            else {
+                console.log(selectedItem.barcode);
+                setLoading(true);
+                addNewProduct(selectedItem.barcode)
+                navigation.navigate('Inventory', { fridgeId: fridgeId, item: selectedItem });
+            }
         } else {
             Alert.alert('Error', 'No item selected.');
         }
@@ -78,7 +113,7 @@ export default function SearchProduct({ route }) {
                 />
             </View>
             {error && <Text style={styles.error}>{error}</Text>}
-
+            {loading && (<ActivityIndicator color="#fff" />)}
 
             <FlatList
                 style={styles.flatList}
@@ -89,8 +124,9 @@ export default function SearchProduct({ route }) {
             />
 
             {selectedItem && (
-                <TouchableOpacity style={styles.addButton} onPress={handleSendSelected}>
-                    <Text style={styles.buttonText}> Add </Text>
+                <TouchableOpacity style={styles.addButton} onPress={handleSendSelected} disabled={loading}>
+                    {!loading && (<Text style={styles.buttonText}> Add </Text>)}
+                    {loading && (<ActivityIndicator color="#fff" />)}
                 </TouchableOpacity>
 
             )}
@@ -107,11 +143,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     itemContainer: {
-        backgroundColor: '#100000',
+        backgroundColor: '#08062e',
         padding: 10,
         marginVertical: 10,
         borderRadius: 10,
         width: '100%',
+        elevation: 5,
     },
     itemText: {
         fontSize: 16,
@@ -150,12 +187,14 @@ const styles = StyleSheet.create({
     },
     flatList: {
         maxHeight: '65%',
+        width: "90%"
     },
     item: {
         backgroundColor: '#f9c2ff',
         padding: 20,
         marginVertical: 8,
         borderRadius: 10,
+
     },
     selectedItem: {
         backgroundColor: '#90ee90',

@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import * as React from 'react';
-import { Image, StyleSheet } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import InventoryScreen from '../screens/InventoryScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
@@ -18,12 +18,16 @@ import FridgeIcon from '../assets/images/fridge.png';
 import LinkIcon from '../assets/images/link.png';
 import SettingsIcon from '../assets/images/setting-d.png';
 import { StatusBar, View } from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigation } from '@react-navigation/native';
 
 
 
 const DrawerNavigator = () => {
 
     const Drawer = createDrawerNavigator()
+    const { fridgeId } = useAuth();
+    const navigation = useNavigation();
 
 
     return (
@@ -53,6 +57,18 @@ const DrawerNavigator = () => {
                         source={FridgeIcon}
                         style={styles.icon}
                     />
+                ),
+                headerRight: () => (
+                    fridgeId !== null ? (
+                        <TouchableOpacity
+                            onPress={() => {
+                                navigation.navigate('SearchProduct', { fridgeId: fridgeId, action: 0 });
+                            }}
+                            style={{ marginRight: 20, padding: 8, borderRadius: 12, backgroundColor: "#5e6898" }}
+                        >
+                            <Text style={{ color: '#fff', fontSize: 15, fontWeight: "bold" }}>Add Product</Text>
+                        </TouchableOpacity>
+                    ) : null
                 ),
             }} />
             <Drawer.Screen name='ShoppingList' component={ShoppingList} options={{
