@@ -563,16 +563,17 @@ def update_product_quantity(refrigerator_id, barcode, quantity):
         error_response = {'error': f"quantity is negative"}
         return error_response, 400
     elif quantity == 0:
-        database.delete_product(refrigerator_id, barcode)
+        database.refrigerator_content_delete_product(refrigerator_id, barcode)
         app.logger.info(f'Deleted product barcode={barcode} from refrigerator number={refrigerator_id}')
         message_response = {
             'message': f"The product has been successfully deleted from refrigerator number={refrigerator_id}"}
         return message_response, 200
     else:  # quantity > 0
-        database.set_product_quantity(refrigerator_id, barcode, quantity)
-        app.logger.info(f'Set quantity for product barcode={barcode} from refrigerator number={refrigerator_id}')
+        database.update_product_quantity(refrigerator_id, barcode, quantity)
+        app.logger.info(
+            f'Set quantity={quantity} for product barcode={barcode} from refrigerator number={refrigerator_id}')
         message_response = {
-            'message': f"The product quantity has been successfully updated at refrigerator number={refrigerator_id}"}
+            'message': f"The product quantity updated to {quantity} at refrigerator number={refrigerator_id}"}
         return message_response, 200
 
 

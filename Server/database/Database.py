@@ -105,26 +105,99 @@ class Database:
                        "WHERE refrigerator_id = ? and barcode = ?",
                        (refrigerator_id, barcode))
         result = cursor.fetchone()  # Fetch the first row of the result
+        conn.close()
 
         if result:
-            cursor.execute(
-                "UPDATE refrigerator_content "
-                "SET product_quantity = ?"
-                "WHERE refrigerator_id = ? and barcode = ?",
-                (result[0] + 1, refrigerator_id, barcode))
+            self.refrigerator_content_add_one_product(refrigerator_id, barcode, result[0])
         else:
-            now = datetime.now()
-            formatted_current_date = now.strftime('%Y-%m-%d')
-            data = (refrigerator_id, barcode, 1, formatted_current_date)
-            cursor.execute(
-                "INSERT INTO refrigerator_content (refrigerator_id,barcode,product_quantity,oldest_added_date)"
-                "VALUES (?,?,?,?)", data)
+            self.refrigerator_content_insert_product(refrigerator_id, barcode)
 
+    def refrigerator_content_add_one_product(self, refrigerator_id, barcode, current_quantity):
+        self.update_product_quantity(refrigerator_id, barcode, current_quantity + 1)
+
+    def refrigerator_content_insert_product(self, refrigerator_id, barcode):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        now = datetime.now()
+        formatted_current_date = now.strftime('%Y-%m-%d')
+
+        cursor.execute(
+            "INSERT INTO refrigerator_content (refrigerator_id, barcode, product_quantity, oldest_added_date)"
+            "VALUES (?, ?, ?, ?)",
+            (refrigerator_id, barcode, 1, formatted_current_date))
         conn.commit()
         conn.close()
-        self.statistics_add_product_to_table("entry_table", refrigerator_id, barcode)
 
-    def statistics_add_product_to_table(self, table_name, refrigerator_id, barcode):
+        self.statistics_add_products_to_table("entry_table", refrigerator_id, barcode, 1)
+
+    def remove_product(self, refrigerator_id, barcode):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT product_quantity "
+                       "FROM refrigerator_content "
+                       "WHERE refrigerator_id = ? and barcode = ?",
+                       (refrigerator_id, barcode))
+        result = cursor.fetchone()  # Fetch the first row of the result
+        conn.close()
+
+        if result:
+            if result[0] == 1:
+                self.refrigerator_content_delete_product(refrigerator_id, barcode)
+            else:  # result[0] > 1
+                self.refrigerator_content_remove_one_product(refrigerator_id, barcode, result[0])
+
+        return result
+
+    def refrigerator_content_delete_product(self, refrigerator_id, barcode):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT product_quantity "
+                       "FROM refrigerator_content "
+                       "WHERE refrigerator_id = ? AND barcode = ?",
+                       (refrigerator_id, barcode))
+        result = cursor.fetchone()
+        quantity = result[0]
+
+        cursor.execute("DELETE FROM refrigerator_content "
+                   "WHERE refrigerator_id = ? and barcode = ?",
+                   (refrigerator_id, barcode))
+        conn.commit()
+        conn.close()
+
+        self.statistics_add_products_to_table("exit_table", refrigerator_id, barcode, quantity)
+
+    def refrigerator_content_remove_one_product(self, refrigerator_id, barcode, current_quantity):
+        self.update_product_quantity(refrigerator_id, barcode, current_quantity - 1)
+
+    def update_product_quantity(self, refrigerator_id, barcode, quantity):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT product_quantity "
+                       "FROM refrigerator_content "
+                       "WHERE refrigerator_id = ? AND barcode = ?",
+                       (refrigerator_id, barcode))
+        result = cursor.fetchone()
+        quantity_before = result[0]
+
+        cursor.execute("UPDATE refrigerator_content "
+                       "SET product_quantity = ? "
+                       "WHERE refrigerator_id = ? and barcode = ?",
+                       (quantity, refrigerator_id, barcode))
+        conn.commit()
+        conn.close()
+
+        if quantity_before > quantity:
+            self.statistics_add_products_to_table("exit_table", refrigerator_id, barcode,
+                                                  quantity_before - quantity)
+        else:  # quantity_before < quantity
+            self.statistics_add_products_to_table("entry_table", refrigerator_id, barcode,
+                                                  quantity - quantity_before)
+
+    def statistics_add_products_to_table(self, table_name, refrigerator_id, barcode, quantity):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
@@ -147,57 +220,13 @@ class Database:
                 f"UPDATE {table_name} "
                 f"SET quantity = ? "
                 f"WHERE refrigerator_id = ? AND barcode = ? AND {column_date} = ? ",
-                (result[0] + 1, refrigerator_id, barcode, formatted_current_date))
+                (result[0] + quantity, refrigerator_id, barcode, formatted_current_date))
         else:
             cursor.execute(
-                f"INSERT INTO {table_name} (refrigerator_id,barcode,{column_date},quantity)"
-                f"VALUES (?,?,?,?)",
-                (refrigerator_id, barcode, formatted_current_date, 1))
+                f"INSERT INTO {table_name} (refrigerator_id, barcode, {column_date}, quantity)"
+                f"VALUES (?, ?, ?, ?)",
+                (refrigerator_id, barcode, formatted_current_date, quantity))
 
-        conn.commit()
-        conn.close()
-
-    def remove_product(self, refrigerator_id, barcode):
-        conn = sqlite3.connect(self.path)
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT product_quantity "
-                       "FROM refrigerator_content "
-                       "WHERE refrigerator_id = ? and barcode = ?",
-                       (refrigerator_id, barcode))
-        result = cursor.fetchone()  # Fetch the first row of the result
-        conn.close()
-
-        if result:
-            if result[0] == 1:
-                self.delete_product(refrigerator_id, barcode)
-            else:  # result[0] > 1
-                self.remove_one_product(refrigerator_id, barcode, result[0])
-
-        self.statistics_add_product_to_table("exit_table", refrigerator_id, barcode)
-        return result
-
-    def delete_product(self, refrigerator_id, barcode):
-        conn = sqlite3.connect(self.path)
-        cursor = conn.cursor()
-
-        cursor.execute("DELETE FROM refrigerator_content "
-                   "WHERE refrigerator_id = ? and barcode = ?",
-                   (refrigerator_id, barcode))
-        conn.commit()
-        conn.close()
-
-    def remove_one_product(self, refrigerator_id, barcode, current_quantity):
-        self.set_product_quantity(refrigerator_id, barcode, current_quantity - 1)
-
-    def set_product_quantity(self, refrigerator_id, barcode, quantity):
-        conn = sqlite3.connect(self.path)
-        cursor = conn.cursor()
-
-        cursor.execute("UPDATE refrigerator_content "
-                       "SET product_quantity = ? "
-                       "WHERE refrigerator_id = ? and barcode = ?",
-                       (quantity, refrigerator_id, barcode))
         conn.commit()
         conn.close()
 
