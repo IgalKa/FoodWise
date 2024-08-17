@@ -252,7 +252,7 @@ class Database:
     def validate_request(self, user_id, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
-        cursor.execute("SELECT *"
+        cursor.execute("SELECT * "
                        "FROM link "
                        "WHERE refrigerator_id = ? AND user_id = ?", (refrigerator_id, user_id))
         result = cursor.fetchone()

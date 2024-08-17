@@ -543,15 +543,15 @@ def update_alert_date_and_quantity():
 def update_product_alert_date(refrigerator_id, barcode, alert_date):
     database = app.extensions['database']
 
-    if not is_future_date(alert_date):
-        app.logger.warning(f"Attempt to update alert_date with date {alert_date} that is in the past")
-        error_response = {'error': f"Alert date {alert_date} is in the past"}
+    if alert_date is not None and not is_future_date(alert_date):
+        app.logger.warning(f"Attempt to update alert_date with date={alert_date} that is in the past")
+        error_response = {'error': f"Alert date={alert_date} is in the past"}
         return error_response, 400
 
     database.update_alert_date(refrigerator_id, barcode, alert_date)
     app.logger.info(f"Alert date of refrigerator={refrigerator_id} with product barcode={barcode} updated successfully"
                     f" to alert_date={alert_date}")
-    message_response = {'message': f"Alert_date updated successfully"}
+    message_response = {'message': f"Alert_date updated successfully to {alert_date}"}
     return message_response, 200
 
 
@@ -626,6 +626,11 @@ def get_statistics():
     }
 
     return jsonify(combined_stats), 200
+
+
+# @app.route('/add_product_with_DB', methods=['POST'])
+# def add_product_with_DB():
+
 
 
 if __name__ == '__main__':
