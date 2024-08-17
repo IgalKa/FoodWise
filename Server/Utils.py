@@ -14,7 +14,7 @@ class Utils:
                                                value=refrigerator_id):
             self.app.logger.warning(f'Attempt to access refrigerator {refrigerator_id} that does not exist')
             error_response = {'error': f"Refrigerator number {refrigerator_id} does not exist"}
-            return error_response
+            return jsonify(error_response), 404
         else:
             return None
 

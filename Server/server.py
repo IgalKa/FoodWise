@@ -98,7 +98,7 @@ def scan():
 
     check_result = utils.check_refrigerator_exist(refrigerator_id)
     if check_result:
-        return jsonify(check_result), 404
+        return check_result
 
     if mode == 'add':
         return utils.add_product_to_refrigerator(product_name=product_name,
