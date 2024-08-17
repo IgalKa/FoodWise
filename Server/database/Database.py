@@ -284,7 +284,7 @@ class Database:
         # Check if result is not None
         if result:
             user_object = {
-                'id': result[0],
+                'user_id': result[0],
                 'first_name': result[1],
                 'last_name': result[2]
             }
