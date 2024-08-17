@@ -1,4 +1,5 @@
 from flask import jsonify
+from datetime import datetime
 
 
 class Utils:
@@ -49,3 +50,10 @@ class Utils:
         self.app.logger.warning(f'Attempt to get product with barcode {barcode} that was not found in the database')
         error_response = {'error': f"Product with barcode {barcode} not found"}
         return jsonify(error_response), 404
+
+    def is_future_date(self, alert_date_str):
+        # Convert the string to a datetime object
+        alert_date = datetime.strptime(alert_date_str, '%Y-%m-%d')
+        now = datetime.now()
+        # Check if the alert_date is in the future
+        return alert_date > now

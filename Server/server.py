@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 import logging
 import sys
 from os.path import abspath, dirname, join
-from models import Functions
 from datetime import timedelta
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -509,7 +508,7 @@ def update_product_alert_date():
                                    f" wasn't found in database"}
         return error_response, 404
 
-    if not Functions.is_future_date(alert_date):
+    if not utils.is_future_date(alert_date):
         app.logger.warning(f"Attempt to update alert_date with date {alert_date} that is in the past")
         error_response = {'error': f"Alert date {alert_date} is in the past"}
         return error_response, 400
