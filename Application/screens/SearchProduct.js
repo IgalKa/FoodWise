@@ -115,13 +115,19 @@ export default function SearchProduct({ route }) {
             {error && <Text style={styles.error}>{error}</Text>}
             {loading && (<ActivityIndicator color="#fff" />)}
 
-            <FlatList
+            {results && results.length > 0 && (<FlatList
                 style={styles.flatList}
                 data={results}
                 keyExtractor={(item) => item.barcode.toString()}
                 renderItem={renderSearchItem}
                 contentContainerStyle={styles.list}
-            />
+            />)}
+
+            {results && results.length === 0 && (
+                <View style={styles.noProdContainer}>
+                    <Text style={styles.defaultText}>No products.</Text>
+                </View>
+            )}
 
             {selectedItem && (
                 <TouchableOpacity style={styles.addButton} onPress={handleSendSelected} disabled={loading}>
@@ -214,5 +220,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#f2dbff',
         padding: 16,
         borderRadius: 50,
+    },
+    defaultText: {
+        color: '#ededed',
+    },
+    noProdContainer: {
+        justifyContent: "center",
+        alignContent: "center",
+        marginTop: 300,
     },
 });

@@ -1,17 +1,22 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-const Counter = ({ initialValue = 0 }) => {
+const Counter = ({ initialValue = 0, onValueChange }) => {
     const [count, setCount] = useState(initialValue);
     const timerRef = useRef(null);
 
     const increase = () => {
-        setCount(prevCount => prevCount + 1);
+        setCount(prevCount => {
+            const newCount = prevCount + 1;
+            onValueChange(newCount);
+            return newCount;
+        });
     };
 
     const decrease = () => {
         setCount(prevCount => {
             const newCount = Math.max(prevCount - 1, 0);
+            onValueChange(newCount);
             return newCount;
         });
     };
@@ -27,6 +32,10 @@ const Counter = ({ initialValue = 0 }) => {
     const stopDecreasing = () => {
         clearInterval(timerRef.current);
     };
+
+    useEffect(() => {
+        setCount(initialValue);
+    }, [initialValue]);
 
     return (
         <View style={styles.container}>

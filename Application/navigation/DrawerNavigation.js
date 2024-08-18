@@ -23,6 +23,7 @@ import { useNavigation } from '@react-navigation/native';
 
 
 
+
 const DrawerNavigator = () => {
 
     const Drawer = createDrawerNavigator()
@@ -64,7 +65,7 @@ const DrawerNavigator = () => {
                             onPress={() => {
                                 navigation.navigate('SearchProduct', { fridgeId: fridgeId, action: 0 });
                             }}
-                            style={{ marginRight: 20, padding: 8, borderRadius: 12, backgroundColor: "#5e6898" }}
+                            style={{ marginRight: 20, padding: 8, borderRadius: 12, backgroundColor: "#465881", elevation: 5, }}
                         >
                             <Text style={{ color: '#fff', fontSize: 15, fontWeight: "bold" }}>Add Product</Text>
                         </TouchableOpacity>

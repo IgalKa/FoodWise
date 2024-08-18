@@ -5,6 +5,7 @@ import apiClient from '../api/apiClient';
 import { useAuth } from '../contexts/AuthContext';
 import NoFridge from '../components/NoFridge';
 import Loading from '../components/Loading';
+import ScreenLayout from '../components/ScreenLayout';
 
 
 export default function NotificationsScreen() {
@@ -92,7 +93,7 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
     itemContainer: {
         flexDirection: 'row',
-        backgroundColor: '#100000',
+        backgroundColor: '#08062e',
         padding: 10,
         marginVertical: 10,
         borderRadius: 10,

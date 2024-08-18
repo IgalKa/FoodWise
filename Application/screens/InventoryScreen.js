@@ -135,13 +135,14 @@ function InventoryScreen({ navigation }) {
     const handleSaveModal = async () => {
         try {
             console.log(alertDate);
+            console.log(quantity);
             setModalVisible(false);
             await updateAlertAndQuantity(fridgeId, productName, alertDate, quantity);
             fetchData();
         } catch (error) {
-            console.log(error);
+            console.log(error.response);
             if (error.response.status = 400) {
-                console.error("error updating product data.");
+                console.error("error updating product data.", error);
             }
         }
     };
@@ -247,7 +248,7 @@ function InventoryScreen({ navigation }) {
 
                         <Text style={styles.modalTitle}>Edit quantity </Text>
                         <View style={styles.buttonContainer}>
-                            <Counter initialValue={quantity} />
+                            <Counter initialValue={quantity} onValueChange={setQuantity} />
                         </View>
 
                         <View style={styles.buttonContainer}>

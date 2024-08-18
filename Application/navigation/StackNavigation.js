@@ -22,7 +22,7 @@ export default function Navigation() {
             <Stack.Screen name="Signup" component={SignupScreen} />
             <Stack.Screen name="Inventory" component={DrawerNavigator} />
             <Stack.Screen name="SearchProduct" component={SearchProduct} />
-            <Stack.Screen name="EditList" component={EditList}/>
+            <Stack.Screen name="EditList" component={EditList} />
         </Stack.Navigator>
     );
 

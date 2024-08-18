@@ -200,7 +200,7 @@ const ConsumptionScreen = () => {
         setLoading(true);
         const sortedData = await fetchStatistics();
         // console.log("sorted data in handleApply is:", sortedData);
-        console.log(sortedData.entry.length == 0);
+        //console.log(sortedData.entry.length == 0);
         if (sortedData) {
             if (sortedData.entry !== null && sortedData.entry.length != 0 && sortedData.entry.labels.length > 0) {
                 console.log("im in entry width");

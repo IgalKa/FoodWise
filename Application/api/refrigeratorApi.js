@@ -59,18 +59,18 @@ export const getAlertDate = (fridgeId, productName) => {
 }
 
 
-export const updateAlertDate = (fridgeId, productName, alertDate) => {
-  const response = apiClient.post('/update_product_alert_date', {
-    refrigerator_id: fridgeId,
-    product_name: productName,
-    alert_date: alertDate
-  });
-  return response;
-}
+// export const updateAlertDate = (fridgeId, productName, alertDate) => {
+//   const response = apiClient.post('/update_product_alert_date', {
+//     refrigerator_id: fridgeId,
+//     product_name: productName,
+//     alert_date: alertDate
+//   });
+//   return response;
+// }
 
 
 export const updateAlertAndQuantity = (fridgeId, productName, alertDate, quantity) => {
-  const response = apiClient.post('/update_product_alert_date', {
+  const response = apiClient.post('/update_alert_date_and_quantity', {
     refrigerator_id: fridgeId,
     product_name: productName,
     alert_date: alertDate,
