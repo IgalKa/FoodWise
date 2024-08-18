@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../components/CustomButton';
 import apiClient from '../api/apiClient';
 import ScreenLayout from '../components/ScreenLayout';
+import Loading from '../components/Loading';
 
 
 export default function EditList({ route }) {
@@ -159,9 +160,7 @@ export default function EditList({ route }) {
             </View>
           </View>
         }
-        {loading && (<View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#fff" />
-        </View>)}
+        {loading && <Loading />}
       </View>
     </ScreenLayout>
     // </ImageBackground>

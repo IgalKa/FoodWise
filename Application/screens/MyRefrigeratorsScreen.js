@@ -84,6 +84,7 @@ const ItemSelectionScreen = () => {
     };
 
     const handleLinkPress = (item) => {
+        console.log("displaying qr code of "+ userId);
         setLinkModalVisible(true);
     };
 
