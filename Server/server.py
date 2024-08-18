@@ -598,7 +598,7 @@ def get_statistics_by_table_name(table_name):
                                                                                   start_date, end_date)
     app.logger.info(
         f"Get {table_name} statistics of refrigerator={refrigerator_id} start_date={start_date} end_date={end_date}")
-    return products_and_quantities, 200
+    return products_and_quantities
 
 
 # /get_entry_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21

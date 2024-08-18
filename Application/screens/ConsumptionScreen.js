@@ -148,6 +148,7 @@ const ConsumptionScreen = () => {
                 let exitData = response.data.exit_statistics.products
                 console.log("in fetch exit data:", exitData);
                 console.log("in fetch entry data", entryData);
+                console.log(response.data);
                 if (entryData !== undefined) {
                     if (entryData.length > 0) {
                         const transformedData = transformData(entryData);
