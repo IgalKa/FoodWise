@@ -22,7 +22,7 @@ export default function WelcomeScreen() {
                 </View>
 
                 <View style={{ alignItems: 'center' }}>
-                    <TouchableOpacity style={styles.startButton} onPress={() => navigation.navigate('Signup')}>
+                    <TouchableOpacity style={styles.startButton} onPress={() => navigation.navigate('Signup')} activeOpacity={0.8}>
                         <Text style={styles.buttonText}>Lets Get Started</Text>
                     </TouchableOpacity>
                 </View>
@@ -62,12 +62,14 @@ const styles = StyleSheet.create({
     slogan: {
         fontSize: 30,
         color: '#ededed',
+        elevation: 5,
     },
     startButton: {
         backgroundColor: '#ab73f0',
         paddingVertical: 25,
         borderRadius: 5,
-        width: '80%'
+        width: '80%',
+        elevation: 5,
 
     },
     buttonText: {
