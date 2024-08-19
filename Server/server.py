@@ -1,19 +1,13 @@
 from flask import Flask, request, jsonify
 import logging
-import sys
-from os.path import abspath, dirname, join
 from datetime import timedelta
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_mail import Mail, Message
-
-# Calculate the project root directory and add it to sys.path
-project_root = abspath(join(dirname(__file__), '..'))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-
-from database.Database import Database
+from models.Database import Database
 from Utils import Utils, is_future_date
+
+
 
 app = Flask(__name__)
 
@@ -31,7 +25,14 @@ app.config['MAIL_DEFAULT_SENDER'] = 'foodwiselmi@gmail.com'
 app.config['JWT_SECRET_KEY'] = '3e2a1b5c4d6f8e9a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=3650)  # 10 years
 
-app.extensions['database'] = Database("../Server/data/database.db")
+
+docker=False
+
+if docker:
+    app.extensions['database'] = Database("/app/data/database.db",docker)
+else:
+    app.extensions['database'] = Database("../Server/data/database.db",docker)
+
 
 mail = Mail(app)
 bcrypt = Bcrypt(app)
@@ -635,4 +636,4 @@ def get_statistics():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=12345, threaded=True)
+    app.run(host='0.0.0.0', port=12345, threaded=True,debug=True)

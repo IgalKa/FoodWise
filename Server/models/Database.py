@@ -1,13 +1,14 @@
 import random
 import sqlite3
-from datetime import datetime, timedelta
-from Server.models.Refrigerator import Refrigerator
-from Server.models.Product import Product
+from datetime import datetime
+from .Product import Product
+from .Refrigerator import Refrigerator
 
 
 class Database:
-    def __init__(self, path):
+    def __init__(self, path,docker):
         self.path = path
+        self.docker=docker
 
     def find_product(self, barcode):
         # Connect to the SQLite database
@@ -48,10 +49,8 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        print(all)
 
         if all == '1':
-            print("test")
             cursor.execute("SELECT product_name,barcode "
                            "FROM product "
                            "WHERE product_name LIKE ? || '%'"
@@ -73,7 +72,7 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT product_name,image,product_quantity,oldest_added_date,alert_date "
+        cursor.execute("SELECT product_name,barcode,product_quantity,oldest_added_date,alert_date "
                        "FROM refrigerator_content NATURAL INNER JOIN product "
                        "WHERE refrigerator_id = ?",
                        (refrigerator_id,))
@@ -81,7 +80,12 @@ class Database:
 
         refrigerator = Refrigerator(refrigerator_id)
         for row in result:
-            product = Product(row[0], row[1], row[2], row[3], row[4])
+            image_path = ""
+            if self.docker:
+                image_path = "/app/pictures/" + row[1] + ".jpg"
+            else:
+                image_path = "../Server/pictures/" + row[1] + ".jpg"
+            product = Product(row[0], image_path, row[2], row[3], row[4])
             refrigerator.add_product(product)
 
         conn.close()
@@ -419,7 +423,7 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT product_name,image,product_quantity,oldest_added_date,alert_date "
+        cursor.execute("SELECT product_name,barcode,product_quantity,oldest_added_date,alert_date "
                        "FROM refrigerator_content NATURAL INNER JOIN product "
                        "WHERE refrigerator_id = ? "
                        "AND alert_date IS NOT NULL "
@@ -429,7 +433,12 @@ class Database:
 
         refrigerator = Refrigerator(refrigerator_id)
         for row in result:
-            product = Product(row[0], row[1], row[2], row[3], row[4])
+            image_path=""
+            if self.docker:
+                image_path = "/app/pictures/"+ row[1] + ".jpg"
+            else:
+                image_path = "../Server/pictures/" + row[1] + ".jpg"
+            product = Product(row[0], image_path, row[2], row[3], row[4])
             refrigerator.add_product(product)
 
         conn.close()

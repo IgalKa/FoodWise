@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import pytest
 from Server.server import app
-from Server.database.Database import Database  # Adjust the import path
+from Server.models.Database import Database  # Adjust the import path
 
 @pytest.fixture
 def client():
