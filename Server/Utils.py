@@ -48,6 +48,24 @@ class Utils:
             error_response = {'error': f"User with email {email} does not exist"}
             return jsonify(error_response), 404
 
+    def check_barcode_already_exist(self, barcode):
+        if self.database.check_value_exist(table_name="product", column_name="barcode", value=barcode):
+            self.app.logger.warning(
+                f"Attempt to add product to DataBase 'product' with barcode={barcode} that already exists")
+            error_response = {'error': f"barcode={barcode} already exists"}
+            return jsonify(error_response), 400
+        else:
+            return None
+
+    def check_product_name_already_exist(self, product_name):
+        if self.database.check_value_exist(table_name="product", column_name="product_name", value=product_name):
+            self.app.logger.warning(
+                f"Attempt to add product to DataBase 'product' with name={product_name} that already exists")
+            error_response = {'error': f"product name={product_name} already exists"}
+            return error_response, 400
+        else:
+            return None
+
     def validate_link(self, user_id, refrigerator_id):
         if not self.database.validate_request(user_id, refrigerator_id):
             self.app.logger.warning(

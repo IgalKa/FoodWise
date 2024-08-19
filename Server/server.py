@@ -630,10 +630,36 @@ def get_statistics():
     return jsonify(combined_stats), 200
 
 
-# @app.route('/add_product_with_DB', methods=['POST'])
-# def add_product_with_DB():
+#     Managers endpoints
 
+
+@app.route('/add_new_product_to_DB', methods=['POST'])
+def add_new_product_to_DB():
+    database = app.extensions['database']
+    data = request.get_json()
+
+    try:
+        barcode = data['barcode']
+        product_name = data['product_name']
+        image = data['image']
+    except KeyError:
+        app.logger.error("Invalid request of add_new_product_to_DB endpoint")
+        error_response = {'error': "invalid request"}
+        return error_response, 400
+
+    check_result = utils.check_barcode_already_exist(barcode)
+    if check_result:
+        return check_result
+
+    check_result = utils.check_product_name_already_exist(product_name)
+    if check_result:
+        return check_result
+
+    database.add_new_product_to_DB(barcode, product_name, image)
+    app.logger.info(f"Added product barcode={barcode}, product name={product_name} to 'product' DB")
+    message_response = {"message": f"Product barcode={barcode}, name={product_name} added successfully to 'product' DB"}
+    return message_response, 200
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=12345, threaded=True,debug=True)
+    app.run(host='0.0.0.0', port=12345, threaded=True, debug=True)

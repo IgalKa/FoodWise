@@ -45,10 +45,9 @@ class Database:
         else:
             return None
 
-    def search_products_by_product_name(self, product_name,all):
+    def search_products_by_product_name(self, product_name, all):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
-
 
         if all == '1':
             cursor.execute("SELECT product_name,barcode "
@@ -59,7 +58,7 @@ class Database:
             cursor.execute("SELECT product_name,barcode "
                            "FROM product "
                            "WHERE product_name LIKE ? || '%' AND barcode LIKE ? || '%'"
-                           , (product_name,"#"))
+                           , (product_name, "#"))
 
         result = cursor.fetchall()
         conn.close()
@@ -560,4 +559,12 @@ class Database:
         conn.close()
         return result[0][0]
 
+    def add_new_product_to_DB(self, barcode, product_name, image):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
 
+        cursor.execute("INSERT INTO product(barcode, product_name, image) "
+                       "VALUES (?, ?, ?) ",
+                       (barcode, product_name, image))
+        conn.commit()
+        conn.close()
