@@ -590,8 +590,8 @@ def get_statistics():
     if check_result:
         return check_result
 
-    entry_stats = utils.get_statistics_by_table_name(table_name="entry_table")
-    exit_stats = utils.get_statistics_by_table_name(table_name="exit_table")
+    entry_stats = utils.get_statistics_by_table_name("entry_table",refrigerator_id,start_date,end_date)
+    exit_stats = utils.get_statistics_by_table_name("exit_table",refrigerator_id,start_date,end_date)
 
     combined_stats = {
         "entry_statistics": entry_stats,
