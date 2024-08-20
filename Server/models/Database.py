@@ -1,13 +1,14 @@
 import random
 import sqlite3
-from datetime import datetime, timedelta
-from Server.models.Refrigerator import Refrigerator
-from Server.models.Product import Product
+from datetime import datetime
+from .Product import Product
+from .Refrigerator import Refrigerator
 
 
 class Database:
-    def __init__(self, path):
+    def __init__(self, path, docker):
         self.path = path
+        self.docker = docker
 
     def find_product(self, barcode):
         # Connect to the SQLite database
@@ -44,14 +45,11 @@ class Database:
         else:
             return None
 
-    def search_products_by_product_name(self, product_name,all):
+    def search_products_by_product_name(self, product_name, all):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        print(all)
-
         if all == '1':
-            print("test")
             cursor.execute("SELECT product_name,barcode "
                            "FROM product "
                            "WHERE product_name LIKE ? || '%'"
@@ -60,7 +58,7 @@ class Database:
             cursor.execute("SELECT product_name,barcode "
                            "FROM product "
                            "WHERE product_name LIKE ? || '%' AND barcode LIKE ? || '%'"
-                           , (product_name,"#"))
+                           , (product_name, "#"))
 
         result = cursor.fetchall()
         conn.close()
@@ -73,7 +71,7 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT product_name,image,product_quantity,oldest_added_date,alert_date "
+        cursor.execute("SELECT product_name,barcode,product_quantity,oldest_added_date,alert_date "
                        "FROM refrigerator_content NATURAL INNER JOIN product "
                        "WHERE refrigerator_id = ?",
                        (refrigerator_id,))
@@ -81,7 +79,12 @@ class Database:
 
         refrigerator = Refrigerator(refrigerator_id)
         for row in result:
-            product = Product(row[0], row[1], row[2], row[3], row[4])
+            image_path = ""
+            if self.docker:
+                image_path = "/app/pictures/" + row[1] + ".jpg"
+            else:
+                image_path = "../Server/pictures/" + row[1] + ".jpg"
+            product = Product(row[0], image_path, row[2], row[3], row[4])
             refrigerator.add_product(product)
 
         conn.close()
@@ -90,6 +93,7 @@ class Database:
     def add_barcode(self, barcode):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
+
         cursor.execute("INSERT INTO pending_barcode (barcode) "
                        "VALUES (?)",
                        (barcode,))
@@ -281,11 +285,14 @@ class Database:
     def validate_request(self, user_id, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
+
         cursor.execute("SELECT * "
                        "FROM link "
-                       "WHERE refrigerator_id = ? AND user_id = ?", (refrigerator_id, user_id))
+                       "WHERE refrigerator_id = ? AND user_id = ?",
+                       (refrigerator_id, user_id))
         result = cursor.fetchone()
         conn.close()
+
         return result is not None
 
     def add_user(self, email, password, first_name, last_name):
@@ -305,7 +312,7 @@ class Database:
         cursor = conn.cursor()
 
         data = (email, password)
-        cursor.execute("SELECT user_id,first_name, last_name "
+        cursor.execute("SELECT user_id,first_name,last_name "
                        "FROM user "
                        "WHERE email = ? AND password = ?", data)
         result = cursor.fetchone()
@@ -321,6 +328,28 @@ class Database:
         else:
             print("no user")
             return None  # Explicitly return None if no user is found
+
+    def update_user_email(self, user_id, email):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("UPDATE user "
+                       "SET email = ? "
+                       "WHERE user_id = ?",
+                       (email, user_id))
+        conn.commit()
+        conn.close()
+
+    def update_user_password(self, user_id, password):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("UPDATE user "
+                       "SET password = ? "
+                       "WHERE user_id = ?",
+                       (password, user_id))
+        conn.commit()
+        conn.close()
 
     def generate_refrigerator_id(self):
         conn = sqlite3.connect(self.path)
@@ -419,7 +448,7 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT product_name,image,product_quantity,oldest_added_date,alert_date "
+        cursor.execute("SELECT product_name,barcode,product_quantity,oldest_added_date,alert_date "
                        "FROM refrigerator_content NATURAL INNER JOIN product "
                        "WHERE refrigerator_id = ? "
                        "AND alert_date IS NOT NULL "
@@ -429,7 +458,12 @@ class Database:
 
         refrigerator = Refrigerator(refrigerator_id)
         for row in result:
-            product = Product(row[0], row[1], row[2], row[3], row[4])
+            image_path=""
+            if self.docker:
+                image_path = "/app/pictures/"+ row[1] + ".jpg"
+            else:
+                image_path = "../Server/pictures/" + row[1] + ".jpg"
+            product = Product(row[0], image_path, row[2], row[3], row[4])
             refrigerator.add_product(product)
 
         conn.close()
@@ -539,16 +573,39 @@ class Database:
         products_json = [{'product_name': row[0], 'amount': row[1]} for row in result]
         return products_json
 
-    def get_password_of_user(self, email):
+    def get_password_of_user_by_email(self, email):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
+
         cursor.execute("""
         SELECT password 
         FROM user
         WHERE email = ?
         """, (email,))
-        result = cursor.fetchall()
+        result = cursor.fetchone()
         conn.close()
-        return result[0][0]
 
+        return result[0]
 
+    def get_password_of_user_by_user_id(self, user_id):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT password "
+                       "FROM user "
+                       "WHERE user_id = ?",
+                       (user_id,))
+        result = cursor.fetchone()
+        conn.close()
+
+        return result[0]
+
+    def add_new_product_to_DB(self, barcode, product_name, image):
+        conn = sqlite3.connect(self.path)
+        cursor = conn.cursor()
+
+        cursor.execute("INSERT INTO product(barcode,product_name,image) "
+                       "VALUES (?,?,?) ",
+                       (barcode, product_name, image))
+        conn.commit()
+        conn.close()

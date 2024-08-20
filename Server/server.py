@@ -1,18 +1,9 @@
 from flask import Flask, request, jsonify
 import logging
-import sys
-from os.path import abspath, dirname, join
 from datetime import timedelta
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from flask_mail import Mail, Message
-
-# Calculate the project root directory and add it to sys.path
-project_root = abspath(join(dirname(__file__), '..'))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-
-from database.Database import Database
+from models.Database import Database
 from Utils import Utils, is_future_date
 
 app = Flask(__name__)
@@ -31,9 +22,13 @@ app.config['MAIL_DEFAULT_SENDER'] = 'foodwiselmi@gmail.com'
 app.config['JWT_SECRET_KEY'] = '3e2a1b5c4d6f8e9a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=3650)  # 10 years
 
-app.extensions['database'] = Database("../Server/data/database.db")
+docker = False
 
-mail = Mail(app)
+if docker:
+    app.extensions['database'] = Database("/app/data/database.db", docker)
+else:
+    app.extensions['database'] = Database("../Server/data/database.db", docker)
+
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 utils = Utils(app)  # Create an instance of the Utils class
@@ -83,24 +78,6 @@ def link():
     return jsonify(message_response), 200
 
 
-def scanned_new_product(barcode):
-    database = app.extensions['database']
-
-    if database.check_value_exist(table_name="pending_barcode", column_name="barcode", value=barcode):
-        app.logger.info(f"Barcode={barcode} already at pending_barcode table")
-    else:
-        database.add_barcode(barcode)
-        msg = Message(
-            subject="New barcode to add",
-            recipients=["foodwiselmi@gmail.com"],
-            body=f"Barcode: {barcode}"
-        )
-        mail.send(msg)
-        app.logger.info(f"Barcode={barcode} added to pending_barcode table and email sent")
-
-    message_response = {'message': f"Product with barcode={barcode} not at database, the adding request at pending"}
-    return message_response, 404
-
 
 # /scan , json={"barcode": 7290008757034, "mode": "add", "refrigerator_id": 1}
 @app.route('/scan', methods=['POST'])
@@ -120,7 +97,7 @@ def scan():
 
     if not product_name:
         app.logger.warning(f'Attempt to get product with barcode={barcode} that was not found in the database')
-        return scanned_new_product(barcode)
+        return utils.scanned_new_product(barcode)
 
     check_result = utils.check_refrigerator_exist(refrigerator_id)
     if check_result:
@@ -194,13 +171,13 @@ def register_new_user():
     check_result = utils.check_email_already_exist(email)
     if check_result:
         return check_result
-    else:
-        app.logger.info(f'Adding user with email {email} to the database')
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        database.add_user(email, hashed_password, first_name, last_name)
-        message_response = {
-            'message': f"The user {first_name} {last_name} has been successfully added to the database"}
-        return jsonify(message_response), 200
+
+    app.logger.info(f'Adding user with email={email}, first name={first_name}, last name={last_name} to database')
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    database.add_user(email, hashed_password, first_name, last_name)
+    message_response = {
+        'message': f"The user {first_name} {last_name} has been successfully added to the database"}
+    return jsonify(message_response), 200
 
 
 # /user_login , json={"email": "liorbaa@mta.ac.il", "password": "12345678"}
@@ -208,7 +185,7 @@ def register_new_user():
 def user_login():
     data = request.get_json()  # Get the Body JSON data from the request
 
-    try:  # Check if 'email', 'password' keys are not exist in the JSON data
+    try:  # Check if 'email', 'password' keys are exist in the JSON data
         user_email = data['email']
         user_password = data['password']
         database = app.extensions['database']
@@ -221,7 +198,7 @@ def user_login():
     if check_result:
         return check_result
 
-    saved_password = database.get_password_of_user(user_email)
+    saved_password = database.get_password_of_user_by_email(user_email)
     if not bcrypt.check_password_hash(saved_password, user_password):
         app.logger.warning(f"Attempt to access user with email: {user_email} with wrong password")
         error_response = {'error': f"Wrong password for user with email {user_email}"}
@@ -232,6 +209,65 @@ def user_login():
     user['access_token'] = access_token
     app.logger.info("User logged successfully")
     return jsonify(user), 200
+
+
+@app.route('/update_user_email', methods=['POST'])
+@jwt_required()
+def update_user_email():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    try:
+        new_email = data['email']
+        database = app.extensions['database']
+    except KeyError:
+        app.logger.error("Invalid request of update_user_email endpoint")
+        error_response = {'error': 'invalid request'}
+        return jsonify(error_response), 400
+
+    check_result = utils.check_user_exist(user_id)
+    if check_result:
+        return check_result
+
+    check_result = utils.check_email_already_exist(new_email)
+    if check_result:
+        return check_result
+
+    database.update_user_email(user_id, new_email)
+    app.logger.info(f"The email of user_id={user_id} updated successfully to new email={new_email}")
+    message_response = {'message': f"The user email has been successfully updated to {new_email}"}
+    return jsonify(message_response), 200
+
+
+@app.route('/update_user_password', methods=['POST'])
+@jwt_required()
+def update_user_password():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    try:
+        new_password = data['password']
+        database = app.extensions['database']
+    except KeyError:
+        app.logger.error("Invalid request of update_user_password endpoint")
+        error_response = {'error': 'invalid request'}
+        return jsonify(error_response), 400
+
+    check_result = utils.check_user_exist(user_id)
+    if check_result:
+        return check_result
+
+    saved_password = database.get_password_of_user_by_user_id(user_id)
+    if bcrypt.check_password_hash(saved_password, new_password):
+        app.logger.warning(f"Attempt to update the exists password with the same password")
+        error_response = {'error': f"Password not updated, this password is your old password"}
+        return jsonify(error_response), 400
+
+    hashed_new_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+    database.update_user_password(user_id, hashed_new_password)
+    app.logger.info(f"The password of user_id={user_id} updated successfully")
+    message_response = {'message': f"The user password has been successfully updated"}
+    return jsonify(message_response), 200
 
 
 # /linked_refrigerators
@@ -263,7 +299,7 @@ def refrigerator_contents():
         return check_result
 
     refrigerator_content = database.find_refrigerator_contents(refrigerator_id)
-    app.logger.info(f'Retrieved refrigerator contents for {refrigerator_id}')
+    app.logger.info(f'Retrieved refrigerator contents for refrigerator={refrigerator_id}')
     return jsonify(refrigerator_content.__json__()), 200
 
 
@@ -487,7 +523,8 @@ def get_refrigerator_content_expired():
     return refrigerator_content.__json__(), 200
 
 
-# /update_alert_date_and_quantity , json={"refrigerator_id": 1, "product_name": "Milk 1% 1L Tnuva", "alert_date": "2024-09-25", "product_quantity": 3}
+# /update_alert_date_and_quantity ,
+# json={"refrigerator_id": 1, "product_name": "Milk 1% 1L Tnuva", "alert_date": "2024-09-25", "product_quantity": 3}
 @app.route("/update_alert_date_and_quantity", methods=['POST'])
 @jwt_required()
 def update_alert_date_and_quantity():
@@ -524,14 +561,14 @@ def update_alert_date_and_quantity():
     if not database.check_3values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
                                         column_name2="barcode", column_name3="alert_date", value1=refrigerator_id,
                                         value2=barcode, value3=alert_date):
-        response, status_code = update_product_alert_date(refrigerator_id, barcode, alert_date)
+        response, status_code = utils.update_product_alert_date(refrigerator_id, barcode, alert_date)
         if status_code != 200:
             return response, status_code
 
     if not database.check_3values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
                                         column_name2="barcode", column_name3="product_quantity", value1=refrigerator_id,
                                         value2=barcode, value3=product_quantity):
-        response, status_code = update_product_quantity(refrigerator_id, barcode, product_quantity)
+        response, status_code = utils.update_product_quantity(refrigerator_id, barcode, product_quantity)
         if status_code != 200:
             return response, status_code
 
@@ -540,86 +577,21 @@ def update_alert_date_and_quantity():
     return message_response, 200
 
 
-def update_product_alert_date(refrigerator_id, barcode, alert_date):
-    database = app.extensions['database']
 
-    if alert_date is not None and not is_future_date(alert_date):
-        app.logger.warning(f"Attempt to update alert_date with date={alert_date} that is in the past")
-        error_response = {'error': f"Alert date={alert_date} is in the past"}
-        return error_response, 400
-
-    database.update_alert_date(refrigerator_id, barcode, alert_date)
-    app.logger.info(f"Alert date of refrigerator={refrigerator_id} with product barcode={barcode} updated successfully"
-                    f" to alert_date={alert_date}")
-    message_response = {'message': f"Alert_date updated successfully to {alert_date}"}
-    return message_response, 200
-
-
-def update_product_quantity(refrigerator_id, barcode, quantity):
-    database = app.extensions['database']
-
-    if quantity < 0:
-        app.logger.warning(f"Attempt to update quantity with negative quantity, quantity={quantity}")
-        error_response = {'error': f"quantity is negative"}
-        return error_response, 400
-    elif quantity == 0:
-        database.refrigerator_content_delete_product(refrigerator_id, barcode)
-        app.logger.info(f'Deleted product barcode={barcode} from refrigerator number={refrigerator_id}')
-        message_response = {
-            'message': f"The product has been successfully deleted from refrigerator number={refrigerator_id}"}
-        return message_response, 200
-    else:  # quantity > 0
-        database.update_product_quantity(refrigerator_id, barcode, quantity)
-        app.logger.info(
-            f'Set quantity={quantity} for product barcode={barcode} from refrigerator number={refrigerator_id}')
-        message_response = {
-            'message': f"The product quantity updated to {quantity} at refrigerator number={refrigerator_id}"}
-        return message_response, 200
-
-
-def get_statistics_by_table_name(table_name):
+@app.route('/get_statistics', methods=['GET'])
+@jwt_required()
+def get_statistics():
     user_id = get_jwt_identity()
     refrigerator_id = request.args.get('refrigerator_id')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
-    database = app.extensions['database']
 
     check_result = utils.validate_link(user_id, refrigerator_id)
     if check_result:
         return check_result
 
-    if not start_date <= end_date:
-        app.logger.warning(
-            f"Attempt to get {table_name} statistics when start_date={start_date} is after the end_date={end_date}")
-        error_response = {'error': f"Start date {start_date} is after end date {end_date}"}
-        return error_response, 400
-
-    products_and_quantities = database.find_products_and_quantities_between_dates(table_name, refrigerator_id,
-                                                                                  start_date, end_date)
-    app.logger.info(
-        f"Get {table_name} statistics of refrigerator={refrigerator_id} start_date={start_date} end_date={end_date}")
-    return products_and_quantities
-
-
-# /get_entry_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
-@app.route('/get_entry_statistics', methods=['GET'])
-@jwt_required()
-def get_entry_statistics():
-    return get_statistics_by_table_name(table_name="entry_table")
-
-
-# /get_exit_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
-@app.route('/get_exit_statistics', methods=['GET'])
-@jwt_required()
-def get_exit_statistics():
-    return get_statistics_by_table_name(table_name="exit_table")
-
-
-@app.route('/get_statistics', methods=['GET'])
-@jwt_required()
-def get_statistics():
-    entry_stats = get_statistics_by_table_name(table_name="entry_table")
-    exit_stats = get_statistics_by_table_name(table_name="exit_table")
+    entry_stats = utils.get_statistics_by_table_name(table_name="entry_table")
+    exit_stats = utils.get_statistics_by_table_name(table_name="exit_table")
 
     combined_stats = {
         "entry_statistics": entry_stats,
@@ -629,10 +601,39 @@ def get_statistics():
     return jsonify(combined_stats), 200
 
 
-# @app.route('/add_product_with_DB', methods=['POST'])
-# def add_product_with_DB():
 
+
+
+#     Managers endpoints
+
+# /add_new_product_to_DB , json={"barcode": "1111111111111", "product_name": "Testing", "image": null}
+@app.route('/add_new_product_to_DB', methods=['POST'])
+def add_new_product_to_DB():
+    database = app.extensions['database']
+    data = request.get_json()
+
+    try:
+        barcode = data['barcode']
+        product_name = data['product_name']
+        image = data['image']
+    except KeyError:
+        app.logger.error("Invalid request of add_new_product_to_DB endpoint")
+        error_response = {'error': "invalid request"}
+        return error_response, 400
+
+    check_result = utils.check_barcode_already_exist(barcode)
+    if check_result:
+        return check_result
+
+    check_result = utils.check_product_name_already_exist(product_name)
+    if check_result:
+        return check_result
+
+    database.add_new_product_to_DB(barcode, product_name, image)
+    app.logger.info(f"Added product barcode={barcode}, product name={product_name} to 'product' DB")
+    message_response = {"message": f"Product barcode={barcode}, name={product_name} added successfully to 'product' DB"}
+    return message_response, 200
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=12345, threaded=True)
+    app.run(host='0.0.0.0', port=12345, threaded=True, debug=True)
