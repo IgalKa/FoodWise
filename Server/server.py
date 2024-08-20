@@ -8,7 +8,6 @@ from models.Database import Database
 from Utils import Utils, is_future_date
 
 
-
 app = Flask(__name__)
 
 # Set up basic configuration for logging to the console
@@ -195,13 +194,13 @@ def register_new_user():
     check_result = utils.check_email_already_exist(email)
     if check_result:
         return check_result
-    else:
-        app.logger.info(f'Adding user with email {email} to the database')
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        database.add_user(email, hashed_password, first_name, last_name)
-        message_response = {
-            'message': f"The user {first_name} {last_name} has been successfully added to the database"}
-        return jsonify(message_response), 200
+
+    app.logger.info(f'Adding user with email={email}, first name={first_name}, last name={last_name} to database')
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    database.add_user(email, hashed_password, first_name, last_name)
+    message_response = {
+        'message': f"The user {first_name} {last_name} has been successfully added to the database"}
+    return jsonify(message_response), 200
 
 
 # /user_login , json={"email": "liorbaa@mta.ac.il", "password": "12345678"}
@@ -209,7 +208,7 @@ def register_new_user():
 def user_login():
     data = request.get_json()  # Get the Body JSON data from the request
 
-    try:  # Check if 'email', 'password' keys are not exist in the JSON data
+    try:  # Check if 'email', 'password' keys are exist in the JSON data
         user_email = data['email']
         user_password = data['password']
         database = app.extensions['database']
@@ -222,7 +221,7 @@ def user_login():
     if check_result:
         return check_result
 
-    saved_password = database.get_password_of_user(user_email)
+    saved_password = database.get_password_of_user_by_email(user_email)
     if not bcrypt.check_password_hash(saved_password, user_password):
         app.logger.warning(f"Attempt to access user with email: {user_email} with wrong password")
         error_response = {'error': f"Wrong password for user with email {user_email}"}
@@ -233,6 +232,65 @@ def user_login():
     user['access_token'] = access_token
     app.logger.info("User logged successfully")
     return jsonify(user), 200
+
+
+@app.route('/update_user_email', methods=['POST'])
+@jwt_required()
+def update_user_email():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    try:
+        new_email = data['email']
+        database = app.extensions['database']
+    except KeyError:
+        app.logger.error("Invalid request of update_user_email endpoint")
+        error_response = {'error': 'invalid request'}
+        return jsonify(error_response), 400
+
+    check_result = utils.check_user_exist(user_id)
+    if check_result:
+        return check_result
+
+    check_result = utils.check_email_already_exist(new_email)
+    if check_result:
+        return check_result
+
+    database.update_user_email(user_id, new_email)
+    app.logger.info(f"The email of user_id={user_id} updated successfully to new email={new_email}")
+    message_response = {'message': f"The user email has been successfully updated to {new_email}"}
+    return jsonify(message_response), 200
+
+
+@app.route('/update_user_password', methods=['POST'])
+@jwt_required()
+def update_user_password():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    try:
+        new_password = data['password']
+        database = app.extensions['database']
+    except KeyError:
+        app.logger.error("Invalid request of update_user_password endpoint")
+        error_response = {'error': 'invalid request'}
+        return jsonify(error_response), 400
+
+    check_result = utils.check_user_exist(user_id)
+    if check_result:
+        return check_result
+
+    saved_password = database.get_password_of_user_by_user_id(user_id)
+    if bcrypt.check_password_hash(saved_password, new_password):
+        app.logger.warning(f"Attempt to update the exists password with the same password")
+        error_response = {'error': f"Password not updated, this password is your old password"}
+        return jsonify(error_response), 400
+
+    hashed_new_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+    database.update_user_password(user_id, hashed_new_password)
+    app.logger.info(f"The password of user_id={user_id} updated successfully")
+    message_response = {'message': f"The user password has been successfully updated"}
+    return jsonify(message_response), 200
 
 
 # /linked_refrigerators
@@ -264,7 +322,7 @@ def refrigerator_contents():
         return check_result
 
     refrigerator_content = database.find_refrigerator_contents(refrigerator_id)
-    app.logger.info(f'Retrieved refrigerator contents for {refrigerator_id}')
+    app.logger.info(f'Retrieved refrigerator contents for refrigerator={refrigerator_id}')
     return jsonify(refrigerator_content.__json__()), 200
 
 
@@ -488,7 +546,8 @@ def get_refrigerator_content_expired():
     return refrigerator_content.__json__(), 200
 
 
-# /update_alert_date_and_quantity , json={"refrigerator_id": 1, "product_name": "Milk 1% 1L Tnuva", "alert_date": "2024-09-25", "product_quantity": 3}
+# /update_alert_date_and_quantity ,
+# json={"refrigerator_id": 1, "product_name": "Milk 1% 1L Tnuva", "alert_date": "2024-09-25", "product_quantity": 3}
 @app.route("/update_alert_date_and_quantity", methods=['POST'])
 @jwt_required()
 def update_alert_date_and_quantity():
@@ -632,7 +691,7 @@ def get_statistics():
 
 #     Managers endpoints
 
-
+# /add_new_product_to_DB , json={"barcode": "1111111111111", "product_name": "Testing", "image": null}
 @app.route('/add_new_product_to_DB', methods=['POST'])
 def add_new_product_to_DB():
     database = app.extensions['database']
