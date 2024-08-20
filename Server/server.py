@@ -3,10 +3,8 @@ import logging
 from datetime import timedelta
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from flask_mail import Mail, Message
 from models.Database import Database
 from Utils import Utils, is_future_date
-
 
 app = Flask(__name__)
 
@@ -24,16 +22,13 @@ app.config['MAIL_DEFAULT_SENDER'] = 'foodwiselmi@gmail.com'
 app.config['JWT_SECRET_KEY'] = '3e2a1b5c4d6f8e9a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=3650)  # 10 years
 
-
-docker=False
+docker = False
 
 if docker:
-    app.extensions['database'] = Database("/app/data/database.db",docker)
+    app.extensions['database'] = Database("/app/data/database.db", docker)
 else:
-    app.extensions['database'] = Database("../Server/data/database.db",docker)
+    app.extensions['database'] = Database("../Server/data/database.db", docker)
 
-
-mail = Mail(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 utils = Utils(app)  # Create an instance of the Utils class
@@ -83,24 +78,6 @@ def link():
     return jsonify(message_response), 200
 
 
-def scanned_new_product(barcode):
-    database = app.extensions['database']
-
-    if database.check_value_exist(table_name="pending_barcode", column_name="barcode", value=barcode):
-        app.logger.info(f"Barcode={barcode} already at pending_barcode table")
-    else:
-        database.add_barcode(barcode)
-        msg = Message(
-            subject="New barcode to add",
-            recipients=["foodwiselmi@gmail.com"],
-            body=f"Barcode: {barcode}"
-        )
-        mail.send(msg)
-        app.logger.info(f"Barcode={barcode} added to pending_barcode table and email sent")
-
-    message_response = {'message': f"Product with barcode={barcode} not at database, the adding request at pending"}
-    return message_response, 404
-
 
 # /scan , json={"barcode": 7290008757034, "mode": "add", "refrigerator_id": 1}
 @app.route('/scan', methods=['POST'])
@@ -120,7 +97,7 @@ def scan():
 
     if not product_name:
         app.logger.warning(f'Attempt to get product with barcode={barcode} that was not found in the database')
-        return scanned_new_product(barcode)
+        return utils.scanned_new_product(barcode)
 
     check_result = utils.check_refrigerator_exist(refrigerator_id)
     if check_result:
@@ -584,14 +561,14 @@ def update_alert_date_and_quantity():
     if not database.check_3values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
                                         column_name2="barcode", column_name3="alert_date", value1=refrigerator_id,
                                         value2=barcode, value3=alert_date):
-        response, status_code = update_product_alert_date(refrigerator_id, barcode, alert_date)
+        response, status_code = utils.update_product_alert_date(refrigerator_id, barcode, alert_date)
         if status_code != 200:
             return response, status_code
 
     if not database.check_3values_exist(table_name="refrigerator_content", column_name1="refrigerator_id",
                                         column_name2="barcode", column_name3="product_quantity", value1=refrigerator_id,
                                         value2=barcode, value3=product_quantity):
-        response, status_code = update_product_quantity(refrigerator_id, barcode, product_quantity)
+        response, status_code = utils.update_product_quantity(refrigerator_id, barcode, product_quantity)
         if status_code != 200:
             return response, status_code
 
@@ -600,86 +577,21 @@ def update_alert_date_and_quantity():
     return message_response, 200
 
 
-def update_product_alert_date(refrigerator_id, barcode, alert_date):
-    database = app.extensions['database']
 
-    if alert_date is not None and not is_future_date(alert_date):
-        app.logger.warning(f"Attempt to update alert_date with date={alert_date} that is in the past")
-        error_response = {'error': f"Alert date={alert_date} is in the past"}
-        return error_response, 400
-
-    database.update_alert_date(refrigerator_id, barcode, alert_date)
-    app.logger.info(f"Alert date of refrigerator={refrigerator_id} with product barcode={barcode} updated successfully"
-                    f" to alert_date={alert_date}")
-    message_response = {'message': f"Alert_date updated successfully to {alert_date}"}
-    return message_response, 200
-
-
-def update_product_quantity(refrigerator_id, barcode, quantity):
-    database = app.extensions['database']
-
-    if quantity < 0:
-        app.logger.warning(f"Attempt to update quantity with negative quantity, quantity={quantity}")
-        error_response = {'error': f"quantity is negative"}
-        return error_response, 400
-    elif quantity == 0:
-        database.refrigerator_content_delete_product(refrigerator_id, barcode)
-        app.logger.info(f'Deleted product barcode={barcode} from refrigerator number={refrigerator_id}')
-        message_response = {
-            'message': f"The product has been successfully deleted from refrigerator number={refrigerator_id}"}
-        return message_response, 200
-    else:  # quantity > 0
-        database.update_product_quantity(refrigerator_id, barcode, quantity)
-        app.logger.info(
-            f'Set quantity={quantity} for product barcode={barcode} from refrigerator number={refrigerator_id}')
-        message_response = {
-            'message': f"The product quantity updated to {quantity} at refrigerator number={refrigerator_id}"}
-        return message_response, 200
-
-
-def get_statistics_by_table_name(table_name):
+@app.route('/get_statistics', methods=['GET'])
+@jwt_required()
+def get_statistics():
     user_id = get_jwt_identity()
     refrigerator_id = request.args.get('refrigerator_id')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
-    database = app.extensions['database']
 
     check_result = utils.validate_link(user_id, refrigerator_id)
     if check_result:
         return check_result
 
-    if not start_date <= end_date:
-        app.logger.warning(
-            f"Attempt to get {table_name} statistics when start_date={start_date} is after the end_date={end_date}")
-        error_response = {'error': f"Start date {start_date} is after end date {end_date}"}
-        return error_response, 400
-
-    products_and_quantities = database.find_products_and_quantities_between_dates(table_name, refrigerator_id,
-                                                                                  start_date, end_date)
-    app.logger.info(
-        f"Get {table_name} statistics of refrigerator={refrigerator_id} start_date={start_date} end_date={end_date}")
-    return products_and_quantities
-
-
-# /get_entry_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
-@app.route('/get_entry_statistics', methods=['GET'])
-@jwt_required()
-def get_entry_statistics():
-    return get_statistics_by_table_name(table_name="entry_table")
-
-
-# /get_exit_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21
-@app.route('/get_exit_statistics', methods=['GET'])
-@jwt_required()
-def get_exit_statistics():
-    return get_statistics_by_table_name(table_name="exit_table")
-
-
-@app.route('/get_statistics', methods=['GET'])
-@jwt_required()
-def get_statistics():
-    entry_stats = get_statistics_by_table_name(table_name="entry_table")
-    exit_stats = get_statistics_by_table_name(table_name="exit_table")
+    entry_stats = utils.get_statistics_by_table_name(table_name="entry_table")
+    exit_stats = utils.get_statistics_by_table_name(table_name="exit_table")
 
     combined_stats = {
         "entry_statistics": entry_stats,
@@ -687,6 +599,9 @@ def get_statistics():
     }
 
     return jsonify(combined_stats), 200
+
+
+
 
 
 #     Managers endpoints
