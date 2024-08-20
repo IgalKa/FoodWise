@@ -8,12 +8,13 @@ import { Avatar } from '@rneui/themed';
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import { Button } from 'react-native-paper';
 import TextInputModal from '../components/TextInputModal';
+import { changeUserEmail, changeUserPassword } from '../api/userApi';
 
 
 
 const SettingsScreen = () => {
 
-    const { userName, userLastName, clearFridgeId, clearUserName, clearUserLastName, clearUserId } = useAuth();
+    const { userName, userLastName, clearFridgeId, clearUserName, clearUserLastName, clearUserId, clearToken } = useAuth();
     const navigation = useNavigation();
     const [isEmailModalVisible, setEmailModalVisible] = useState(false);
     const [isPassModalVisible, setPassModalVisible] = useState(false);
@@ -34,6 +35,7 @@ const SettingsScreen = () => {
         await clearUserId();
         await clearUserName();
         await clearUserLastName();
+        await clearToken();
     }
 
     const handleEmailChange = async () => {
@@ -48,9 +50,12 @@ const SettingsScreen = () => {
         console.log("Im past check");
 
         try {
-            //server request to change email
-            if (Response.status === 200)
+            const response = await changeUserEmail(textField);
+            if (response.status === 200) {
                 Alert.alert("Email changed succesfully");
+                setEmailModalVisible(false);
+                setTextField("");
+            }
         }
         catch (err) {
             Alert.alert("There was a problem, try again.");
@@ -65,9 +70,12 @@ const SettingsScreen = () => {
         }
 
         try {
-            //server request to change email
-            if (Response.status === 200)
+            const response = await changeUserPassword(textField);
+            if (response.status === 200) {
                 Alert.alert("Password changed succesfully");
+                setPassModalVisible(false);
+                setTextField("");
+            }
         }
         catch (err) {
             Alert.alert("There was a problem, try again.");
@@ -93,14 +101,16 @@ const SettingsScreen = () => {
                     containerStyle={{ backgroundColor: "#465881" }}
                 />
                 <Text style={styles.name}>Hey, {fullUserName}</Text>
-                <View style={styles.buttonContainer}>
-                    <Button mode="contained" onPress={() => setEmailModalVisible(true)}>Change Email</Button>
-                </View>
-                <View style={styles.buttonContainer}>
-                    <Button mode="contained" onPress={() => setPassModalVisible(true)}>Change Password</Button>
+                <View style={styles.container}>
+                    <View style={styles.buttonContainer}>
+                        <Button mode="contained-tonal" onPress={() => setEmailModalVisible(true)}>Change Email</Button>
+                    </View>
+                    <View style={styles.buttonContainer}>
+                        <Button mode="contained-tonal" onPress={() => setPassModalVisible(true)}>Change Password</Button>
+                    </View>
                 </View>
                 <View style={styles.logoutContainer}>
-                    <Button mode="contained-tonal" onPress={handleLogout}>Logout</Button>
+                    <Button mode="elevated" onPress={handleLogout}>Logout</Button>
                 </View>
             </View>
             <TextInputModal

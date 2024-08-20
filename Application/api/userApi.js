@@ -15,3 +15,18 @@ export const userSignup = (email, password, firstName, lastName) => {
     });
     return response;
 };
+
+
+export const changeUserEmail = (email) => {
+    const response = apiClient.post('/update_user_email', {
+        email,
+    });
+    return response;
+};
+
+export const changeUserPassword = (password) => {
+    const response = apiClient.post('/update_user_password', {
+        password,
+    });
+    return response;
+};

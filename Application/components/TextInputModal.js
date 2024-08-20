@@ -9,7 +9,7 @@ const TextInputModal = ({
     setNewName,
     onAction,
     title,
-    actionButtonTitle
+    actionButtonTitle,
 }) => {
     return (
         <Modal

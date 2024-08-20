@@ -33,13 +33,15 @@ const maxDate = new Date;
 
 const ConsumptionScreen = () => {
 
+    const currentDate = new Date();
+    const oneMonthEarlier = new Date(currentDate.setMonth(currentDate.getMonth() - 1));
     const [loading, setLoading] = useState(false);
     const [entrySort, setEntrySort] = useState(true);
     const [exitSort, setExitSort] = useState(true);
     const [sortedEntryData, setSortedEntryData] = useState(null);
     const [sortedExitData, setSortedExitData] = useState(null);
     const { fridgeId } = useAuth();
-    const [startDate, setStartDate] = useState(new Date());
+    const [startDate, setStartDate] = useState(oneMonthEarlier);
     const [showStart, setShowStart] = useState(false);
     const [endDate, setEndDate] = useState(new Date());
     const [showEnd, setShowEnd] = useState(false);
