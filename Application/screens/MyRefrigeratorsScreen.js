@@ -7,6 +7,7 @@ import ScreenLayout from '../components/ScreenLayout';
 import { useAuth } from '../contexts/AuthContext';
 import QRCode from 'react-native-qrcode-svg';
 import { getLinkedRefrigerators, updateRefrigeratorName } from '../api/refrigeratorApi';
+import TextInputModal from '../components/TextInputModal';
 
 const ItemSelectionScreen = () => {
     const [selectedItem, setSelectedItem] = useState(null);
@@ -84,7 +85,7 @@ const ItemSelectionScreen = () => {
     };
 
     const handleLinkPress = (item) => {
-        console.log("displaying qr code of "+ userId);
+        console.log("displaying qr code of " + userId);
         setLinkModalVisible(true);
     };
 
@@ -162,7 +163,7 @@ const ItemSelectionScreen = () => {
 
 
 
-            <Modal
+            {/* <Modal
                 visible={isModalVisible}
                 transparent={true}
                 animationType="fade"
@@ -186,7 +187,17 @@ const ItemSelectionScreen = () => {
                         </View>
                     </View>
                 </View>
-            </Modal>
+            </Modal> */}
+
+            <TextInputModal
+                isVisible={isModalVisible}
+                onClose={() => setModalVisible(false)}
+                newName={newName}
+                setNewName={setNewName}
+                onAction={handleRename}
+                title={"Rename Refrigerator"}
+                actionButtonTitle={"Rename"}
+            />
 
             <Modal
                 visible={isLinkModalVisible}
