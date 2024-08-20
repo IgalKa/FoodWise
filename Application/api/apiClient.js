@@ -4,7 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const apiClient = axios.create({
-    baseURL: 'http://10.100.102.7:12345',
+    // baseURL: 'http://10.100.102.7:12345',
+    baseURL: 'https://foodwise-5jxeyknkuq-uc.a.run.app',
     timeout: 20000,
 });
 

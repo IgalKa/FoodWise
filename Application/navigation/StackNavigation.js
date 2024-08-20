@@ -6,10 +6,10 @@ import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import SearchProduct from '../screens/SearchProduct';
 import EditList from '../screens/EditList';
+import InitialLoadingScreen from '../screens/initialLoadingScreen';
 import DrawerNavigator from './DrawerNavigation';
 import { useAuth } from '../contexts/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
-import ScreenLayout from '../components/ScreenLayout';
 
 
 
@@ -18,13 +18,7 @@ export default function Navigation() {
     const { token, isLoading } = useAuth();
 
     if (isLoading) {
-        return (
-            <ScreenLayout>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color="#fff" />
-                </View>
-            </ScreenLayout>
-        );
+        return <InitialLoadingScreen />;
     }
 
     return (
