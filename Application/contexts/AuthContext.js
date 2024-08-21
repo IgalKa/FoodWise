@@ -13,27 +13,35 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const fetchAuthData = async () => {
-            const token = await AsyncStorage.getItem('token');
-            const fridge = await AsyncStorage.getItem('fridgeId');
-            const name = await AsyncStorage.getItem('userName');
-            const lastName = await AsyncStorage.getItem('userLastName');
-            const user = await AsyncStorage.getItem('userId');
-            if (token) {
-                setToken(token);
+            try {
+                const [token, fridge, name, lastName, user] = await Promise.all([
+                    AsyncStorage.getItem('token'),
+                    AsyncStorage.getItem('fridgeId'),
+                    AsyncStorage.getItem('userName'),
+                    AsyncStorage.getItem('userLastName'),
+                    AsyncStorage.getItem('userId')
+                ]);
+
+                if (token) {
+                    setToken(token);
+                }
+                if (fridge) {
+                    setFridgeId(fridge);
+                }
+                if (user) {
+                    setUserId(user);
+                }
+                if (name) {
+                    setUserName(name);
+                }
+                if (lastName) {
+                    setUserLastName(lastName);
+                }
+            } catch (e) {
+                console.error('Failed to retrieve auth data:', e);
+            } finally {
+                setIsLoading(false);
             }
-            if (fridge) {
-                setFridgeId(fridge);
-            }
-            if(user){
-                setUserId(user);
-            }
-            if (name) {
-                setUserName(name);
-            }
-            if (lastName) {
-                setUserLastName(lastName);
-            }
-            setIsLoading(false);
         };
         fetchAuthData();
     }, []);
@@ -93,7 +101,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ token: token,userId:userId ,fridgeId ,userName, userLastName, setToken: saveToken,setUserId: saveUserId ,setFridgeId: saveFridgeId, setUserName: saveUserName, setUserLastName: saveUserLastName, clearToken: clearToken, clearUserId :clearUserId ,clearFridgeId, clearUserName, clearUserLastName, isLoading }}>
+        <AuthContext.Provider value={{ token: token, userId: userId, fridgeId, userName, userLastName, setToken: saveToken, setUserId: saveUserId, setFridgeId: saveFridgeId, setUserName: saveUserName, setUserLastName: saveUserLastName, clearToken: clearToken, clearUserId: clearUserId, clearFridgeId, clearUserName, clearUserLastName, isLoading }}>
             {children}
         </AuthContext.Provider>
     );
