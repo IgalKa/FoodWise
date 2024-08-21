@@ -600,12 +600,12 @@ class Database:
 
         return result[0]
 
-    def add_new_product_to_DB(self, barcode, product_name, image):
+    def add_new_product_to_DB(self, barcode, product_name):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
         cursor.execute("INSERT INTO product(barcode,product_name,image) "
                        "VALUES (?,?,?) ",
-                       (barcode, product_name, image))
+                       (barcode, product_name, None))
         conn.commit()
         conn.close()
