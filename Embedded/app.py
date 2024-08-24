@@ -4,11 +4,12 @@ import tkinter as tk
 from tkinter import font
 import threading
 import queue
+import time
 
 
 class App:
     def __init__(self):
-        self.url = f'https://michaelshu.pythonanywhere.com/'
+        self.url = f'https://foodwise-5jxeyknkuq-uc.a.run.app/'
         self.mode = "add"
         self.queue = queue.Queue()
 
@@ -69,6 +70,7 @@ class App:
 
         self.status_label.pack(pady=10)
 
+        time.sleep(10)
         self.root.after(100, self.process_queue)
         self.barcode_thread = threading.Thread(target=self.listen_barcode_scanner)
         self.barcode_thread.daemon = True
