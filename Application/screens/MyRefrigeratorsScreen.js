@@ -154,8 +154,8 @@ const ItemSelectionScreen = () => {
                     />
                 </View>
             )}
-            {!loading && data && data.length === 0 && (
-                <View style={styles.container}>
+            {((!loading && data && data.length === 0) || (!loading && !data)) && (
+                <View style={styles.noFridgeContainer}>
                     <Text style={styles.defaultText}>No Refrigerators</Text>
                 </View>
 
@@ -349,5 +349,10 @@ const styles = StyleSheet.create({
         width: 20,
         height: 20,
         marginRight: 15,
+    },
+    noFridgeContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
     },
 });

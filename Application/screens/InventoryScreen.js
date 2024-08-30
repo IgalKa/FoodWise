@@ -54,12 +54,14 @@ function InventoryScreen({ navigation }) {
 
     useFocusEffect(
         useCallback(() => {
-            // Fetch data initially when the screen is focused
-            fetchData();
-            // Set up interval for periodic polling
-            const intervalId = setInterval(fetchData, 15000);
-            // Clean up interval when the screen goes out of focus
-            return () => clearInterval(intervalId);
+            if (fridgeId) {
+                // Fetch data initially when the screen is focused
+                fetchData();
+                // Set up interval for periodic polling
+                const intervalId = setInterval(fetchData, 15000);
+                // Clean up interval when the screen goes out of focus
+                return () => clearInterval(intervalId);
+            }
         }, [fridgeId])
     );
 
@@ -106,31 +108,31 @@ function InventoryScreen({ navigation }) {
         }
     };
 
-    const handleSaveAlertDate = async () => {
-        try {
-            setModalVisible(false);
-            await updateAlertDate(fridgeId, productName, alertDate);
-            fetchData();
-        } catch (error) {
-            console.log(error);
-            if (error.response.status = 400) {
-                console.error("please choose a date in the future.");
-            }
-        }
-    };
+    // const handleSaveAlertDate = async () => {
+    //     try {
+    //         setModalVisible(false);
+    //         await updateAlertDate(fridgeId, productName, alertDate);
+    //         fetchData();
+    //     } catch (error) {
+    //         console.log(error);
+    //         if (error.response.status = 400) {
+    //             console.error("please choose a date in the future.");
+    //         }
+    //     }
+    // };
 
-    const handleSaveQuantity = async () => {
-        try {
-            setModalVisible(false);
-            //await updateAlertDate(fridgeId, productName, alertDate);
-            fetchData();
-        } catch (error) {
-            console.log(error);
-            if (error.response.status = 400) {
-                console.error("error saving quantity.");
-            }
-        }
-    };
+    // const handleSaveQuantity = async () => {
+    //     try {
+    //         setModalVisible(false);
+    //         //await updateAlertDate(fridgeId, productName, alertDate);
+    //         fetchData();
+    //     } catch (error) {
+    //         console.log(error);
+    //         if (error.response.status = 400) {
+    //             console.error("error saving quantity.");
+    //         }
+    //     }
+    // };
 
     const handleSaveModal = async () => {
         try {

@@ -89,7 +89,7 @@ const SettingsScreen = () => {
     }
 
     const fullUserName = `${userName || ''} ${userLastName || ''}`.trim();
-    const initials = `${userName ? userName[0] : ''}${userLastName ? userLastName[0] : ''}`.toUpperCase();
+    const initials = `${userName ? userName[0] : ''}${userLastName ? userLastName[0] : ''}`.toUpperCase() || '?';
 
     return (
         <ScreenLayout>
