@@ -615,7 +615,6 @@ def add_new_product_to_DB():
     try:
         barcode = data['barcode']
         product_name = data['product_name']
-        image = data['image']
     except KeyError:
         app.logger.error("Invalid request of add_new_product_to_DB endpoint")
         error_response = {'error': "invalid request"}
@@ -629,7 +628,7 @@ def add_new_product_to_DB():
     if check_result:
         return check_result
 
-    database.add_new_product_to_DB(barcode, product_name, image)
+    database.add_new_product_to_DB(barcode, product_name)
     app.logger.info(f"Added product barcode={barcode}, product name={product_name} to 'product' DB")
     message_response = {"message": f"Product barcode={barcode}, name={product_name} added successfully to 'product' DB"}
     return message_response, 200

@@ -529,8 +529,7 @@ class Database:
         cursor = conn.cursor()
         cursor.execute("""
             SELECT product_name,amount-COALESCE(product_quantity,0) AS amount
-            FROM refrigerator_track 
-            LEFT OUTER JOIN refrigerator_content ON refrigerator_track.barcode=refrigerator_content.barcode
+            FROM refrigerator_track NATURAL LEFT OUTER JOIN refrigerator_content
             NATURAL INNER JOIN product
             WHERE refrigerator_track.refrigerator_id=? AND (product_quantity IS null OR amount>product_quantity)
         """, (refrigerator_id,))
@@ -600,12 +599,12 @@ class Database:
 
         return result[0]
 
-    def add_new_product_to_DB(self, barcode, product_name, image):
+    def add_new_product_to_DB(self, barcode, product_name):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
         cursor.execute("INSERT INTO product(barcode,product_name,image) "
                        "VALUES (?,?,?) ",
-                       (barcode, product_name, image))
+                       (barcode, product_name, None))
         conn.commit()
         conn.close()
