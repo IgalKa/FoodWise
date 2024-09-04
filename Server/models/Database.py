@@ -20,11 +20,10 @@ class Database:
                        "WHERE barcode = ? ",
                        (barcode,))
         result = cursor.fetchone()
-
         conn.close()
         # If a row was found, return the name, otherwise return None
         if result:
-            return result[0]  # Return the first column of the result (product_name)
+            return result[0]
         else:
             return None
 
@@ -37,11 +36,10 @@ class Database:
                        "WHERE product_name = ? ",
                        (product_name,))
         result = cursor.fetchone()
-
         conn.close()
         # If a row was found, return the name, otherwise return None
         if result:
-            return result[0]  # Return the first column of the result (barcode)
+            return result[0]
         else:
             return None
 
@@ -50,12 +48,12 @@ class Database:
         cursor = conn.cursor()
 
         if all == '1':
-            cursor.execute("SELECT product_name,barcode "
+            cursor.execute("SELECT product_name, barcode "
                            "FROM product "
                            "WHERE product_name LIKE ? || '%'"
                            , (product_name,))
         else:
-            cursor.execute("SELECT product_name,barcode "
+            cursor.execute("SELECT product_name, barcode "
                            "FROM product "
                            "WHERE product_name LIKE ? || '%' AND barcode LIKE ? || '%'"
                            , (product_name, "#"))
@@ -71,7 +69,7 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT product_name,barcode,product_quantity,oldest_added_date,alert_date "
+        cursor.execute("SELECT product_name, barcode, product_quantity, oldest_added_date, alert_date "
                        "FROM refrigerator_content NATURAL INNER JOIN product "
                        "WHERE refrigerator_id = ?",
                        (refrigerator_id,))
@@ -79,7 +77,6 @@ class Database:
 
         refrigerator = Refrigerator(refrigerator_id)
         for row in result:
-            image_path = ""
             if self.docker:
                 image_path = "/app/pictures/" + row[1] + ".jpg"
             else:
@@ -108,7 +105,7 @@ class Database:
                        "FROM refrigerator_content "
                        "WHERE refrigerator_id = ? and barcode = ?",
                        (refrigerator_id, barcode))
-        result = cursor.fetchone()  # Fetch the first row of the result
+        result = cursor.fetchone()
         conn.close()
 
         if result:
@@ -299,10 +296,10 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        data = (email, password, first_name, last_name)
         cursor.execute(
-            "INSERT INTO user (email,password,first_name,last_name)"
-            "VALUES (?,?,?,?)", data)
+            "INSERT INTO user (email, password, first_name, last_name)"
+            "VALUES (?, ?, ?, ?)",
+            (email, password, first_name, last_name))
 
         conn.commit()
         conn.close()
@@ -311,10 +308,10 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        data = (email, password)
-        cursor.execute("SELECT user_id,first_name,last_name "
+        cursor.execute("SELECT user_id, first_name, last_name "
                        "FROM user "
-                       "WHERE email = ? AND password = ?", data)
+                       "WHERE email = ? AND password = ?",
+                       (email, password))
         result = cursor.fetchone()
         conn.close()
         # Check if result is not None
@@ -326,7 +323,6 @@ class Database:
             }
             return user_object
         else:
-            print("no user")
             return None  # Explicitly return None if no user is found
 
     def update_user_email(self, user_id, email):
@@ -362,10 +358,11 @@ class Database:
                 break
 
         cursor.execute("INSERT INTO refrigerator (refrigerator_id)"
-                       "VALUES (?)", (random_number,))
-
+                       "VALUES (?)",
+                       (random_number,))
         conn.commit()
         conn.close()
+
         return random_number
 
     def link_refrigerator_to_user(self, refrigerator_id, user_id):
@@ -374,7 +371,8 @@ class Database:
 
         cursor.execute("SELECT * "
                        "FROM link "
-                       "WHERE user_id = ? AND refrigerator_id = ?", (user_id, refrigerator_id))
+                       "WHERE user_id = ? AND refrigerator_id = ?",
+                       (user_id, refrigerator_id))
         result = cursor.fetchall()
 
         if result:
@@ -383,27 +381,32 @@ class Database:
 
         cursor.execute("SELECT * "
                        "FROM link"
-                       " WHERE user_id = ? ", (user_id,))
+                       " WHERE user_id = ? ",
+                       (user_id,))
         result = cursor.fetchall()
         nickname = f"Refrigerator {len(result) + 1}"
 
-        cursor.execute("INSERT INTO link (user_id, refrigerator_id,nickname) "
-                       "VALUES (?,?,?)", (user_id, refrigerator_id, nickname))
+        cursor.execute("INSERT INTO link (user_id, refrigerator_id, nickname) "
+                       "VALUES (?, ?, ?)",
+                       (user_id, refrigerator_id, nickname))
         conn.commit()
         conn.close()
+
         return "Link created", 1
 
     def find_linked_refrigerators(self, user_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT refrigerator_id,nickname "
+        cursor.execute("SELECT refrigerator_id, nickname "
                        "FROM link "
-                       "WHERE user_id = ? ", (user_id,))
+                       "WHERE user_id = ? ",
+                       (user_id,))
         result = cursor.fetchall()
 
         linked_refrigerators = {"refrigerators": [{"refrigerator_id": row[0], "nickname": row[1]} for row in result]}
         conn.close()
+
         return linked_refrigerators
 
     def change_refrigerator_nickname(self, refrigerator_id, user_id, nickname):
@@ -448,7 +451,7 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT product_name,barcode,product_quantity,oldest_added_date,alert_date "
+        cursor.execute("SELECT product_name, barcode, product_quantity, oldest_added_date, alert_date "
                        "FROM refrigerator_content NATURAL INNER JOIN product "
                        "WHERE refrigerator_id = ? "
                        "AND alert_date IS NOT NULL "
@@ -458,15 +461,14 @@ class Database:
 
         refrigerator = Refrigerator(refrigerator_id)
         for row in result:
-            image_path=""
             if self.docker:
-                image_path = "/app/pictures/"+ row[1] + ".jpg"
+                image_path = "/app/pictures/" + row[1] + ".jpg"
             else:
                 image_path = "../Server/pictures/" + row[1] + ".jpg"
             product = Product(row[0], image_path, row[2], row[3], row[4])
             refrigerator.add_product(product)
-
         conn.close()
+
         return refrigerator
 
     def find_products_and_quantities_between_dates(self, table_name, refrigerator_id, start_date, end_date):
@@ -489,8 +491,8 @@ class Database:
         products = []
         for row in result:
             products.append({"product_name": row[0], "quantity": row[1]})
-
         conn.close()
+
         return {"products": products}
 
     def update_refrigerator_parameters(self, refrigerator_id, products):
@@ -499,11 +501,13 @@ class Database:
 
         cursor.execute(
             "DELETE FROM refrigerator_track "
-            "WHERE refrigerator_id = ? ", (refrigerator_id,))
+            "WHERE refrigerator_id = ? ",
+            (refrigerator_id,))
 
         for product in products:
             cursor.execute('''
-                INSERT INTO refrigerator_track(refrigerator_id,barcode, amount) VALUES (?,?,?)
+                INSERT INTO refrigerator_track(refrigerator_id, barcode, amount)
+                 VALUES (?, ?, ?)
             ''', (refrigerator_id, product['barcode'], product['amount']))
 
         conn.commit()
@@ -512,13 +516,16 @@ class Database:
     def save_shopping_list(self,refrigerator_id, products):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
+
         cursor.execute(
             "DELETE FROM shopping_list "
-            "WHERE refrigerator_id = ? ", (refrigerator_id,))
+            "WHERE refrigerator_id = ? ",
+            (refrigerator_id,))
 
         for product in products:
             cursor.execute('''
-                        INSERT INTO shopping_list(refrigerator_id, product_name, amount) VALUES (?,?,?)
+                        INSERT INTO shopping_list(refrigerator_id, product_name, amount)
+                         VALUES (?, ?, ?)
                     ''', (refrigerator_id, product['product_name'], product['amount']))
 
         conn.commit()
@@ -527,15 +534,16 @@ class Database:
     def generate_initial_shopping_list(self, refrigerator_id):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
+
         cursor.execute("""
-            SELECT product_name,amount-COALESCE(product_quantity,0) AS amount
+            SELECT product_name, amount-COALESCE(product_quantity, 0) AS amount
             FROM refrigerator_track NATURAL LEFT OUTER JOIN refrigerator_content
             NATURAL INNER JOIN product
-            WHERE refrigerator_track.refrigerator_id=? AND (product_quantity IS null OR amount>product_quantity)
+            WHERE refrigerator_track.refrigerator_id = ? AND (product_quantity IS null OR amount > product_quantity)
         """, (refrigerator_id,))
-
         result = cursor.fetchall()
         conn.close()
+
         products_json = [{'product_name': row[0], 'amount': row[1]} for row in result]
         return products_json
 
@@ -544,10 +552,9 @@ class Database:
         cursor = conn.cursor()
 
         cursor.execute("""
-        SELECT product_name,barcode,amount
-        FROM refrigerator_track
-        NATURAL INNER JOIN product
-        WHERE refrigerator_id = ?  
+            SELECT product_name, barcode, amount
+            FROM refrigerator_track NATURAL INNER JOIN product
+            WHERE refrigerator_id = ?  
         """, (refrigerator_id,))
         result = cursor.fetchall()
         conn.close()
@@ -561,9 +568,9 @@ class Database:
         cursor = conn.cursor()
 
         cursor.execute("""
-        SELECT product_name,amount
-        FROM shopping_list
-        WHERE refrigerator_id = ?
+            SELECT product_name, amount
+            FROM shopping_list
+            WHERE refrigerator_id = ?
         """, (refrigerator_id,))
         result = cursor.fetchall()
         conn.close()
@@ -577,9 +584,9 @@ class Database:
         cursor = conn.cursor()
 
         cursor.execute("""
-        SELECT password 
-        FROM user
-        WHERE email = ?
+            SELECT password 
+            FROM user
+            WHERE email = ?
         """, (email,))
         result = cursor.fetchone()
         conn.close()
@@ -603,8 +610,8 @@ class Database:
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
 
-        cursor.execute("INSERT INTO product(barcode,product_name,image) "
-                       "VALUES (?,?,?) ",
+        cursor.execute("INSERT INTO product(barcode, product_name, image) "
+                       "VALUES (?, ?, ?) ",
                        (barcode, product_name, None))
         conn.commit()
         conn.close()

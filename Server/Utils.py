@@ -181,13 +181,11 @@ class Utils:
             f"Get {table_name} statistics of refrigerator={refrigerator_id} start_date={start_date} end_date={end_date}")
         return products_and_quantities
 
-    def scanned_new_product(self,barcode):
-        database = self.app.extensions['database']
-
-        if database.check_value_exist(table_name="pending_barcode", column_name="barcode", value=barcode):
+    def scanned_new_product(self, barcode):
+        if self.database.check_value_exist(table_name="pending_barcode", column_name="barcode", value=barcode):
             self.app.logger.info(f"Barcode={barcode} already at pending_barcode table")
         else:
-            database.add_barcode(barcode)
+            self.database.add_barcode(barcode)
             msg = Message(
                 subject="New barcode to add",
                 recipients=["foodwiselmi@gmail.com"],
@@ -198,5 +196,4 @@ class Utils:
 
         message_response = {'message': f"Product with barcode={barcode} not at database, the adding request at pending"}
         return message_response, 404
-
 

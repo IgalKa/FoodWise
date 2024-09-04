@@ -4,7 +4,7 @@ from datetime import timedelta
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from models.Database import Database
-from Utils import Utils, is_future_date
+from Utils import Utils
 
 app = Flask(__name__)
 
@@ -76,7 +76,6 @@ def link():
 
     message_response = {'message': result[0]}
     return jsonify(message_response), 200
-
 
 
 # /scan , json={"barcode": 7290008757034, "mode": "add", "refrigerator_id": 1}
@@ -290,9 +289,9 @@ def linked_refrigerators():
 @jwt_required()
 def refrigerator_contents():
     user_id = get_jwt_identity()
+    database = app.extensions['database']
     # Get the QueryParam 'refrigerator_id' from the request
     refrigerator_id = request.args.get('refrigerator_id')
-    database = app.extensions['database']
 
     check_result = utils.validate_link(user_id, refrigerator_id)
     if check_result:
@@ -577,7 +576,6 @@ def update_alert_date_and_quantity():
     return message_response, 200
 
 
-
 @app.route('/get_statistics', methods=['GET'])
 @jwt_required()
 def get_statistics():
@@ -601,12 +599,9 @@ def get_statistics():
     return jsonify(combined_stats), 200
 
 
-
-
-
 #     Managers endpoints
 
-# /add_new_product_to_DB , json={"barcode": "1111111111111", "product_name": "Testing", "image": null}
+# /add_new_product_to_DB , json={"barcode": "1111111111111", "product_name": "Testing"}
 @app.route('/add_new_product_to_DB', methods=['POST'])
 def add_new_product_to_DB():
     database = app.extensions['database']
