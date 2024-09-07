@@ -120,7 +120,7 @@ def scan():
 
 #     Frontend endpoints
 
-
+# /add_product_with_app , json={"barcode": "7290008757034", "refrigerator_id": 1}
 @app.route('/add_product_with_app', methods=['POST'])
 @jwt_required()
 def add_product_with_app():
@@ -210,6 +210,7 @@ def user_login():
     return jsonify(user), 200
 
 
+# /update_user_email , json={"email": "liorbarak99@gmail.com"}
 @app.route('/update_user_email', methods=['POST'])
 @jwt_required()
 def update_user_email():
@@ -238,6 +239,7 @@ def update_user_email():
     return jsonify(message_response), 200
 
 
+# /update_user_password , json={"password": "12345678"}
 @app.route('/update_user_password', methods=['POST'])
 @jwt_required()
 def update_user_password():
@@ -349,6 +351,7 @@ def update_refrigerator_name():
     return jsonify(message_response), 200
 
 
+# /search_products?product_name=C&all=1
 @app.route('/search_products', methods=['GET'])
 @jwt_required()
 def search_products():
@@ -380,6 +383,7 @@ def search_products():
     return jsonify(result), 200
 
 
+# /update_refrigerator_parameters?refrigerator_id=1 , json=[{"barcode": 7290004131074, "amount" : 3}]
 @app.route('/update_refrigerator_parameters', methods=['POST'])
 @jwt_required()
 def update_refrigerator_parameters():
@@ -402,6 +406,8 @@ def update_refrigerator_parameters():
     return jsonify(message_response), 200
 
 
+# /save_shopping_list?refrigerator_id=1
+# json=[{"barcode": 7290004131074, "amount" : 3}, {"barcode": 7290004127329, "amount": 2}]
 @app.route('/save_shopping_list', methods=['POST'])
 @jwt_required()
 def save_shopping_list():
@@ -423,7 +429,7 @@ def save_shopping_list():
     message_response = {'message': "The shopping list was saved successfully"}
     return jsonify(message_response), 200
 
-
+# /generate_initial_shopping_list?refrigerator_id=1
 @app.route('/generate_initial_shopping_list', methods=['GET'])
 @jwt_required()
 def generate_initial_shopping_list():
@@ -440,6 +446,7 @@ def generate_initial_shopping_list():
     return jsonify(result), 200
 
 
+# /get_refrigerator_parameters?refrigerator_id=1
 @app.route('/get_refrigerator_parameters', methods=['GET'])
 @jwt_required()
 def get_refrigerator_parameters():
@@ -456,6 +463,7 @@ def get_refrigerator_parameters():
     return jsonify(result), 200
 
 
+# /fetch_saved_shopping_list?refrigerator_id=1
 @app.route('/fetch_saved_shopping_list', methods=['GET'])
 @jwt_required()
 def fetch_saved_shopping_list():
@@ -576,6 +584,7 @@ def update_alert_date_and_quantity():
     return message_response, 200
 
 
+# /get_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-08-09
 @app.route('/get_statistics', methods=['GET'])
 @jwt_required()
 def get_statistics():
@@ -601,7 +610,7 @@ def get_statistics():
 
 #     Managers endpoints
 
-# /add_new_product_to_DB , json={"barcode": "1111111111111", "product_name": "Testing"}
+# /add_new_product_to_DB , json={"barcode": "#027", "product_name": "Tahini"}
 @app.route('/add_new_product_to_DB', methods=['POST'])
 def add_new_product_to_DB():
     database = app.extensions['database']
