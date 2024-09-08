@@ -1,0 +1,1746 @@
+{
+	"info": {
+		"_postman_id": "19cf0f3e-fc89-4fc8-89cf-6ad7b3f1a3af",
+		"name": "FoodWise Updated",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26867489"
+	},
+	"item": [
+		{
+			"name": "Embedded API",
+			"item": [
+				{
+					"name": "request_refrigerator_id",
+					"item": [
+						{
+							"name": "request_refrigerator_id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:12345/request_refrigerator_id",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"request_refrigerator_id"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "link",
+					"item": [
+						{
+							"name": "link",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"user_id\": 1,\r\n    \"refrigerator_id\": 848743546\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/link",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"link"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "scan",
+					"item": [
+						{
+							"name": "scan - Add - Soda water Schwepps",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7290008757034\",\r\n    \"mode\": \"add\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/scan",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"scan"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "scan - Add - Milk 3% 1L Tnuva",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7290004131074\",\r\n    \"mode\": \"add\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/scan",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"scan"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "scan - Add - Koteg 5% Tnuva",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7290004127329\",\r\n    \"mode\": \"add\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/scan",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"scan"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "scan - Add -Milk 1% 1L Tnuva",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7290000042435\",\r\n    \"mode\": \"add\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/scan",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"scan"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "scan - Add -Ketchup Osem",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7290000072623\",\r\n    \"mode\": \"add\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/scan",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"scan"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "scan - Add -Milka Milk White Chocolate",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7622400005190\",\r\n    \"mode\": \"add\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/scan",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"scan"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "scan - Add - Eggs pack 12L free organic",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7290008605038\",\r\n    \"mode\": \"add\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/scan",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"scan"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "scan - Add -Danone pro peach mango",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7290110552237\",\r\n    \"mode\": \"add\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/scan",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"scan"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "scan - Remove - Soda water Schwepps",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7290008757034\",\r\n    \"mode\": \"remove\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/scan",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"scan"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "scan - Remove - Milk 3% 1L Tnuva",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7290004131074\",\r\n    \"mode\": \"remove\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/scan",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"scan"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "scan - Remove - Milk 1% 1L",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7290000042435\",\r\n    \"mode\": \"remove\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/scan",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"scan"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "scan - Add - Not exists product",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": 72900087570349,\r\n    \"mode\": \"add\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/scan",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"scan"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Frontend API",
+			"item": [
+				{
+					"name": "register",
+					"item": [
+						{
+							"name": "register - Lior",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"liorbaa@mta.ac.il\",\r\n    \"password\": \"12345678\",\r\n    \"first_name\": \"Lior\",\r\n    \"last_name\": \"Barak\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "register - Michael",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"michaelsho@mta.ac.il\",\r\n    \"password\": \"12345678\",\r\n    \"first_name\": \"Michael\",\r\n    \"last_name\": \"Shuster\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"register"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "user_login",
+					"item": [
+						{
+							"name": "user_login - Lior",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"liorbaa@mta.ac.il\",\r\n    \"password\": \"12345678\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/user_login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"user_login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "user_login - Michael",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"michaelsu@mta.ac.il\",\r\n    \"password\": \"12345678\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/user_login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"user_login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "linked_refrigerators",
+					"item": [
+						{
+							"name": "linked_refrigerators",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjY4NywianRpIjoiODE3OWM1NjAtMjc1My00ODdkLThmMzEtMDUyMTI2ODA1YThjIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyNjg3LCJjc3JmIjoiOTFiMTM2YjktNTM3MC00YTY1LThlOTMtZDE3MTU3MjBmZmRjIiwiZXhwIjoyMDM5MDAyNjg3fQ.9gYwW38JMkWTo5uz1-uqLuMU3YkghUIrwyda5TQkPnY",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/linked_refrigerators",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"linked_refrigerators"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "refrigerator_contents",
+					"item": [
+						{
+							"name": "refrigerator_contents",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjY4NywianRpIjoiODE3OWM1NjAtMjc1My00ODdkLThmMzEtMDUyMTI2ODA1YThjIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyNjg3LCJjc3JmIjoiOTFiMTM2YjktNTM3MC00YTY1LThlOTMtZDE3MTU3MjBmZmRjIiwiZXhwIjoyMDM5MDAyNjg3fQ.9gYwW38JMkWTo5uz1-uqLuMU3YkghUIrwyda5TQkPnY",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/refrigerator_contents?refrigerator_id=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"refrigerator_contents"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "number_linked_refrigerators",
+					"item": [
+						{
+							"name": "number_linked_refrigerators",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:12345/number_linked_refrigerators?user_id=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"number_linked_refrigerators"
+									],
+									"query": [
+										{
+											"key": "user_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update_refrigerator_name",
+					"item": [
+						{
+							"name": "update_refrigerator_name",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"refrigerator_id\": 1,\r\n    \"new_name\": \"My fridge\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/update_refrigerator_name",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"update_refrigerator_name"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update_product_alert_date",
+					"item": [
+						{
+							"name": "update_product_alert_date",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"refrigerator_id\": 1,\r\n    \"product_name\": \"Milk 1% 1L Tnuva\",\r\n    \"alert_date\": \"2024-09-25\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/update_product_alert_date",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"update_product_alert_date"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update_product_alert_date - date in the past",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"refrigerator_id\": 1,\r\n    \"product_name\": \"Milk 1% 1L Tnuva\",\r\n    \"alert_date\": \"2024-07-20\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/update_product_alert_date",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"update_product_alert_date"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get_product_alert_date",
+					"item": [
+						{
+							"name": "get_product_alert_date",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/get_product_alert_date?refrigerator_id=1&product_name=Milk 1% 1L Tnuva",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"get_product_alert_date"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										},
+										{
+											"key": "product_name",
+											"value": "Milk 1% 1L Tnuva"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get_product_alert_date - null",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/get_product_alert_date?refrigerator_id=1&product_name=Soda water Schwepps",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"get_product_alert_date"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										},
+										{
+											"key": "product_name",
+											"value": "Soda water Schwepps"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get_product_alert_date - Error",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/get_product_alert_date?refrigerator_id=1&product_name=Test",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"get_product_alert_date"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										},
+										{
+											"key": "product_name",
+											"value": "Test"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get_refrigerator_content_expired",
+					"item": [
+						{
+							"name": "get_refrigerator_content_by_alert_date_passed",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/get_refrigerator_content_expired?refrigerator_id=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"get_refrigerator_content_expired"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get_entry_statistics",
+					"item": [
+						{
+							"name": "get_entry_statistics",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/get_entry_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-08-09",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"get_entry_statistics"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										},
+										{
+											"key": "start_date",
+											"value": "2024-07-20"
+										},
+										{
+											"key": "end_date",
+											"value": "2024-08-09"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get_entry_statistics - start_date after end_date",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/get_entry_statistics?refrigerator_id=1&start_date=2024-07-23&end_date=2024-07-21",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"get_entry_statistics"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										},
+										{
+											"key": "start_date",
+											"value": "2024-07-23"
+										},
+										{
+											"key": "end_date",
+											"value": "2024-07-21"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get_exit_statistics",
+					"item": [
+						{
+							"name": "get_exit_statistics",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:12345/get_exit_statistics?refrigerator_id=1&start_date=2024-07-20&end_date=2024-07-21",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"get_exit_statistics"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										},
+										{
+											"key": "start_date",
+											"value": "2024-07-20"
+										},
+										{
+											"key": "end_date",
+											"value": "2024-07-21"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get_exit_statistics - start_date after end_date Copy",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/get_exit_statistics?refrigerator_id=1&start_date=2024-07-23&end_date=2024-07-21",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"get_exit_statistics"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										},
+										{
+											"key": "start_date",
+											"value": "2024-07-23"
+										},
+										{
+											"key": "end_date",
+											"value": "2024-07-21"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "search_products",
+					"item": [
+						{
+							"name": "existing result with no filter",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/search_products?product_name=C&all=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"search_products"
+									],
+									"query": [
+										{
+											"key": "product_name",
+											"value": "C"
+										},
+										{
+											"key": "all",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "existing result with filter",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/search_products?product_name=C&all=0",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"search_products"
+									],
+									"query": [
+										{
+											"key": "product_name",
+											"value": "C"
+										},
+										{
+											"key": "all",
+											"value": "0"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "empty search query",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/search_products?product_name=",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"search_products"
+									],
+									"query": [
+										{
+											"key": "product_name",
+											"value": ""
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "no results",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/search_products?product_name=dadsada",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"search_products"
+									],
+									"query": [
+										{
+											"key": "product_name",
+											"value": "dadsada"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update_refrigerator_parameters",
+					"item": [
+						{
+							"name": "working example",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n    {\r\n        \"barcode\": 7290004131074,\r\n        \"amount\" : 3\r\n    }\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/update_refrigerator_parameters?refrigerator_id=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"update_refrigerator_parameters"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "save_shopping_list",
+					"item": [
+						{
+							"name": "working example",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n    {\r\n        \"barcode\": 7290004131074,\r\n        \"amount\" : 3\r\n    },\r\n    {\r\n        \"barcode\": 7290004127329,\r\n        \"amount\": 2\r\n    }\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/save_shopping_list?refrigerator_id=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"save_shopping_list"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "generate_initial_shopping_list",
+					"item": [
+						{
+							"name": "working exmaple",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/generate_initial_shopping_list?refrigerator_id=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"generate_initial_shopping_list"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get_refrigerator_parameters",
+					"item": [
+						{
+							"name": "working example",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/get_refrigerator_parameters?refrigerator_id=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"get_refrigerator_parameters"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "fetch_saved_shopping_list",
+					"item": [
+						{
+							"name": "working example",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:12345/fetch_saved_shopping_list?refrigerator_id=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"fetch_saved_shopping_list"
+									],
+									"query": [
+										{
+											"key": "refrigerator_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "add_product_with_app",
+					"item": [
+						{
+							"name": "app - Add - Soda water Schwepps",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7290008757034\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/add_product_with_app",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"add_product_with_app"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "remove_product_wtih_app",
+					"item": [
+						{
+							"name": "scan - Remove - Soda water Schwepps",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"7290008757034\",\r\n    \"refrigerator_id\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/remove_product_wtih_app",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"remove_product_wtih_app"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update_alert_date_and_quantity",
+					"item": [
+						{
+							"name": "update_alert_date_and_quantity",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"refrigerator_id\": 1,\r\n    \"product_name\": \"Milk 1% 1L Tnuva\",\r\n    \"alert_date\": \"2024-09-25\",\r\n    \"product_quantity\": 3\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/update_alert_date_and_quantity",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"update_alert_date_and_quantity"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update_alert_date_and_quantity - Soda - 7290008757034",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"refrigerator_id\": 1,\r\n    \"product_name\": \"Soda water Schwepps\",\r\n    \"alert_date\": null,\r\n    \"product_quantity\": 4\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/update_alert_date_and_quantity",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"update_alert_date_and_quantity"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update_alert_date_and_quantity - alert_date NULL",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"refrigerator_id\": 1,\r\n    \"product_name\": \"Milk 3%1L Tnuva\",\r\n    \"alert_date\": null,\r\n    \"product_quantity\": 2\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/update_alert_date_and_quantity",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"update_alert_date_and_quantity"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update_user_email",
+					"item": [
+						{
+							"name": "update_user_email - liorGmail",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"liorbarak99@gmail.com\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/update_user_email",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"update_user_email"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update_user_email - liormMta",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"liorbaa@mta.ac.il\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/update_user_email",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"update_user_email"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update_user_password",
+					"item": [
+						{
+							"name": "update_user_password - lior - 12345678",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"password\": \"12345678\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/update_user_password",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"update_user_password"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update_user_password - lior - 12345678910",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMzY0MjkzNiwianRpIjoiYjBjZDczYzctY2JkMi00MjY0LWJlMzItOGVhZmMxZTZkMjc4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzIzNjQyOTM2LCJjc3JmIjoiNGVhNjY1OTQtMDc5OC00MzUxLWJhNzEtZGY0Zjg1ZDkyNzY0IiwiZXhwIjoyMDM5MDAyOTM2fQ.BTpxzst7G6HcpV19fhp_Wv2bpEKex70fQ_EOKDdD50Y",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"password\": \"12345678910\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/update_user_password",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"update_user_password"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Manager API",
+			"item": [
+				{
+					"name": "add_new_product_to_DB",
+					"item": [
+						{
+							"name": "add_new_product_to_DB",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"barcode\": \"#027\",\r\n    \"product_name\": \"Tahini\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:12345/add_new_product_to_DB",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "12345",
+									"path": [
+										"add_new_product_to_DB"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}
