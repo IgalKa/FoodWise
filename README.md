@@ -32,20 +32,36 @@ FoodWise is an innovative smart refrigerator project that integrates an IoT devi
 First, we need to build a Docker image containing the Flask app and then upload the image to Docker Hub and then upload the Docker to the google cloud.
 In the Server directory, there is already a Dockerfile with all the necessary instructions to create the image.
 Now the following steps need to be done.
-1) Ensure that the docker variable at the beginning of the server.py file (line 25 at the time of writing this document) is set to True.
+1) Ensure that the docker variable at the beginning of the server.py file (line 25) is set to True.
+   
 2) Ensure that all libraries not included in Python's standard library are listed in the requirements.txt file, located in the Server directory, in the following format: <library_name> == <version_number>.
+  
 3) Make sure Docker Engine is installed on your computer and is connected to your Dockerhub account
+   
 4) Open cmd and run the following commands:
   - docker build -t my-flask-app .
   - docker tag my-flask-app username/my-flask-app:<version_tag>
   - docker push username/my-flask-app:<same_version>
+  
 5) Now, go to Google Cloud Console, then to Cloud Run, and click on the Create Service Button.
+   
 6) In the Container image URL field, enter the following URL (after making the necessary adjustments):
 docker.io/username/my-flask-app:<version_tag>
+
 7) In the Service name field, enter foodwise.
+   
 8) In the Authentication section, check the box for Allow unauthenticated invocations.
+    
 9) In the Minimum number of instances section, select 1.
+    
 10) In the Container section, ensure that the Container port is set to 12345.
+
+
+# Explanation on how to run the Flask app on a local machine
+1) Ensure that the docker variable at the beginning of the server.py file (line 25) is set to False.
+   
+2) Run the server.py script using an IDE like PyCharm or by executing the command python server.py in the terminal
+<in The name you gave to the project in your machiner>/Server/
 
 
 # Technical Explanations and Important Notes for the IoT Device
