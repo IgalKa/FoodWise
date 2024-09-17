@@ -50,15 +50,25 @@ docker.io/username/my-flask-app:<version_tag>
 
 # Technical Explanations and Important Notes for the IoT Device
 The device is a Raspberry Pi 4 running the following operating system: Raspbian GNU/Linux 11 (Bullseye).
+
 The device also has a touchscreen connected via HDMI and a scanner connected via USB.
+
 To give the device access to Wi-Fi, you need to connect it to the local Wi-Fi network through its operating system.
+
 To do this, you need to connect a keyboard and mouse to the device.
+
 After that, turn on the device, and once the operating system has started, click on the Wi-Fi icon and select the Wi-Fi network you want to connect to.
+
 After the device is connected to Wi-Fi, you can access it remotely using a program called VNC Viewer.
-You'll need the local IP address that the device received from the local Wi-Fi network.                       
+
+You'll need the local IP address that the device received from the local Wi-Fi network.     
+
 You can find the local IP address by running the command hostname -I in the terminal of the operating system running on the device.
+
 When connecting, you will be prompted to enter a username and password. The username is codeCrafters and the password is 12345.
-On the device's operating system desktop, there is a file named app.py, which is the program running on the device
+
+On the device's operating system desktop, 
+there is a file named app.py, which is the program running on the device
 To ensure that the program runs automatically when the operating system starts, you need to make sure that there is a file named autorunmyfile.desktop    
 in the file system at /home/codeCrafters/.config/autostart.
 
@@ -69,3 +79,4 @@ Exec = bash -c "cd /home/codeCrafters/Desktop && sudo python3 app.py > /home/cod
 This file runs automatically when the operating system starts, 
 giving the operating system the instruction to navigate to the directory where the app.py file is located, 
 run it with full permissions, and direct all the program's output, including logs, to a file named app.log on the desktop.
+
