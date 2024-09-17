@@ -55,7 +55,7 @@ Run server.py
 ```bash
 python server.py
 ```
-
+<br><br>
 
 ### Locally start the mobile application
 
@@ -72,7 +72,7 @@ start the Metro Bundler:
 npm start android
 ```
 To run on a physical device, make sure USB Debugging is enabled and the device is connected.
-
+<br><br>
 
 ### Explanation on how to deploy the Flask app to GCP (Google Cloud)
 First, we need to build a Docker image containing the Flask app and then upload the image to Docker Hub and then upload the Docker to the google cloud.
@@ -113,7 +113,7 @@ docker.io/username/my-flask-app:<version_tag>
 
 10. In the Container section, ensure that the Container port is set to 12345
 
-
+<br><br>
 ### Creating a debug APK for the application
 
 Go to the root of the application in the terminal and run
