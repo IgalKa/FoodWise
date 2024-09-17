@@ -24,8 +24,8 @@ FoodWise is an innovative smart refrigerator project that integrates an IoT devi
 # Technology Stack
 * **Backend:** Python, Flask, SQLite Database
 * **Frontend (Mobile app)**: React-Native
-* **Embedded**: Rasperry Pi OS, Python
-* **Hardware:** Rasperry Pi, Touchscreen , Scanner
+* **Embedded**: Raspberry Pi OS, Python
+* **Hardware:** Raspberry Pi, Touchscreen , Scanner
 * **Cloud**: GCP
 
 # Deployment
