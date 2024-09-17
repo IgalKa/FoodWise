@@ -114,6 +114,27 @@ docker.io/username/my-flask-app:<version_tag>
 10. In the Container section, ensure that the Container port is set to 12345
 
 
+### Creating a debug APK for the application
+
+Go to the root of the application in the terminal and run
+```bash
+react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+```
+
+Go to android directory 
+```bash
+cd android
+```
+
+run this command
+```bash
+./gradlew assembleDebug
+```
+The APK will be created in
+```bash
+Application/android/app/build/outputs/apk/debug/app-debug.apk
+```
+
 # Technical Explanations and Important Notes for the IoT Device
 The device is a Raspberry Pi 4 running the following operating system: Raspbian GNU/Linux 11 (Bullseye).
 
