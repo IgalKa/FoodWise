@@ -36,9 +36,9 @@ Now the following steps need to be done.
 2) Ensure that all libraries not included in Python's standard library are listed in the requirements.txt file, located in the Server directory, in the following format: <library_name> == <version_number>.
 3) Make sure Docker Engine is installed on your computer and is connect to your Dockerhub account
 4) Open cmd and run the following commands:
-docker build -t my-flask-app .
-docker tag my-flask-app username/my-flask-app:<version_tag>
-docker push username/my-flask-app:<same_version>
+  - docker build -t my-flask-app .
+  - docker tag my-flask-app username/my-flask-app:<version_tag>
+  - docker push username/my-flask-app:<same_version>
 5) Now, go to Google Cloud Console, then to Cloud Run, and click on the Create Service Button.
 6) In the Container image URL field, enter the following URL (after making the necessary adjustments):
 docker.io/username/my-flask-app:<version_tag>
