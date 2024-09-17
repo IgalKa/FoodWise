@@ -34,7 +34,7 @@ In the Server directory, there is already a Dockerfile with all the necessary in
 Now the following steps need to be done.
 1) Ensure that the docker variable at the beginning of the server.py file (line 25 at the time of writing this document) is set to True.
 2) Ensure that all libraries not included in Python's standard library are listed in the requirements.txt file, located in the Server directory, in the following format: <library_name> == <version_number>.
-3) Make sure Docker Engine is installed on your computer and is connect to your Dockerhub account
+3) Make sure Docker Engine is installed on your computer and is connected to your Dockerhub account
 4) Open cmd and run the following commands:
   - docker build -t my-flask-app .
   - docker tag my-flask-app username/my-flask-app:<version_tag>
@@ -45,7 +45,7 @@ docker.io/username/my-flask-app:<version_tag>
 7) In the Service name field, enter foodwise.
 8) In the Authentication section, check the box for Allow unauthenticated invocations.
 9) In the Minimum number of instances section, select 1.
-10) In the Container section, ensure that the Container port is set to 12345
+10) In the Container section, ensure that the Container port is set to 12345.
 
 
 # Technical Explanations and Important Notes for the IoT Device
