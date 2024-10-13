@@ -20,6 +20,7 @@ FoodWise is an innovative smart refrigerator project that integrates an IoT devi
 
 * **Personalized Notifications** - Set reminders for expiration dates, low stock, etc.
 
+![App Screens](https://github.com/IgalKa/FoodWise/blob/main/AppScreens.png)
 
 # Technology Stack
 * **Backend:** Python, Flask, SQLite Database
