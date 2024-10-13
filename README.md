@@ -1,4 +1,4 @@
-# FoodWise
+![FoodWise Logo](https://github.com/IgalKa/FoodWise/blob/main/FoodWise%20Logo.png)
 
 
 # Overview
